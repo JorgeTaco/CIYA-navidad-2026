@@ -22,9 +22,10 @@ cada archivo:
 - `tests/draw.test.cjs` pasó a `tests/unit/` y ahora apunta a las nuevas rutas.
 - `tools/local-stage.py` sirve `apps/web/` en `127.0.0.1:8080` y su lista de
   archivos permitidos incluye los nuevos CSS y JS.
-- Se agregaron `scripts/check.sh`, `scripts/deploy-static.sh` y
-  `tools/check-structure.py`. El detalle de arquitectura, decisiones y
-  operación vive en `docs/`; hay un único `README.md` en la raíz.
+- Se agregaron `scripts/check.sh`, `scripts/deploy-static.sh`,
+  `tools/check-structure.py` y `.github/workflows/deploy-pages.yml`, que publica
+  `apps/web/` como raíz de GitHub Pages. El detalle de arquitectura, decisiones
+  y operación vive en `docs/`; hay un único `README.md` en la raíz.
 
 ## Estructura
 
@@ -32,6 +33,8 @@ cada archivo:
 CIYA-navidad-2026/
 ├─ README.md                       # este documento: cambio, uso, operación y límites
 ├─ .env.example                    # nombres de variables; los secretos van a Supabase
+├─ .github/workflows/
+│  └─ deploy-pages.yml             # publica apps/web/ en GitHub Pages
 ├─ docs/
 │  ├─ arquitectura.md              # contratos web ↔ RPC y entre módulos
 │  ├─ decisiones/                  # ADR-001: Supabase como backend
@@ -177,6 +180,18 @@ Con la configuración correcta, la barra indica **Sincronización activa** y se
 puede iniciar sesión en recepción, escenario y administración. Si las claves
 están puestas pero el proyecto no responde, la barra indica **Sin sincronización**
 y las operaciones muestran el error de conexión.
+
+### Publicación en GitHub Pages
+
+El repositorio incluye `.github/workflows/deploy-pages.yml`, que toma `apps/web/`
+y lo publica como raíz del sitio. En GitHub entrar a **Settings → Pages → Build
+and deployment → Source** y elegir **GitHub Actions**. Después, cada push a
+`main` —o la ejecución manual del workflow— actualiza
+`https://jorgetaco.github.io/CIYA-navidad-2026/`.
+
+Antes aparecía el `README.md` porque GitHub Pages buscaba `index.html` en la
+raíz y el archivo quedó en `apps/web/index.html:1`. Para dominio propio, agregar
+un archivo `CNAME` dentro de `apps/web/` con el dominio deseado.
 
 ## Operación
 
