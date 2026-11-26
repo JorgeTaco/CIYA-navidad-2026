@@ -85,17 +85,98 @@ CIYA-navidad-2026/
   `CIYA_STAGE_RENDER` permite actualizar la proyección desde ese módulo.
 - `CIYA_DRAW` valida el respaldo sellado versión 2 y gestiona la ruleta.
 
-## Arranque y configuración
+## Cómo ejecutar el proyecto
 
-1. `python3 -m http.server 8000` desde `apps/web/` para inspeccionar el sitio.
-   La ruta QR y la linterna funcionan sin Supabase.
-2. Crear el proyecto Supabase, aplicar `supabase/migrations/` en orden y crear
-   cuentas con roles en `ciya.roles`.
-3. Completar `supabaseUrl` y `supabaseAnonKey` en `apps/web/shared/js/config.js`.
-4. Desplegar `ciya-receipts`, configurar Brevo, Vault y `pg_cron` según
-   `docs/operacion/runbook.md`.
-5. Publicar `apps/web/` con `scripts/deploy-static.sh <destino>` o el hosting
-   estático que se use.
+El frontend **no lee `.env`**: `.env.example` es solo la plantilla de secretos
+para Supabase/Edge Functions. Las dos URLs públicas que necesita el navegador se
+ponen en `apps/web/shared/js/config.js`.
+
+### Caso A: todavía sin variables reales de Supabase
+
+Dejar `supabaseUrl: ''` y `supabaseAnonKey: ''` como están en el repositorio y
+servir solo el frontend:
+
+```bash
+cd apps/web
+python3 -m http.server 8000
+```
+
+Abrir `http://127.0.0.1:8000/index.html`. En este modo funcionan la maquetación,
+el portal, la linterna (`index.html?modo=linterna#linterna`), las bases
+(`bases.html`) y la ruta QR estática (`qr.html`, mensajes, trivias y memes).
+`Store.init()` sale sin conectarse y la barra indica **Sin configurar**.
+
+Qué no funciona todavía:
+
+- `recepcion.html`, `admin.html` y `escenario.html` muestran la pantalla de
+  acceso porque requieren una cuenta, aunque se pueda revisar su diseño.
+- Los formularios no guardan nada: al enviar aparece
+  `Configura Supabase para usar esta función.`
+- Los QR Dorados no pueden validarse: `Store.gold()` necesita la RPC.
+
+Para revisar la consola de escenario sin red ni Supabase:
+
+```bash
+python3 tools/local-stage.py
+```
+
+Pedir una contraseña local de al menos 8 caracteres ASCII y abrir
+`http://127.0.0.1:8080/escenario.html?modo=local` con usuario `escenario`. Ese
+servidor sirve únicamente los archivos de escenario y no almacena nada en la nube.
+
+### Caso B: con Supabase configurado
+
+1. Completar en `apps/web/shared/js/config.js` los valores públicos del proyecto:
+
+```js
+window.CIYA_CONFIG = {
+  supabaseUrl: 'https://<ref>.supabase.co',
+  supabaseAnonKey: '<anon-public-key>',
+  syncIntervalMs: 3000,
+  relayCommand: 'RELAY_ON\n',
+  serialBaudRate: 9600
+};
+```
+
+   Usar solo la clave `anon` pública. **Nunca** poner `service_role`, tokens de
+   Brevo ni secretos en este archivo ni en el frontend.
+
+2. Aplicar el backend en orden:
+
+```bash
+supabase link --project-ref <ref>
+supabase db push
+supabase functions deploy ciya-receipts
+```
+
+   Si no se usa la CLI, ejecutar manualmente los cuatro archivos de
+   `supabase/migrations/` en orden en el editor SQL de Supabase.
+
+3. Crear las cuentas en Supabase Auth y asignar roles. Ejemplo para recepción:
+
+```sql
+insert into ciya.roles (user_id, panel)
+select id, 'recepcion' from auth.users where email = 'correo@ejemplo.com';
+```
+
+   Repetir con `escenario` y `admin` según corresponda.
+
+4. Configurar los secretos de `ciya-receipts`, Brevo, Vault y `pg_cron` según
+   `docs/operacion/runbook.md`; los nombres están en `.env.example`.
+
+5. Servir o publicar el frontend:
+
+```bash
+cd apps/web
+python3 -m http.server 8000
+```
+
+   O desde la raíz: `bash scripts/deploy-static.sh <destino>`.
+
+Con la configuración correcta, la barra indica **Sincronización activa** y se
+puede iniciar sesión en recepción, escenario y administración. Si las claves
+están puestas pero el proyecto no responde, la barra indica **Sin sincronización**
+y las operaciones muestran el error de conexión.
 
 ## Operación
 
