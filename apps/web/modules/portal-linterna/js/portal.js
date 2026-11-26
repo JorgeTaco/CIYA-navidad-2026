@@ -3,20 +3,117 @@
   const Store = window.CIYA_STORE;
   const Data = window.CIYA_DATA;
   const esc = UI.escapeHtml;
-
   const linterna = { carrera: 'sistemas', frase: 'Feliz Navidad CIYA', blink: true };
 
-  function carreraOptions() {
-    return Data.carreras.map(function (c) {
-      return '<option value="' + c.id + '">' + esc(c.nombre) + '</option>';
-    }).join('');
-  }
+  function template() {
+    return `
+      <section class="event-hero" id="inicio">
+        <div class="event-art" aria-hidden="true"><span></span></div>
+        <span class="kicker">4 de diciembre de 2026 · Hall principal CIYA</span>
+        <h1>Ingenio que ilumina <em>la Navidad</em></h1>
+        <nav class="event-actions" aria-label="Actividades principales">
+          <a class="event-action lantern-link" href="index.html?modo=linterna#linterna">
+            <span class="action-icon" aria-hidden="true">✦</span><span>Mar de Linternas</span>
+          </a>
+          <a class="event-action route-link" href="qr.html">
+            <span class="action-icon" aria-hidden="true">▦</span><span>Ruta QR</span>
+          </a>
+          <a class="event-action wishes-link" href="#buzon">
+            <span class="action-icon" aria-hidden="true">✉</span><span>Buzón 2027</span>
+          </a>
+          <a class="event-action music-link" href="#villancicos">
+            <span class="action-icon" aria-hidden="true">♫</span><span>Villancicos</span>
+          </a>
+        </nav>
+      </section>
 
-  function fillSelects() {
-    document.getElementById('vil-carrera').innerHTML = carreraOptions();
-    document.getElementById('vil-categoria').innerHTML = Data.categoriasVillancicos.map(function (category) {
-      return '<option>' + esc(category) + '</option>';
-    }).join('');
+      <section class="event-summary" aria-label="Resumen en vivo">
+        <div><div class="label">Asistentes</div><div class="stat" id="stat-asistentes">—</div></div>
+        <div><div class="label">Boletos</div><div class="stat" id="stat-boletos">—</div></div>
+        <div><div class="label">Grupos</div><div class="stat" id="stat-grupos">—</div></div>
+        <div><div class="label">Deseos aprobados</div><div class="stat" id="stat-deseos">—</div></div>
+      </section>
+
+      <section class="section" id="linterna">
+        <div class="section-head">
+          <div><span class="kicker">Acto central · 18:25 – 18:55</span><h2>Mar de Linternas</h2></div>
+        </div>
+        <div class="lantern-layout">
+          <div class="card lantern-setup">
+            <fieldset class="field">
+              <legend>Carrera</legend>
+              <div class="chips" id="linterna-carreras"></div>
+            </fieldset>
+            <fieldset class="field">
+              <legend>Mensaje</legend>
+              <div class="chips" id="linterna-frases"></div>
+              <label class="custom-message" for="linterna-custom">O escribe tu mensaje (hasta 60 caracteres)</label>
+              <input id="linterna-custom" maxlength="60" placeholder="Tu mensaje navideño">
+            </fieldset>
+          </div>
+          <div>
+            <p class="label">Vista previa</p>
+            <div class="lantern-stage" id="lantern-stage">
+              <div class="lantern-message" id="lantern-message">Feliz Navidad CIYA</div>
+              <div class="lantern-meta" id="lantern-carrera">Selecciona tu carrera</div>
+              <button class="btn small ghost lantern-exit" id="lantern-exit" hidden>Salir de pantalla completa</button>
+            </div>
+            <div class="lantern-controls">
+              <button class="btn primary wide" id="lantern-fullscreen">Pantalla completa</button>
+              <button class="btn" id="lantern-blink" aria-pressed="true">Parpadeo</button>
+              <button class="btn ghost" id="lantern-sync">Sincronizar destello</button>
+            </div>
+            <button class="btn small ghost" id="copy-url">Copiar enlace de la linterna</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="section card" id="registro">
+        <h2>Registro para el Gran Sorteo</h2>
+        <p>Acude a la mesa del hall de 17:00 a 17:45 con tu credencial o documento de identificación. Recepción verificará tu ingreso y enviará el comprobante a tu correo.</p>
+        <ul>
+          <li>Ingreso acreditado y mensaje en el Muro de la Empatía: 1 boleto base.</li>
+          <li>Juguete funcional: 2 boletos extra. Funda de caramelos: 1 boleto extra.</li>
+          <li>QR Dorado canjeado: 3 boletos extra.</li>
+        </ul>
+        <p class="hint">Donaciones y canjes de 08:00 a 17:45. Cada estudiante puede ganar un premio y tiene 45 segundos para presentarse con su identificación.</p>
+      </section>
+
+      <section class="section" id="villancicos">
+        <div class="section-head"><div><span class="kicker">Actividad I · 17:45 – 18:25</span><h2>Concurso de Villancicos “CIYA tiene Talento”</h2></div></div>
+        <div class="grid cols-2">
+          <div id="inscripciones-root"></div>
+          <div class="card"><h3>Orden de presentación</h3><div id="lista-grupos"><p class="empty">Consultando los grupos inscritos…</p></div></div>
+        </div>
+      </section>
+
+      <section class="section" id="buzon">
+        <div class="section-head"><div><span class="kicker">QR junto al Rincón Instagrameable</span><h2>Buzón “Compilando Deseos 2027”</h2></div></div>
+        <div class="grid cols-2">
+          <div id="buzon-root"></div>
+          <div class="card"><h3>Frases aprobadas</h3><div class="frases-aprobadas" id="frases-aprobadas"><p class="empty">Consultando las frases aprobadas…</p></div></div>
+        </div>
+      </section>
+
+      <section class="section card" id="muro">
+        <h2>Muro de la Empatía</h2>
+        <p>Deja tu mensaje en el muro del hall y pide que lo confirmen en recepción para recibir el boleto base.</p>
+      </section>
+
+      <section class="section" id="puertas">
+        <div class="section-head"><div><span class="kicker">Actividad II</span><h2>Puertas Decoradas por Carrera</h2></div></div>
+        <div class="card">
+          <div class="grid cols-2">
+            <div><h3>Espacios asignados</h3><div id="espacios-puertas"></div></div>
+            <div><h3>Matriz de evaluación (100 puntos)</h3><div id="criterios-puertas"></div><p class="hint">Instalación hasta las 15:00. Jurado: 15:30 – 16:45. Se prioriza reciclaje, bajo costo y protección de bienes institucionales.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="ranking">
+        <div class="section-head"><h2>Copa Solidaria Inter-Carreras</h2><span class="sync-pill" id="sync-status">Consultando marcador</span></div>
+        <div class="card" id="ranking-portal"><p class="empty">Consultando los aportes por carrera…</p></div>
+      </section>`;
   }
 
   function renderChips(containerId, items, onChange) {
@@ -55,7 +152,6 @@
     const message = document.getElementById('lantern-message');
     stage.classList.remove('blink');
     if (!linterna.blink) return;
-    // Recompute the animation origin whenever the operator aligns the pulse.
     void message.offsetWidth;
     message.style.animationDelay = -((Date.now() % 1600) / 1000) + 's';
     stage.classList.add('blink');
@@ -167,7 +263,12 @@
     UI.renderRanking('ranking-portal', Store.ranking());
   }
 
+  function mount() {
+    document.getElementById('portal-root').innerHTML = template();
+  }
+
   async function init() {
+    mount();
     setupLantern();
     if (new URLSearchParams(location.search).get('modo') === 'linterna') {
       document.body.classList.add('lantern-page');
@@ -179,14 +280,12 @@
       document.title = 'Mar de Linternas | CIYA Navidad 2026';
       return;
     }
-    fillSelects();
-    window.CIYA_INSCRIPCIONES.init();
-    window.CIYA_BUZON.init();
     setupEstaticos();
     UI.initNav();
     await Store.init();
     Store.subscribe(render);
   }
 
+  window.CIYA_PORTAL = { mount, init };
   init();
 })();

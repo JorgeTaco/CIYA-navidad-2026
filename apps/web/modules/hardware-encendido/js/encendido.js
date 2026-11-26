@@ -9,12 +9,31 @@
   const ignicion = { count: 10, running: false, timer: null, step: -1, sequenceTimer: null };
   const serial = { port: null, reader: null, writer: null, armed: false, connecting: false };
 
+  function template() {
+    return `
+      <h2>Encendido 5 en 1 (local/offline)</h2>
+      <p class="muted">Reacción: Industrial → Hidráulica → Electromecánica → Sistemas → Electricidad. El sensor Arduino/ESP32 dispara la cuenta regresiva por puerto serial.</p>
+      <div class="row"><button class="btn small" id="serial-connect">Conectar sensor serial</button><button class="btn small" id="serial-arm" disabled>Armar disparo del sensor</button><span class="badge" id="serial-status">Sin conectar</span></div>
+      <p class="hint" id="serial-hint">Usa Chrome o Edge de escritorio. Ante una falla de la conexión serial, coordina el disparo con el operador de Electricidad.</p>
+      <button class="btn primary wide" id="ignicion-manual" style="margin-top:0.6rem">Disparar cuenta regresiva manualmente</button>
+      <p class="hint" style="margin-top:0.6rem"><strong>Tecla de emergencia:</strong> barra espaciadora inicia la cuenta local. Electricidad dispone de un interruptor físico independiente.</p>
+      <div id="secuencia-encendido" style="margin-top:1rem"></div>
+      <div id="estado-relay" style="margin-top:0.8rem">Simulación local: placa desconectada.</div>
+      <p class="muted">${esc(String(CFG.serialBaudRate))} baudios · comando de relé: ${esc(JSON.stringify(CFG.relayCommand))}</p>`;
+  }
+
+  function mount() {
+    const root = document.getElementById('encendido-root');
+    if (root) root.innerHTML = template();
+  }
+
   function status() {
     return { count: ignicion.count, running: ignicion.running, step: ignicion.step, armed: serial.armed };
   }
 
   function relayStatus(message, kind) {
     const statusNode = document.getElementById('estado-relay');
+    if (!statusNode) return;
     statusNode.textContent = message;
     statusNode.className = 'badge ' + kind;
   }
@@ -27,7 +46,7 @@
     try {
       await serial.writer.write(new TextEncoder().encode(CFG.relayCommand));
       relayStatus('Comando enviado a la placa.', 'ok');
-    } catch {
+    } catch (error) {
       relayStatus('Error al enviar el comando. Avisa a Electricidad.', 'bad');
     }
   }
@@ -64,7 +83,8 @@
   function startIgnicion() {
     if (ignicion.running || ignicion.sequenceTimer) return;
     serial.armed = false;
-    document.getElementById('serial-arm').textContent = 'Armar disparo del sensor';
+    const arm = document.getElementById('serial-arm');
+    if (arm) arm.textContent = 'Armar disparo del sensor';
     Sound.enable();
     ignicion.running = true;
     ignicion.count = 10;
@@ -151,5 +171,12 @@
     });
   }
 
-  window.CIYA_IGNITE = { status: status, renderSequence: renderSequence, start: startIgnicion, connect: connectSerial, setup: setup };
+  window.CIYA_IGNITE = {
+    mount: mount,
+    status: status,
+    renderSequence: renderSequence,
+    start: startIgnicion,
+    connect: connectSerial,
+    setup: setup
+  };
 })();

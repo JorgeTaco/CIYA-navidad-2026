@@ -4,6 +4,56 @@
   const Data = window.CIYA_DATA;
   const esc = UI.escapeHtml;
 
+  function template() {
+    return `
+      <div class="section-head">
+        <div><span class="kicker">Docentes organizadores y Asociación Estudiantil</span><h1>Curaduría y Evaluación</h1></div>
+        <button class="btn ghost small" id="logout">Cerrar sesión</button>
+      </div>
+      <div id="locked" hidden><p class="empty">Esta vista privada requiere una cuenta de administración.</p></div>
+      <div id="panel" hidden>
+        <section class="section">
+          <div class="section-head"><div><h2>Buzón “Compilando Deseos 2027”</h2><p class="muted">Revisa, aprueba o descarta las frases. Las aprobadas podrán proyectarse en la chocolatada y exportarse para redes de CIYA en enero.</p></div>
+            <div class="row"><button class="btn small" id="export-aprobados">Exportar aprobados CSV</button><button class="btn small ghost" id="export-todos">Exportar todos CSV</button></div>
+          </div>
+          <div class="card"><div id="lista-deseos"></div></div>
+        </section>
+        <section class="section grid cols-2">
+          <div class="card">
+            <h2>Evaluación de Puertas Decoradas</h2>
+            <p class="muted">Jurado: viernes 4 de diciembre, 15:30 – 16:45. Matriz de 100 puntos.</p>
+            <div class="field"><label for="puerta-carrera">Carrera evaluada</label><select id="puerta-carrera"></select></div>
+            <div id="puerta-criterios"></div>
+            <div class="field"><label for="puerta-notas">Observaciones</label><textarea id="puerta-notas" maxlength="400"></textarea></div>
+            <button class="btn primary wide" id="guardar-puerta">Guardar evaluación</button>
+          </div>
+          <div class="card"><h3>Resultado de puertas</h3><div id="ranking-puertas"></div></div>
+        </section>
+        <section class="section card">
+          <h2>Calificaciones de villancicos registradas</h2>
+          <div id="lista-scores"></div>
+        </section>
+        <section class="section card" id="admin-gold">
+          <h2>Impresión privada de los QR Dorados</h2>
+          <p>Usa estas URLs en el generador de QR. Distribuye solo los tres impresos y guarda este listado en privado.</p>
+          <div id="gold-links"></div>
+          <button class="btn" id="print-gold">Imprimir listado privado</button>
+        </section>
+        <section class="section card" id="admin-import">
+          <h2>Importar respaldo de la primera versión</h2>
+          <p>Revisa los datos antes de importarlos a una instancia nueva. Confirma solo las acreditaciones verificadas presencialmente.</p>
+          <input type="file" id="legacy-file" accept=".json,application/json">
+          <button class="btn" id="legacy-preview">Revisar archivo</button>
+          <div id="legacy-report" aria-live="polite"></div>
+          <button class="btn primary" id="legacy-apply" hidden>Importar respaldo revisado</button>
+        </section>
+      </div>`;
+  }
+
+  function mount() {
+    document.getElementById('admin-root').innerHTML = template();
+  }
+
   function exportDeseos(OnlyApproved) {
     const rows = [['Nombre', 'Rol', 'Carrera/Área', 'Frase', 'Estado', 'Fecha']];
     Store.get().deseos.filter(function (d) { return !OnlyApproved || d.aprobado; }).forEach(function (d) {
@@ -188,6 +238,7 @@
   }
 
   async function init() {
+    mount();
     const ok = await UI.requireAccount('admin', 'Panel administrativo');
     if (!ok) {
       document.getElementById('locked').hidden = false;
@@ -199,5 +250,6 @@
     setup();
   }
 
+  window.CIYA_ADMIN = { mount, init };
   init();
 })();

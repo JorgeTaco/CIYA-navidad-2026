@@ -34,131 +34,7 @@
     </div>
   </header>
 
-  <main class="container">
-    <section class="event-hero" id="inicio">
-      <div class="event-art" aria-hidden="true"><span></span></div>
-      <span class="kicker">4 de diciembre de 2026 · Hall principal CIYA</span>
-      <h1>Ingenio que ilumina <em>la Navidad</em></h1>
-      <nav class="event-actions" aria-label="Actividades principales">
-        <a class="event-action lantern-link" href="index.html?modo=linterna#linterna">
-          <span class="action-icon" aria-hidden="true">✦</span><span>Mar de Linternas</span>
-        </a>
-        <a class="event-action route-link" href="qr.html">
-          <span class="action-icon" aria-hidden="true">▦</span><span>Ruta QR</span>
-        </a>
-        <a class="event-action wishes-link" href="#buzon">
-          <span class="action-icon" aria-hidden="true">✉</span><span>Buzón 2027</span>
-        </a>
-        <a class="event-action music-link" href="#villancicos">
-          <span class="action-icon" aria-hidden="true">♫</span><span>Villancicos</span>
-        </a>
-      </nav>
-    </section>
-
-    <section class="event-summary" aria-label="Resumen en vivo">
-      <div><div class="label">Asistentes</div><div class="stat" id="stat-asistentes">—</div></div>
-      <div><div class="label">Boletos</div><div class="stat" id="stat-boletos">—</div></div>
-      <div><div class="label">Grupos</div><div class="stat" id="stat-grupos">—</div></div>
-      <div><div class="label">Deseos aprobados</div><div class="stat" id="stat-deseos">—</div></div>
-    </section>
-
-    <section class="section" id="linterna">
-      <div class="section-head">
-        <div><span class="kicker">Acto central · 18:25 – 18:55</span><h2>Mar de Linternas</h2></div>
-      </div>
-      <div class="lantern-layout">
-        <div class="card lantern-setup">
-          <fieldset class="field">
-            <legend>Carrera</legend>
-            <div class="chips" id="linterna-carreras"></div>
-          </fieldset>
-          <fieldset class="field">
-            <legend>Mensaje</legend>
-            <div class="chips" id="linterna-frases"></div>
-            <label class="custom-message" for="linterna-custom">O escribe tu mensaje (hasta 60 caracteres)</label>
-            <input id="linterna-custom" maxlength="60" placeholder="Tu mensaje navideño">
-          </fieldset>
-        </div>
-        <div>
-          <p class="label">Vista previa</p>
-          <div class="lantern-stage" id="lantern-stage">
-            <div class="lantern-message" id="lantern-message">Feliz Navidad CIYA</div>
-            <div class="lantern-meta" id="lantern-carrera">Selecciona tu carrera</div>
-            <button class="btn small ghost lantern-exit" id="lantern-exit" hidden>Salir de pantalla completa</button>
-          </div>
-          <div class="lantern-controls">
-            <button class="btn primary wide" id="lantern-fullscreen">Pantalla completa</button>
-            <button class="btn" id="lantern-blink" aria-pressed="true">Parpadeo</button>
-            <button class="btn ghost" id="lantern-sync">Sincronizar destello</button>
-          </div>
-          <button class="btn small ghost" id="copy-url">Copiar enlace de la linterna</button>
-        </div>
-      </div>
-    </section>
-
-    <section class="section card" id="registro">
-      <h2>Registro para el Gran Sorteo</h2>
-      <p>Acude a la mesa del hall de 17:00 a 17:45 con tu credencial o documento de identificación. Recepción verificará tu ingreso y enviará el comprobante a tu correo.</p>
-      <ul>
-        <li>Ingreso acreditado y mensaje en el Muro de la Empatía: 1 boleto base.</li>
-        <li>Juguete funcional: 2 boletos extra. Funda de caramelos: 1 boleto extra.</li>
-        <li>QR Dorado canjeado: 3 boletos extra.</li>
-      </ul>
-      <p class="hint">Donaciones y canjes de 08:00 a 17:45. Cada estudiante puede ganar un premio y tiene 45 segundos para presentarse con su identificación.</p>
-    </section>
-
-    <section class="section" id="villancicos">
-      <div class="section-head"><div><span class="kicker">Actividad I · 17:45 – 18:25</span><h2>Concurso de Villancicos “CIYA tiene Talento”</h2></div></div>
-      <div class="grid cols-2">
-        <form class="card" id="form-villancicos">
-          <div class="field"><label for="vil-grupo">Nombre artístico del grupo</label><input id="vil-grupo" required></div>
-          <div class="field"><label for="vil-integrantes">Nómina de integrantes (uno por línea)</label><textarea id="vil-integrantes" required placeholder="Nombre 1&#10;Nombre 2"></textarea></div>
-          <div class="field"><label for="vil-representante">Representante del grupo</label><input id="vil-representante" maxlength="120" required></div>
-          <div class="field"><label for="vil-carrera">Carrera representada</label><select id="vil-carrera" required></select></div>
-          <div class="field"><label for="vil-cancion">Obra musical seleccionada</label><input id="vil-cancion" required></div>
-          <div class="field"><label for="vil-categoria">Modalidad</label><select id="vil-categoria" required></select></div>
-          <button class="btn primary wide" type="submit">Inscribir grupo</button>
-          <p class="hint">Inscripción oficial abierta hasta el jueves 3 de diciembre de 2026, 17:30. Evaluación: 30% creatividad, 30% musicalidad, 20% puesta en escena y 20% aplausómetro.</p>
-        </form>
-        <div class="card"><h3>Orden de presentación</h3><div id="lista-grupos"><p class="empty">Consultando los grupos inscritos…</p></div></div>
-      </div>
-    </section>
-
-    <section class="section" id="buzon">
-      <div class="section-head"><div><span class="kicker">QR junto al Rincón Instagrameable</span><h2>Buzón “Compilando Deseos 2027”</h2></div></div>
-      <div class="grid cols-2">
-        <form class="card" id="form-deseo">
-          <div class="field"><label for="des-nombre">Nombre del autor</label><input id="des-nombre" required></div>
-          <div class="field"><label for="des-rol">Rol</label><select id="des-rol" required><option value="estudiante">Estudiante</option><option value="docente">Docente</option><option value="personal">Personal</option></select></div>
-          <div class="field"><label for="des-carrera">Carrera / Área</label><input id="des-carrera" required></div>
-          <div class="field"><label for="des-frase">Frase inspiradora o meta para 2027</label><textarea id="des-frase" maxlength="280" required></textarea></div>
-          <button class="btn primary wide" type="submit">Enviar al buzón</button>
-          <p class="hint">Las frases quedan pendientes de aprobación y podrán proyectarse durante la chocolatada final.</p>
-        </form>
-        <div class="card"><h3>Frases aprobadas</h3><div class="frases-aprobadas" id="frases-aprobadas"><p class="empty">Consultando las frases aprobadas…</p></div></div>
-      </div>
-    </section>
-
-    <section class="section card" id="muro">
-      <h2>Muro de la Empatía</h2>
-      <p>Deja tu mensaje en el muro del hall y pide que lo confirmen en recepción para recibir el boleto base.</p>
-    </section>
-
-    <section class="section" id="puertas">
-      <div class="section-head"><div><span class="kicker">Actividad II</span><h2>Puertas Decoradas por Carrera</h2></div></div>
-      <div class="card">
-        <div class="grid cols-2">
-          <div><h3>Espacios asignados</h3><div id="espacios-puertas"></div></div>
-          <div><h3>Matriz de evaluación (100 puntos)</h3><div id="criterios-puertas"></div><p class="hint">Instalación hasta las 15:00. Jurado: 15:30 – 16:45. Se prioriza reciclaje, bajo costo y protección de bienes institucionales.</p></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="ranking">
-      <div class="section-head"><h2>Copa Solidaria Inter-Carreras</h2><span class="sync-pill" id="sync-status">Consultando marcador</span></div>
-      <div class="card" id="ranking-portal"><p class="empty">Consultando los aportes por carrera…</p></div>
-    </section>
-  </main>
+  <main class="container" id="portal-root"></main>
 
   <footer class="footer">Facultad CIYA · Carrera de Sistemas y Software</footer>
 
@@ -166,8 +42,8 @@
   <script src="shared/js/data.js"></script>
   <script src="shared/js/store.js"></script>
   <script src="shared/js/ui.js"></script>
+  <script src="modules/portal-linterna/js/portal.js"></script>
   <script src="modules/formularios-datos/js/inscripciones.js"></script>
   <script src="modules/formularios-datos/js/buzon.js"></script>
-  <script src="modules/portal-linterna/js/portal.js"></script>
 </body>
 </html>

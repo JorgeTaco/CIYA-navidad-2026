@@ -31,51 +31,7 @@
     </div>
   </header>
 
-  <main class="container" id="ruta-index">
-    <div class="event-hero route-hero">
-      <h1>Ruta de Códigos QR</h1>
-      <p>Explora los pasillos, las gradas y los laboratorios de CIYA. Hay tres QR Dorados ocultos en la facultad.</p>
-      <nav class="section-links" aria-label="Contenido de la ruta">
-        <a href="#mensajes">Mensajes</a>
-        <a href="#trivias">Trivias</a>
-        <a href="#memes">Memes</a>
-        <a href="#dorados">QR Dorados</a>
-      </nav>
-    </div>
-
-    <section class="section" id="mensajes">
-      <h2>Mensajes navideños</h2>
-      <div class="grid auto" id="lista-mensajes"></div>
-    </section>
-
-    <section class="section" id="trivias">
-      <h2>Trivias relámpago</h2>
-      <div class="grid auto" id="lista-trivias"></div>
-    </section>
-
-    <section class="section" id="memes">
-      <h2>Memes de la Ruta QR</h2>
-      <div class="grid auto" id="lista-memes"></div>
-    </section>
-
-    <section class="section card" id="dorados">
-      <h2>QR Dorados</h2>
-      <p>El primer estudiante que canjee cada QR Dorado gana tres boletos extra. Muestra la pantalla activa y tu credencial estudiantil en recepción antes de las 17:45.</p>
-    </section>
-
-    <section class="section card">
-      <h2>Impresión de la ruta</h2>
-      <p class="muted">Genera los impresos públicos con el enlace de cada tarjeta (<code>qr.html?id=…</code>) y colócalos en los puntos sugeridos.</p>
-      <div class="row"><button class="btn" onclick="window.print()">Imprimir listado</button><button class="btn ghost" id="copiar-base">Copiar URL base de la ruta</button></div>
-    </section>
-  </main>
-
-  <main class="container narrow" id="ruta-detalle" hidden></main>
-
-  <nav class="bottom-actions" aria-label="Actividades del evento">
-    <a class="btn primary" href="index.html?modo=linterna#linterna">Abrir Modo Linterna</a>
-    <a class="btn" href="index.html#buzon" aria-label="Ir al Buzón Compilando Deseos 2027">Ir al Buzón 2027</a>
-  </nav>
+  <div id="qr-root"></div>
 
   <footer class="footer">CIYA Navidad 2026 · Ruta de Códigos QR</footer>
 

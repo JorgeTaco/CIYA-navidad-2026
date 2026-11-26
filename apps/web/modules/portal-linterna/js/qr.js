@@ -9,10 +9,55 @@
 
   function link(item) { return 'qr.html?id=' + encodeURIComponent(item.id); }
 
+  function shell() {
+    return `
+      <main class="container" id="ruta-index"></main>
+      <main class="container narrow" id="ruta-detalle" hidden></main>
+      <nav class="bottom-actions" aria-label="Actividades del evento">
+        <a class="btn primary" href="index.html?modo=linterna#linterna">Abrir Modo Linterna</a>
+        <a class="btn" href="index.html#buzon" aria-label="Ir al Buzón Compilando Deseos 2027">Ir al Buzón 2027</a>
+      </nav>`;
+  }
+
   function renderIndex() {
-    document.getElementById('ruta-index').hidden = false;
-    document.getElementById('ruta-detalle').hidden = true;
+    const target = document.getElementById('ruta-index');
+    const detail = document.getElementById('ruta-detalle');
+    target.hidden = false;
+    detail.hidden = true;
     document.title = 'CIYA Navidad 2026 | Ruta de Códigos QR';
+    target.innerHTML = `
+      <div class="event-hero route-hero">
+        <h1>Ruta de Códigos QR</h1>
+        <p>Explora los pasillos, las gradas y los laboratorios de CIYA. Hay tres QR Dorados ocultos en la facultad.</p>
+        <nav class="section-links" aria-label="Contenido de la ruta">
+          <a href="#mensajes">Mensajes</a>
+          <a href="#trivias">Trivias</a>
+          <a href="#memes">Memes</a>
+          <a href="#dorados">QR Dorados</a>
+        </nav>
+      </div>
+      <section class="section" id="mensajes">
+        <h2>Mensajes navideños</h2>
+        <div class="grid auto" id="lista-mensajes"></div>
+      </section>
+      <section class="section" id="trivias">
+        <h2>Trivias relámpago</h2>
+        <div class="grid auto" id="lista-trivias"></div>
+      </section>
+      <section class="section" id="memes">
+        <h2>Memes de la Ruta QR</h2>
+        <div class="grid auto" id="lista-memes"></div>
+      </section>
+      <section class="section card" id="dorados">
+        <h2>QR Dorados</h2>
+        <p>El primer estudiante que canjee cada QR Dorado gana tres boletos extra. Muestra la pantalla activa y tu credencial estudiantil en recepción antes de las 17:45.</p>
+      </section>
+      <section class="section card">
+        <h2>Impresión de la ruta</h2>
+        <p class="muted">Genera los impresos públicos con el enlace de cada tarjeta (<code>qr.html?id=…</code>) y colócalos en los puntos sugeridos.</p>
+        <div class="row"><button class="btn" data-print-route>Imprimir listado</button><button class="btn ghost" id="copiar-base">Copiar URL base de la ruta</button></div>
+      </section>`;
+
     document.getElementById('lista-mensajes').innerHTML = Data.mensajesQR.map(function (m) {
       return '<a class="card card-link" href="' + link(m) + '"><span class="badge">' + esc(m.ubicacion) + '</span><h3 style="margin-top:0.7rem">' + esc(m.titulo) + '</h3><p class="muted">' + esc(m.texto.slice(0, 120)) + '…</p></a>';
     }).join('');
@@ -20,8 +65,9 @@
       return '<a class="card card-link" href="' + link(t) + '"><span class="badge">' + esc(t.ubicacion) + '</span><h3 style="margin-top:0.7rem">Trivia relámpago</h3><p class="muted">' + esc(t.pregunta) + '</p></a>';
     }).join('');
     document.getElementById('lista-memes').innerHTML = Data.memes.map(function (m) {
-      return '<a class="card card-link" href="' + link(m) + '"><span class="badge">' + esc(m.plantilla) + '</span><p style="margin-top:0.7rem">' + esc(m.texto.replace('|', ' vs. ')) + '</p></a>';
+      return '<a class="card card-link" href="' + link(m) + '"><span class="badge">' + esc(m.ubicacion) + '</span><p style="margin-top:0.7rem">' + esc(m.texto.replace('|', ' vs. ')) + '</p></a>';
     }).join('');
+    target.querySelector('[data-print-route]').onclick = function () { window.print(); };
     document.getElementById('copiar-base').onclick = function () { UI.copy(new URL('qr.html', location.href).href); };
   }
 
@@ -29,8 +75,8 @@
     const mensaje = Data.mensajesQR.find(function (m) { return m.id === id; });
     const trivia = Data.trivias.find(function (t) { return t.id === id; });
     const meme = Data.memes.find(function (m) { return m.id === id; });
-    const target = document.getElementById('ruta-detalle');
     document.getElementById('ruta-index').hidden = true;
+    const target = document.getElementById('ruta-detalle');
     target.hidden = false;
 
     if (mensaje) {
@@ -61,7 +107,7 @@
       const panels = meme.texto.split('|').map(function (part) {
         return '<div class="card"><p>' + esc(part.trim()) + '</p></div>';
       });
-      target.innerHTML = '<article class="event-hero qr-story"><span class="kicker">Meme de la ruta</span><h1>' + esc(meme.plantilla) + '</h1>' +
+      target.innerHTML = '<article class="event-hero qr-story"><h1>' + esc(meme.plantilla) + '</h1>' +
         '<div class="grid' + (panels.length > 1 ? ' cols-2' : '') + '">' + panels.join('') + '</div>' +
         '<a class="btn ghost" href="qr.html">Ver toda la ruta</a></article>';
     } else {
@@ -121,6 +167,11 @@
     else renderIndex();
   }
 
+  function mount() {
+    document.getElementById('qr-root').innerHTML = shell();
+  }
+
+  mount();
   UI.initNav('qr');
   window.addEventListener('hashchange', renderRoute);
   renderRoute();

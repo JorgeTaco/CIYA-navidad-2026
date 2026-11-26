@@ -17,6 +17,94 @@
   let lastDrawFrame = '';
   let lastTick = 0;
 
+  function template() {
+    return `
+      <div class="section-head">
+        <div><span class="kicker">Laptop + proyector · 16:9</span><h1>Consola de Pantalla Gigante</h1></div>
+        <div class="row"><button class="btn small ghost" id="audio-toggle">Activar audio</button><button class="btn small" id="project-fullscreen">Proyección a pantalla completa</button><button class="btn small ghost" id="logout">Cerrar sesión</button></div>
+      </div>
+      <div id="locked" hidden><p class="empty">Esta consola requiere una cuenta de escenario.</p></div>
+
+      <div id="panel" hidden>
+        <div class="stage-tabs" role="tablist">
+          <button class="btn small active" data-tab="villancicos">Villancicos</button>
+          <button class="btn small" data-tab="ranking">Ranking</button>
+          <button class="btn small" data-tab="deseos">Deseos 2027</button>
+          <button class="btn small" data-tab="encendido">Encendido 5 en 1</button>
+          <button class="btn small" data-tab="ruleta">Gran Ruleta</button>
+          <button class="btn small" data-tab="respaldo">Respaldo local</button>
+        </div>
+
+        <div class="stage-grid">
+          <div>
+            <div class="stage-screen" id="stage-screen" tabindex="0"></div>
+            <p class="hint" style="margin-top:0.6rem">Vista optimizada para proyector HD/Full HD. Mantén esta pestaña visible; el contenido se actualiza en tiempo real.</p>
+          </div>
+          <div>
+            <section class="card tab-panel" data-panel="villancicos">
+              <h2>Gestor de Villancicos</h2>
+              <div class="field"><label for="vil-grupo-activo">Grupo en escenario</label><select id="vil-grupo-activo"></select></div>
+              <div class="row"><button class="btn primary" id="cronometro-start">Iniciar 3:00</button><button class="btn" id="cronometro-pause">Pausar</button><button class="btn ghost" id="cronometro-reset">Reiniciar</button></div>
+              <h3 style="margin-top:1.2rem">Aplausómetro</h3>
+              <p class="muted" id="mic-estado">Activa el micrófono para medir el aplauso o usa el control manual.</p>
+              <div class="row"><button class="btn small" id="mic-start">Activar micrófono</button><button class="btn small ghost" id="mic-stop">Detener</button></div>
+              <div class="field" style="margin-top:0.8rem"><label for="aplauso-manual">Nivel manual</label><input id="aplauso-manual" type="range" min="0" max="100" value="0"></div>
+              <div class="bar"><span id="aplauso-bar" style="width:0%;--bar-color:var(--green)"></span></div>
+              <h3 style="margin-top:1.2rem">Calificación del jurado</h3>
+              <form id="form-score">
+                <div id="score-fields"></div>
+                <button class="btn primary wide" type="submit">Guardar calificación</button>
+              </form>
+              <div id="scores-list" style="margin-top:1rem"></div>
+            </section>
+
+            <section class="card tab-panel" data-panel="ranking" hidden>
+              <h2>Ranking en vivo</h2>
+              <div id="ranking-detalle"></div>
+              <p class="hint">Puntuación: juguete 5 pts, funda de caramelos 2 pts. Desempate: juguetes operativos y donantes únicos.</p>
+            </section>
+
+            <section class="card tab-panel" data-panel="deseos" hidden>
+              <h2>Frases aprobadas</h2>
+              <p class="muted">Rotación automática cada 8 segundos durante la chocolatada final (19:25 – 20:15).</p>
+              <div class="row"><button class="btn small" id="deseos-play">Iniciar rotación</button><button class="btn small ghost" id="deseos-stop">Detener</button></div>
+              <div id="deseos-lista" style="margin-top:1rem"></div>
+            </section>
+
+            <section class="card tab-panel" data-panel="encendido" hidden>
+              <div id="encendido-root"></div>
+            </section>
+
+            <section class="card tab-panel" data-panel="ruleta" hidden>
+              <h2>Gran Ruleta Digital</h2>
+              <p class="muted">Los boletos elegibles del respaldo sellado participan. Un estudiante solo puede ganar un premio.</p>
+              <div class="row between"><span>Boletos válidos</span><strong id="ruleta-boletos">0</strong></div>
+              <div class="row between"><span>Participantes</span><strong id="ruleta-personas">0</strong></div>
+              <div class="row between"><span>Premios entregados</span><strong id="ruleta-entregados">0</strong></div>
+              <div class="field"><label for="ruleta-premio">Premio en juego</label><input id="ruleta-premio" maxlength="120" placeholder="Premio Sorpresa CIYA 2026"></div>
+              <button class="btn primary wide" id="ruleta-girar" style="margin-top:0.9rem">Girar ruleta</button>
+              <div id="ruleta-resultado" style="margin-top:1rem"></div>
+              <div id="ruleta-historial" style="margin-top:1rem"></div>
+            </section>
+
+            <section class="card tab-panel" data-panel="respaldo" hidden>
+              <h2>Respaldo local</h2>
+              <p class="muted">A las 17:45, descarga el JSON con la lista completa de boletos y el marcador final de donaciones. La ruleta, el ranking y el encendido siguen funcionando sin internet.</p>
+              <button class="btn primary wide" id="backup-download">Descargar Respaldo Local (JSON)</button>
+              <div class="field" style="margin-top:1rem"><label for="backup-file">Restaurar desde archivo</label><input id="backup-file" type="file" accept="application/json,.json"></div>
+              <button class="btn wide" id="backup-load">Cargar respaldo</button>
+              <p class="hint" style="margin-top:1rem">Importa el respaldo en la consola local. Usa una sola pestaña para operar el sorteo.</p>
+            </section>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function mount() {
+    document.getElementById('escenario-root').innerHTML = template();
+    Ignite.mount();
+  }
+
   function wishes() {
     return draw ? (draw.snapshot.wishes || []) : Store.get().deseos.filter(function (wish) { return wish.aprobado; });
   }
@@ -403,6 +491,7 @@
   }
 
   async function init() {
+    mount();
     if (localMode && (!navigator.locks || !await claimLocalConsole().catch(function () { return false; }))) {
       const locked = document.getElementById('locked');
       locked.textContent = 'La consola local requiere Chrome o Edge y una sola pestaña activa.';
@@ -435,5 +524,6 @@
   }
 
   window.CIYA_STAGE_RENDER = renderStage;
+  window.CIYA_STAGE = { mount: mount, init: init };
   init();
 })();

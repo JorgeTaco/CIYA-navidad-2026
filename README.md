@@ -9,7 +9,10 @@ el backend es el proyecto Supabase de `supabase/`.
 El comportamiento funcional se conservó. Cambió la ubicación y la propiedad de
 cada archivo:
 
-- Las seis páginas pasaron a `apps/web/`; siguen siendo los *shells* de entrada.
+- Las cinco páginas funcionales pasaron a `apps/web/` y son *shells* delgados:
+  header, footer y un punto de montaje (`#portal-root`, `#qr-root`,
+  `#recepcion-root`, `#admin-root`, `#escenario-root`); el contenido lo renderiza
+  el JS del módulo. `bases.html` sigue siendo un documento estático de consulta.
 - `assets/css/app.css` se dividió en `shared/css/` (tokens, base, componentes y
   responsive) y en los CSS de cada módulo. Se respetó el orden original de la
   cascada cargando `responsive.css` al final.
@@ -82,11 +85,46 @@ CIYA-navidad-2026/
 ## Contratos entre módulos
 
 - `CIYA_STORE` en `shared/js/store.js` es el único acceso a Supabase.
-- `CIYA_INSCRIPCIONES.init()` y `CIYA_BUZON.init()` montan sus formularios en el
-  portal; `portal.js` no contiene esa lógica.
-- `CIYA_IGNITE` expone el encendido (serial, cuenta, relé y tecla) y
+- Cada shell expone un punto de montaje y su JS dueño: `CIYA_PORTAL.mount()` en
+  `#portal-root`, `CIYA_RECEPCION.mount()` en `#recepcion-root`,
+  `CIYA_ADMIN.mount()` en `#admin-root` y `CIYA_STAGE.mount()` en
+  `#escenario-root`. La ruta QR usa `qr.js` sobre `#qr-root`.
+- `CIYA_INSCRIPCIONES.init()` y `CIYA_BUZON.init()` montan sus formularios dentro
+  del portal en `#inscripciones-root` y `#buzon-root`; `portal.js` no contiene esa
+  lógica.
+- `CIYA_IGNITE.mount()` dibuja el panel de hardware dentro de `#encendido-root`;
+  `CIYA_IGNITE.setup()` enlaza serial, cuenta, relé y tecla, y
   `CIYA_STAGE_RENDER` permite actualizar la proyección desde ese módulo.
 - `CIYA_DRAW` valida el respaldo sellado versión 2 y gestiona la ruleta.
+
+## Actores del sistema (stakeholders)
+
+| Actor | Acceso y responsabilidad | Implementación |
+| --- | --- | --- |
+| Estudiantes y Docentes (Asistentes) | Portal móvil responsive: Mar de Linternas, inscripción de villancicos, buzón “Compilando Deseos 2027” y Ruta de Códigos QR. | `apps/web/index.html`, `modules/portal-linterna/`, `modules/formularios-datos/js/inscripciones.js`, `modules/formularios-datos/js/buzon.js` y `qr.html`; acciones públicas `group` y `wish`. |
+| Equipo de Recepción (Delegados Estudiantiles de Industrial) | Panel desde celular o laptop, 17:00–17:45: registrar asistentes, contabilizar donaciones por carrera y validar QR Dorados. | `recepcion.html` y `recepcion.js`; rol `recepcion`; acciones `checkin`, `donate`, `redeem` y `seal`; franjas en `ciya.event`. |
+| Equipo de Producción / Escenario (Sistemas y Software) | Consola conectada a proyector y Arduino/ESP32: ranking en vivo, villancicos, Encendido 5 en 1 y Gran Ruleta Digital. | `escenario.html`, `modules/pantalla-gigante/` y `modules/hardware-encendido/`; rol `escenario`; modo local sin red. |
+| Docentes Organizadores y Asociación Estudiantil (Curadores) | Vista privada del buzón para moderar, aprobar y exportar las frases en enero. | `admin.html` y `admin.js`; rol `admin`; acción `moderate`; CSV de deseos aprobados o todos. |
+
+Los permisos no son solo visuales: `ciya_access` y `ciya_write` validan roles y
+horarios en `supabase/migrations/0002_rpc_read_write.sql`. La exportación en
+enero es la actividad operativa prevista; no hay un bloqueo de fecha que impida
+exportar antes, porque la curaduría puede realizarse apenas se reciben las frases.
+
+## Requisitos funcionales — Módulo A: Portal y Mar de Linternas
+
+| RF | Cumplimiento | Evidencia |
+| --- | --- | --- |
+| RF-01 Acceso inmediato sin instalación | Sí | Sitio estático servido por URL/QR desde GitHub Pages; HTML/CSS/JS puro, sin build, `manifest`, service worker ni tiendas de aplicaciones. |
+| RF-02 Selección de carrera | Sí | Las 5 carreras están en `apps/web/shared/js/data.js:9` con `color` e `icono`; `applyLantern()` aplica `--lantern-color` y muestra el icono en `#lantern-carrera`. |
+| RF-03 Mensajes personalizables | Sí | Frases predefinidas (“Feliz Navidad CIYA”, “Orgullo Industrial”, “Compilando el 2027”) y campo libre de 60 caracteres; tipografía `clamp(2rem, 9vw, 7rem)`, alto contraste y animación `lanternPulse` de 1,6 s con botón “Sincronizar destello”. |
+| RF-04 Pantalla completa y ejecución local | Sí | El botón “Pantalla completa” usa `requestFullscreen()` con vista CSS de respaldo. En `index.html?modo=linterna#linterna`, `init()` termina antes de `Store.init()`: color, carrera, mensaje y parpadeo se resuelven solo en JS/CSS del navegador. |
+| RF-05 Ruta de códigos QR | Sí | `qr.html` y `qr.js` sirven mensajes, trivias y memes; `ciya.gold` tiene 3 ranuras y admin genera las URLs `qr.html#dorado=<secret>` para los QR Dorados. |
+
+Matiz de RF-04: al no existir service worker —la PWA fue excluida del SRS—, la
+continuidad tras cortar el Wi-Fi depende de que la página ya haya sido cargada y
+quede en caché del navegador. La prueba real en Chrome Android, Safari iOS y Edge
+está prevista en el ensayo del 3 de diciembre (`docs/operacion/runbook.md`).
 
 ## Cómo ejecutar el proyecto
 
@@ -225,8 +263,13 @@ se documentan en `tests/` a medida que se implementan.
   módulos. Lo que usa un solo módulo se queda dentro de ese módulo. Los helpers
   `format.js` y `dom.js` siguen dentro de `ui.js` porque todavía no hay código
   suficiente para extraerlos.
-- **Shells delgados**: `index.html` y `escenario.html` deben seguir siendo solo
-  contenedores; la lógica va en `modules/` mediante puntos de montaje.
+- **Shells delgados**: los cinco HTML funcionales de `apps/web/` solo cargan
+  CSS/JS y definen un contenedor; la lógica y el markup dinámico viven en
+  `modules/` mediante puntos de montaje. `bases.html` es la excepción: contenido
+  oficial estático sin JS. El orden de scripts es parte del contrato: en `index.html`,
+  `portal.js` se carga antes que `inscripciones.js` y `buzon.js` para que el
+  portal cree sus raíces; en `escenario.html`, `encendido.js` se carga antes que
+  `escenario.js` para exponer `CIYA_IGNITE` y permitir `CIYA_STAGE.mount()`.
 - **Migraciones**: nunca editar una migración ya aplicada; agregar `0005_...`.
   Los secretos solo en entorno o Vault, nunca en el repositorio.
 - **Pruebas**: hoy hay cobertura real en `tests/unit`; `integration/`,
