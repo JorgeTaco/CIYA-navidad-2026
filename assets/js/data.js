@@ -7,11 +7,11 @@ window.CIYA_DATA = {
     plataforma: 'Aplicación Web Responsive CIYA Navidad 2026'
   },
   carreras: [
-    { id: 'electricidad', nombre: 'Electricidad', sigla: 'EL', color: '#ffd166', aula: '20 a la 26' },
-    { id: 'electromecanica', nombre: 'Electromecánica', sigla: 'EM', color: '#ff8c42', aula: '9 a la 13' },
-    { id: 'industrial', nombre: 'Industrial', sigla: 'IN', color: '#ef476f', aula: '15 a la 19' },
-    { id: 'hidraulica', nombre: 'Hidráulica', sigla: 'HI', color: '#4cc9f0', aula: '1 a la 4' },
-    { id: 'sistemas', nombre: 'Sistemas y Software', sigla: 'SY', color: '#06d6a0', aula: '5 a la 8' }
+    { id: 'electricidad', nombre: 'Electricidad', sigla: 'EL', icono: '⚡', color: '#ffd166', aula: '20 a la 26' },
+    { id: 'electromecanica', nombre: 'Electromecánica', sigla: 'EM', icono: '⚙', color: '#ff8c42', aula: '9 a la 13' },
+    { id: 'industrial', nombre: 'Industrial', sigla: 'IN', icono: '🏭', color: '#ef476f', aula: '15 a la 19' },
+    { id: 'hidraulica', nombre: 'Hidráulica', sigla: 'HI', icono: '💧', color: '#4cc9f0', aula: '1 a la 4' },
+    { id: 'sistemas', nombre: 'Sistemas y Software', sigla: 'SY', icono: '💻', color: '#06d6a0', aula: '5 a la 8' }
   ],
   categoriasVillancicos: [
     'Acústico / Rock Navideño',
@@ -31,7 +31,6 @@ window.CIYA_DATA = {
     { id: 'equipo', nombre: 'Trabajo en equipo y cumplimiento de normas', detalle: 'Colaboración en la ejecución y observancia de las reglas de seguridad.', peso: 15 }
   ],
   secuenciaEncendido: ['industrial', 'hidraulica', 'electromecanica', 'sistemas', 'electricidad'],
-  ponderaciones: { juguete: 5, caramelos: 2, qrDorado: 3, muro: 1, base: 1 },
   frasesLinterna: [
     'Feliz Navidad CIYA',
     'Orgullo Industrial',
@@ -45,7 +44,7 @@ window.CIYA_DATA = {
       id: 'mensaje-general',
       titulo: 'Mensaje general',
       ubicacion: 'Entrada / Hall',
-      texto: '¡Feliz Navidad, futuro ingeniero! Si sobreviviste a los parciales, a los informes de madrugada y al tráfico, mereces un buen chocolate caliente hoy. ¡Nos vemos a las 17:00 en el encendido!'
+      texto: '¡Feliz Navidad, futuro ingeniero! Si sobreviviste a los parciales, a los informes de madrugada y al tráfico, mereces un buen chocolate caliente hoy. ¡Nos vemos desde las 17:00 en el hall para la acreditación!'
     },
     {
       id: 'mensaje-electricidad',
@@ -107,7 +106,7 @@ window.CIYA_DATA = {
       pregunta: 'En el encendido de hoy, ¿cuál es el orden exacto de la reacción en cadena "5 Carreras, 1 Energía"?',
       opciones: ['Electricidad → Software → Industrial', 'Industrial → Hidráulica → Electromecánica → Software → Electricidad', 'Todos a la vez y que sea lo que Dios quiera'],
       correcta: 1,
-      remate: '¡Aprobado! No te pierdas el encendido en vivo a las 18:25 en el hall.'
+      remate: '¡Aprobado! No te pierdas el acto central de 18:25 a 18:55 en el hall.'
     },
     {
       id: 'trivia-sistemas',
@@ -153,13 +152,8 @@ window.CIYA_DATA = {
       texto: '¡Te dije que el código de la ruleta debía funcionar sin Wi-Fi! | En mi compu sí compilaba.'
     }
   ],
-  dorados: [
-    { id: 'oro-01', codigo: 'CIYA-ORO-01', pista: 'Detrás de un adorno en la baranda de Sistemas' },
-    { id: 'oro-02', codigo: 'CIYA-ORO-02', pista: 'Lateral de una columna del hall principal' },
-    { id: 'oro-03', codigo: 'CIYA-ORO-03', pista: 'Cerca del bar, junto a la estación de chocolate' }
-  ],
   cronograma: [
-    { hora: '08:00 – 17:45', bloque: 'Recepción Solidaria, Donaciones y Canje de QR', detalle: 'Registro de asistentes, recepción de bienes y cierre del sistema QR.' },
+    { hora: '08:00 – 17:45', bloque: 'Recepción Solidaria, Donaciones y Canje de QR', detalle: 'Recepción de bienes y canje de QR. Acreditación del sorteo de 17:00 a 17:45.' },
     { hora: '15:00', bloque: 'Cierre de montaje de Puertas Decoradas', detalle: 'Término del plazo formal para las cinco carreras.' },
     { hora: '15:30 – 16:45', bloque: 'Evaluación de Puertas Decoradas', detalle: 'Recorrido formal de inspección del jurado calificador.' },
     { hora: '17:45 – 18:25', bloque: 'Concurso de Villancicos "CIYA tiene Talento"', detalle: 'Presentaciones sobre escenario, límite de 3 minutos por intervención.' },

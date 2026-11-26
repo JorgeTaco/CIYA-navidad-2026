@@ -27,7 +27,7 @@
       <div><span class="kicker">Docentes organizadores y Asociación Estudiantil</span><h1>Curaduría y Evaluación</h1></div>
       <button class="btn ghost small" id="logout">Cerrar sesión</button>
     </div>
-    <div id="locked" hidden><p class="empty">Esta vista privada requiere PIN del equipo organizador.</p></div>
+    <div id="locked" hidden><p class="empty">Esta vista privada requiere una cuenta de administración.</p></div>
 
     <div id="panel" hidden>
       <section class="section">
@@ -52,6 +52,20 @@
       <section class="section card">
         <h2>Calificaciones de villancicos registradas</h2>
         <div id="lista-scores"></div>
+      </section>
+      <section class="section card" id="admin-gold">
+        <h2>Impresión privada de los QR Dorados</h2>
+        <p>Usa estas URLs en el generador de QR. Distribuye solo los tres impresos y guarda este listado en privado.</p>
+        <div id="gold-links"></div>
+        <button class="btn" id="print-gold">Imprimir listado privado</button>
+      </section>
+      <section class="section card" id="admin-import">
+        <h2>Importar respaldo de la primera versión</h2>
+        <p>Revisa los datos antes de importarlos a una instancia nueva. Confirma solo las acreditaciones verificadas presencialmente.</p>
+        <input type="file" id="legacy-file" accept=".json,application/json">
+        <button class="btn" id="legacy-preview">Revisar archivo</button>
+        <div id="legacy-report" aria-live="polite"></div>
+        <button class="btn primary" id="legacy-apply" hidden>Importar respaldo revisado</button>
       </section>
     </div>
   </main>

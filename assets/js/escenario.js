@@ -5,14 +5,27 @@
   const Sound = window.CIYA_SOUND;
   const CFG = window.CIYA_CONFIG;
   const esc = UI.escapeHtml;
+  const Draw = window.CIYA_DRAW;
+  const localMode = location.origin === 'http://127.0.0.1:8080' &&
+    new URLSearchParams(location.search).get('modo') === 'local';
 
   let activeTab = 'villancicos';
   const cron = { remaining: 180, running: false, timer: null };
-  const aplauso = { value: 0, stream: null, context: null, analyser: null, frame: null, data: null };
+  const aplauso = { value: 0, db: null, stream: null, context: null, analyser: null, frame: null, data: null };
   const rotacion = { timer: null, index: 0 };
   const ignicion = { count: 10, running: false, timer: null, step: -1, sequenceTimer: null };
-  const serial = { port: null, reader: null, writer: null };
-  const ruleta = { spinning: false, current: null, timer: null, remaining: 45, excluded: [], rotation: 0, wheelTimer: null };
+  const serial = { port: null, reader: null, writer: null, armed: false, connecting: false };
+  let draw = null;
+  let lastDrawFrame = '';
+  let lastTick = 0;
+
+  function wishes() {
+    return draw ? (draw.snapshot.wishes || []) : Store.get().deseos.filter(function (wish) { return wish.aprobado; });
+  }
+
+  function ranking() {
+    return draw ? draw.snapshot.ranking : Store.ranking();
+  }
 
   function activeGroup() {
     const select = document.getElementById('vil-grupo-activo');
@@ -38,17 +51,18 @@
         '<p class="muted">' + esc(group ? group.categoria + ' · ' + group.integrantes.length + ' integrantes' : 'Esperando grupos inscritos') + '</p>' +
         '<div class="big-number">' + formatTime(cron.remaining) + '</div>' +
         '<div style="width:min(520px,90%);margin-top:1rem"><div class="bar"><span style="width:' + aplauso.value + '%;--bar-color:var(--green)"></span></div>' +
-        '<small>Aplausómetro: ' + Math.round(aplauso.value) + ' / 100</small></div>';
+        '<small>Aplausómetro: ' + (aplauso.db === null ? 'nivel manual ' + Math.round(aplauso.value) + ' / 100' :
+          aplauso.db + ' dBFS') + '</small></div>';
     } else if (activeTab === 'ranking') {
-      const rows = Store.ranking();
-      const max = Math.max(1, rows.reduce(function (sum, r) { return sum + r.puntos; }, 0));
+      const rows = ranking();
+      const max = Math.max(1, ...rows.map(function (row) { return row.puntos; }));
       screen.innerHTML = '<span class="kicker">Copa Solidaria Inter-Carreras</span><h2>Ranking en vivo</h2><div style="width:min(700px,100%)">' +
         rows.map(function (r) {
           return '<div class="ranking-row"><div class="ranking-head"><span>' + esc(r.nombre) + '</span><strong>' + r.puntos + ' pts</strong></div>' +
-            '<div class="bar"><span style="width:' + Math.round((r.puntos / max) * 100) + '%;--bar-color:' + r.color + '"></span></div></div>';
+            '<div class="bar"><span style="width:' + Math.round((r.puntos / max) * 100) + '%;--bar-color:' + Store.carrera(r.id).color + '"></span></div><small>' + r.juguetes + ' juguetes · ' + r.caramelos + ' fundas · ' + r.total + ' artículos</small></div>';
         }).join('') + '</div>';
     } else if (activeTab === 'deseos') {
-      const aprobados = Store.get().deseos.filter(function (d) { return d.aprobado; });
+      const aprobados = wishes();
       const frase = aprobados[rotacion.index % Math.max(1, aprobados.length)];
       screen.innerHTML = '<span class="kicker">Compilando Deseos 2027</span>' +
         '<h2 style="font-size:clamp(1.6rem,4.5vw,3rem);text-wrap:balance">' + (frase ? '“' + esc(frase.frase) + '”' : 'Esperando frases aprobadas') + '</h2>' +
@@ -56,21 +70,24 @@
     } else if (activeTab === 'encendido') {
       screen.innerHTML = '<span class="kicker">5 carreras, 1 energía</span>' +
         '<h2>Encendido del Árbol CIYA 2026</h2>' +
-        '<div class="big-number">' + (ignicion.running ? ignicion.count : 'LISTO') + '</div>' +
+        '<div class="big-number">' + (ignicion.running ? ignicion.count : ignicion.step >= 0 ? '0' : 'LISTO') + '</div>' +
         '<div class="row" style="justify-content:center;margin-top:1rem">' + Data.secuenciaEncendido.map(function (id, index) {
           const c = Store.carrera(id);
           const cls = index === ignicion.step ? 'active' : index < ignicion.step ? 'done' : '';
           return '<span class="badge ' + cls + '" style="border-color:' + c.color + ';color:' + c.color + '">' + c.sigla + '</span>';
         }).join('') + '</div>';
     } else if (activeTab === 'ruleta') {
-      const winner = ruleta.current;
-      screen.innerHTML = '<span class="kicker">Gran Sorteo Digital</span><h2>' + (winner ? 'Ganador: ' + esc(winner.nombre) : 'Gran Ruleta Digital') + '</h2>' +
-        '<div class="wheel-wrap"><div class="wheel-pointer"></div><div class="wheel" id="ruleta-wheel"></div></div>' +
-        '<p class="muted">' + (winner ? 'Presenta tu identificación ante la Comisión. Tiempo: ' + ruleta.remaining + ' s' : 'Gira la ruleta para comenzar') + '</p>';
-      const wheel = document.getElementById('ruleta-wheel');
-      if (wheel && !ruleta.spinning && ruleta.rotation) wheel.style.transform = 'rotate(' + (ruleta.rotation % 360) + 'deg)';
+      const pending = draw && draw.current;
+      const spinning = pending && pending.expiresAt === null;
+      const winner = !spinning && draw && (pending || draw.lastWinner);
+      screen.innerHTML = '<span class="kicker">Gran Sorteo Digital</span><h2>' +
+        (winner ? esc(winner.nombre) : 'Gran Ruleta Digital') + '</h2>' +
+        '<div class="wheel-wrap"><div class="wheel-pointer"></div><div class="wheel' + (spinning ? ' spinning' : '') + '"></div></div>' +
+        '<p class="muted">' + (winner ? esc(winner.number) + (pending ? ' · Preséntate: ' +
+          Math.max(0, Math.ceil((pending.expiresAt - Date.now()) / 1000)) + ' s' : '') :
+          spinning ? 'Girando…' : 'Listo para el siguiente giro') + '</p>';
     } else {
-      screen.innerHTML = '<span class="kicker">Respaldo local</span><h2>Modo contingencia</h2><p class="muted">Descarga el JSON desde el panel lateral antes de las 17:45.</p>';
+      screen.innerHTML = '<span class="kicker">Respaldo local</span><h2>Modo contingencia</h2><p class="muted">Descarga el JSON después de que recepción selle los datos a las 17:45.</p>';
     }
   }
 
@@ -104,7 +121,7 @@
   }
 
   function startCronometro() {
-    if (cron.running) return;
+    if (cron.running || !cron.remaining) return;
     cron.running = true;
     Sound.enable();
     cron.timer = setInterval(function () {
@@ -142,6 +159,7 @@
     aplauso.context = null;
     aplauso.analyser = null;
     aplauso.value = 0;
+    aplauso.db = null;
     document.getElementById('mic-estado').textContent = 'Micrófono detenido. Usa el control manual.';
     renderStage();
   }
@@ -153,7 +171,7 @@
       return;
     }
     try {
-      aplauso.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      aplauso.stream = await navigator.mediaDevices.getUserMedia({ audio: { autoGainControl: false, noiseSuppression: false, echoCancellation: false } });
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       aplauso.context = new AudioContextClass();
       const source = aplauso.context.createMediaStreamSource(aplauso.stream);
@@ -161,8 +179,9 @@
       aplauso.analyser.fftSize = 256;
       aplauso.data = new Uint8Array(aplauso.analyser.fftSize);
       source.connect(aplauso.analyser);
-      document.getElementById('mic-estado').textContent = 'Micrófono activo: midiendo aplausos en vivo.';
-      const loop = function () {
+      document.getElementById('mic-estado').textContent = 'Micrófono activo: nivel relativo en dBFS.';
+      let lastRender = 0;
+      const loop = function (now) {
         aplauso.analyser.getByteTimeDomainData(aplauso.data);
         let sum = 0;
         for (let i = 0; i < aplauso.data.length; i++) {
@@ -170,20 +189,25 @@
           sum += value * value;
         }
         const rms = Math.sqrt(sum / aplauso.data.length);
-        aplauso.value = Math.min(100, Math.round(rms * 420));
+        aplauso.db = Math.max(-60, Math.round(20 * Math.log10(rms)));
+        aplauso.value = (aplauso.db + 60) / 60 * 100;
         document.getElementById('aplauso-manual').value = aplauso.value;
         document.getElementById('aplauso-bar').style.width = aplauso.value + '%';
-        renderStage();
+        if (activeTab === 'villancicos' && now - lastRender > 90) {
+          lastRender = now;
+          renderStage();
+        }
         aplauso.frame = requestAnimationFrame(loop);
       };
-      loop();
+      aplauso.frame = requestAnimationFrame(loop);
     } catch (error) {
+      stopMic();
       UI.toast('No se pudo activar el micrófono: ' + error.message, 'bad');
     }
   }
 
   function startRotation() {
-    const aprobados = Store.get().deseos.filter(function (d) { return d.aprobado; });
+    const aprobados = wishes();
     if (!aprobados.length) return UI.toast('No hay frases aprobadas todavía', 'bad');
     if (rotacion.timer) clearInterval(rotacion.timer);
     rotacion.index = 0;
@@ -199,207 +223,191 @@
     rotacion.timer = null;
   }
 
-  function writeRelay() {
-    if (serial.writer) {
-      serial.writer.write(new TextEncoder().encode(CFG.relayCommand)).catch(function (error) {
-        UI.toast('No se pudo enviar pulso al relé: ' + error.message, 'bad');
-      });
-      UI.toast('Pulso enviado al relé de Electricidad');
-    } else {
-      UI.toast('Pulso de relé simulado (sin placa conectada)', 'warn');
+  function relayStatus(message, kind) {
+    const status = document.getElementById('estado-relay');
+    status.textContent = message;
+    status.className = 'badge ' + kind;
+  }
+
+  async function writeRelay() {
+    if (!serial.writer) {
+      relayStatus('Simulación local: placa desconectada.', 'warn');
+      return;
+    }
+    try {
+      await serial.writer.write(new TextEncoder().encode(CFG.relayCommand));
+      relayStatus('Comando enviado a la placa.', 'ok');
+    } catch {
+      relayStatus('Error al enviar el comando. Avisa a Electricidad.', 'bad');
     }
   }
 
   function runSequence() {
-    clearInterval(ignicion.sequenceTimer);
-    let index = 0;
     ignicion.step = 0;
     renderSequence();
     renderStage();
     ignicion.sequenceTimer = setInterval(function () {
-      index += 1;
-      if (index >= Data.secuenciaEncendido.length) {
+      ignicion.step += 1;
+      if (ignicion.step >= Data.secuenciaEncendido.length) {
         clearInterval(ignicion.sequenceTimer);
-        ignicion.step = Data.secuenciaEncendido.length;
+        ignicion.sequenceTimer = null;
         Sound.ignite();
-        renderSequence();
-        renderStage();
-        Store.update(function (draft) {
-          draft.ignition.lastRun = Date.now();
-          draft.ignition.relay = true;
-        });
-        return;
+      } else {
+        Sound.beep();
       }
-      ignicion.step = index;
-      Sound.beep();
       renderSequence();
       renderStage();
     }, 900);
   }
 
   function startIgnicion() {
-    if (ignicion.running) return;
+    if (ignicion.running || ignicion.sequenceTimer) return;
+    serial.armed = false;
+    document.getElementById('serial-arm').textContent = 'Armar disparo del sensor';
     Sound.enable();
     ignicion.running = true;
     ignicion.count = 10;
     ignicion.step = -1;
-    clearInterval(ignicion.sequenceTimer);
+    const deadline = performance.now() + 10000;
+    relayStatus('Cuenta en curso.', 'warn');
     renderSequence();
     renderStage();
     ignicion.timer = setInterval(function () {
-      ignicion.count -= 1;
-      if (ignicion.count > 0) Sound.countdown();
-      if (ignicion.count <= 0) {
+      const seconds = Math.max(0, Math.ceil((deadline - performance.now()) / 1000));
+      if (seconds === ignicion.count) return;
+      ignicion.count = seconds;
+      if (seconds === 0) {
         clearInterval(ignicion.timer);
         ignicion.running = false;
-        ignicion.count = 0;
         Sound.go();
         writeRelay();
         runSequence();
+      } else {
+        Sound.countdown();
+        renderStage();
       }
-      renderStage();
-    }, 1000);
+    }, 50);
   }
 
   async function connectSerial() {
-    if (!navigator.serial) {
-      UI.toast('Web Serial no disponible en este navegador; usa la tecla de emergencia', 'bad');
-      return;
-    }
+    if (serial.connecting) return;
+    if (!navigator.serial) return UI.toast('Web Serial requiere Chrome o Edge de escritorio.', 'bad');
+    serial.connecting = true;
+    const connect = document.getElementById('serial-connect');
+    const arm = document.getElementById('serial-arm');
+    const status = document.getElementById('serial-status');
+    connect.disabled = true;
     try {
       serial.port = await navigator.serial.requestPort();
       await serial.port.open({ baudRate: CFG.serialBaudRate });
       serial.writer = serial.port.writable.getWriter();
-      document.getElementById('serial-status').textContent = 'Sensor conectado';
-      document.getElementById('serial-status').className = 'badge ok';
-      const decoder = new TextDecoder();
       serial.reader = serial.port.readable.getReader();
+      status.textContent = 'Sensor conectado';
+      arm.disabled = false;
+      let buffer = '';
+      const decoder = new TextDecoder();
       while (true) {
-        const result = await serial.reader.read();
-        if (result.done) break;
-        const text = decoder.decode(result.value, { stream: true });
-        if (/SENSOR|TRIGGER|DISPARO|IGNITE|\b1\b/i.test(text)) startIgnicion();
+        const packet = await serial.reader.read();
+        if (packet.done) break;
+        buffer += decoder.decode(packet.value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        if (buffer.length > 256) buffer = '';
+        for (const line of lines) {
+          if (serial.armed && /^(SENSOR|TRIGGER|DISPARO|IGNITE|1)$/i.test(line.trim())) startIgnicion();
+        }
       }
     } catch (error) {
-      document.getElementById('serial-status').textContent = 'Sin conectar';
-      UI.toast('No se pudo conectar el sensor: ' + error.message, 'bad');
+      if (error.name !== 'NotFoundError') UI.toast('Puerto serial interrumpido: ' + error.message, 'bad');
+    } finally {
+      if (serial.reader) serial.reader.releaseLock();
+      if (serial.writer) serial.writer.releaseLock();
+      if (serial.port) await serial.port.close().catch(function () {});
+      Object.assign(serial, { port: null, reader: null, writer: null, armed: false, connecting: false });
+      status.textContent = 'Sin conectar';
+      arm.textContent = 'Armar disparo del sensor';
+      arm.disabled = true;
+      connect.disabled = false;
     }
   }
 
-  function candidates() {
-    const state = Store.get();
-    return state.attendees.filter(function (a) {
-      const tickets = Store.ticketBreakdown(a.cedula);
-      return tickets.total > 0 && !tickets.ganado && ruleta.excluded.indexOf(a.cedula) === -1;
-    });
+  function updateDraw() {
+    if (!draw) return;
+    const now = Date.now();
+    if (!document.hidden && activeTab === 'ruleta') draw = Draw.reveal(draw, now);
+    if (draw.current && draw.current.expiresAt !== null && now >= draw.current.expiresAt) {
+      draw = Draw.finish(draw, 'sin comparecencia', now);
+    }
+    if (draw.retry) draw = Draw.start(draw, now);
+    const pending = draw.current;
+    const spinning = pending && pending.expiresAt === null;
+    const frame = pending ? pending.number + ':' + (spinning ? 'spin' : Math.ceil((pending.expiresAt - now) / 1000)) :
+      'ready:' + draw.history.length;
+    if (spinning && now - lastTick > 200) {
+      lastTick = now;
+      Sound.tick();
+    }
+    if (lastDrawFrame !== frame) {
+      if (pending && !spinning && lastDrawFrame.endsWith(':spin')) Sound.success();
+      lastDrawFrame = frame;
+      renderRuleta();
+      if (activeTab === 'ruleta') renderStage();
+    }
   }
 
-  function pickWinner() {
-    const pool = [];
-    candidates().forEach(function (a) {
-      const total = Store.ticketBreakdown(a.cedula).total;
-      for (let i = 0; i < total; i++) pool.push(a);
-    });
-    if (!pool.length) return null;
-    const random = new Uint32Array(1);
-    crypto.getRandomValues(random);
-    return pool[random[0] % pool.length];
-  }
-
-  function clearClaimTimer() {
-    clearInterval(ruleta.timer);
-    ruleta.timer = null;
+  function drawSafely(action) {
+    try { action(); }
+    catch (error) {
+      document.getElementById('ruleta-girar').disabled = true;
+      UI.toast('Sorteo detenido: ' + error.message, 'bad');
+      return false;
+    }
+    return true;
   }
 
   function spin() {
-    if (ruleta.spinning) return;
-    const winner = pickWinner();
-    if (!winner) return UI.toast('No quedan participantes con boletos disponibles', 'bad');
+    if (!draw || draw.current) return;
+    if (!Draw.eligible(draw).length) return UI.toast('No quedan boletos elegibles.', 'warn');
     Sound.enable();
-    ruleta.spinning = true;
-    ruleta.current = winner;
-    ruleta.remaining = 45;
-    ruleta.rotation += 1440 + Math.floor(Math.random() * 720);
-    clearClaimTimer();
-    renderRuleta();
-    renderStage();
-    requestAnimationFrame(function () {
-      const wheel = document.getElementById('ruleta-wheel');
-      if (wheel) wheel.style.transform = 'rotate(' + ruleta.rotation + 'deg)';
+    drawSafely(function () {
+      const prize = document.getElementById('ruleta-premio').value.trim();
+      draw = Draw.start(draw, Date.now(), prize);
+      updateDraw();
     });
-    ruleta.wheelTimer = setInterval(function () { Sound.tick(); }, 140);
-    setTimeout(function () {
-      clearInterval(ruleta.wheelTimer);
-      ruleta.spinning = false;
-      ruleta.rotation = ruleta.rotation % 360;
-      Sound.success();
-      ruleta.timer = setInterval(function () {
-        ruleta.remaining -= 1;
-        if (ruleta.remaining <= 0) {
-          markAbsent(true);
-          return;
-        }
-        renderRuleta();
-        renderStage();
-      }, 1000);
-      renderRuleta();
-      renderStage();
-    }, 4100);
-  }
-
-  function markDelivered() {
-    if (!ruleta.current) return;
-    const winner = ruleta.current;
-    Store.update(function (draft) {
-      draft.winners.push({ cedula: winner.cedula, nombre: winner.nombre, premio: ruleta.current.premio || 'Premio Sorpresa CIYA 2026', creado: Date.now() });
-      draft.roulette.history.push({ cedula: winner.cedula, nombre: winner.nombre, estado: 'entregado', creado: Date.now() });
-    });
-    clearClaimTimer();
-    ruleta.current = null;
-    ruleta.excluded = [];
-    renderRuleta();
-    renderStage();
-    UI.toast('Premio marcado como entregado a ' + winner.nombre);
-  }
-
-  function markAbsent(expired) {
-    if (!ruleta.current) return;
-    const winner = ruleta.current;
-    Store.update(function (draft) {
-      draft.roulette.history.push({ cedula: winner.cedula, nombre: winner.nombre, estado: expired ? 'sin comparecencia' : 'ausente', creado: Date.now() });
-    });
-    ruleta.excluded.push(winner.cedula);
-    ruleta.current = null;
-    clearClaimTimer();
-    renderRuleta();
-    renderStage();
-    UI.toast(expired ? 'Sin comparecencia en 45 s: se gira nuevamente' : 'Ganador ausente: se gira nuevamente', 'warn');
-    setTimeout(spin, 700);
   }
 
   function renderRuleta() {
-    const totalBoletos = candidates().reduce(function (sum, a) { return sum + Store.ticketBreakdown(a.cedula).total; }, 0);
-    const state = Store.get();
-    document.getElementById('ruleta-boletos').textContent = totalBoletos;
-    document.getElementById('ruleta-personas').textContent = candidates().length;
-    document.getElementById('ruleta-entregados').textContent = state.winners.length;
+    const eligible = Draw.eligible(draw);
+    const pending = draw && draw.current;
+    const spinning = pending && pending.expiresAt === null;
+    const history = draw ? draw.history : [];
+    const prize = document.getElementById('ruleta-premio');
+    prize.disabled = !draw || Boolean(pending);
+    if (pending) prize.value = pending.premio || '';
+    document.getElementById('ruleta-girar').disabled = !draw || Boolean(pending) || !eligible.length;
+    document.getElementById('ruleta-boletos').textContent = eligible.length;
+    document.getElementById('ruleta-personas').textContent = new Set(eligible.map(function (ticket) { return ticket.person; })).size;
+    document.getElementById('ruleta-entregados').textContent = history.filter(function (record) { return record.estado === 'entregado'; }).length;
     const result = document.getElementById('ruleta-resultado');
-    if (ruleta.current) {
-      const t = Store.ticketBreakdown(ruleta.current.cedula);
-      result.innerHTML = '<div class="card" style="background:rgba(255,209,102,0.12)"><h3>' + esc(ruleta.current.nombre) + '</h3>' +
-        '<p>' + esc(Store.carrera(ruleta.current.carrera).nombre) + ' · ' + t.total + ' boletos</p>' +
-        '<p><strong>' + (ruleta.spinning ? 'Girando…' : ruleta.remaining + ' segundos para presentarse') + '</strong></p>' +
-        '<div class="row"><button class="btn primary small" id="premio-entregado">Marcar premio entregado</button>' +
-        '<button class="btn danger small" id="premio-ausente">Ausente / girar de nuevo</button></div></div>';
-      const entregado = document.getElementById('premio-entregado');
-      const ausente = document.getElementById('premio-ausente');
-      if (entregado) entregado.addEventListener('click', markDelivered);
-      if (ausente) ausente.addEventListener('click', function () { markAbsent(false); });
+    if (pending && !spinning) {
+      result.innerHTML = '<p><strong>' + esc(pending.nombre) + '</strong> · ' + esc(pending.number) + '</p>' +
+        '<p>' + Math.max(0, Math.ceil((pending.expiresAt - Date.now()) / 1000)) + ' segundos para presentarse</p>' +
+        '<div class="row"><button class="btn primary small" id="premio-entregado">Premio entregado</button>' +
+        '<button class="btn danger small" id="premio-ausente">Ausente · volver a girar</button></div>';
+      [['premio-entregado', 'entregado'], ['premio-ausente', 'ausente']].forEach(function ([id, status]) {
+        document.getElementById(id).onclick = function () {
+          drawSafely(function () {
+            draw = Draw.finish(draw, status, Date.now());
+            updateDraw();
+          });
+        };
+      });
     } else {
-      result.innerHTML = '<p class="empty">' + (ruleta.spinning ? 'La ruleta está girando…' : 'Lista para girar.') + '</p>';
+      result.textContent = !draw ? 'Carga el respaldo sellado en la consola local.' :
+        spinning ? 'Girando…' : eligible.length ? 'Listo para girar.' : 'No quedan boletos elegibles.';
     }
-    document.getElementById('ruleta-historial').innerHTML = UI.table(['Premiado', 'Estado', 'Fecha'], state.roulette.history.map(function (h) {
-      return [esc(h.nombre), esc(h.estado), esc(UI.dateTime(h.creado))];
+    document.getElementById('ruleta-historial').innerHTML = UI.table(['Estudiante', 'Boleto', 'Premio', 'Estado', 'Fecha'], history.map(function (record) {
+      return [esc(record.nombre), esc(record.number), esc(record.premio), esc(record.estado), esc(UI.dateTime(record.creado))];
     }));
   }
 
@@ -407,27 +415,20 @@
     const select = document.getElementById('vil-grupo-activo');
     const previous = select.value;
     select.innerHTML = state.groups.length ? state.groups.slice().sort(function (a, b) { return a.orden - b.orden; }).map(function (g) {
-      return '<option value="' + g.id + '">' + g.orden + '. ' + esc(g.nombre) + '</option>';
+      return '<option value="' + esc(g.id) + '">' + g.orden + '. ' + esc(g.nombre) + '</option>';
     }).join('') : '<option value="">Sin grupos inscritos</option>';
     if (previous && state.groups.some(function (g) { return g.id === previous; })) select.value = previous;
 
     document.getElementById('scores-list').innerHTML = UI.table(['Grupo', 'Total', 'Aplauso'], state.scores.map(function (s) {
       const group = state.groups.find(function (g) { return g.id === s.grupoId; });
-      return [esc(group ? group.nombre : 'Grupo'), s.total + '/100', s.aplauso];
+      return [esc(group ? group.nombre : 'Grupo'), Number(s.total) + '/100', Number(s.aplauso)];
     }));
 
-    document.getElementById('ranking-detalle').innerHTML = Store.ranking().map(function (r, index) {
-      return '<p><strong>' + (index + 1) + '. ' + esc(r.nombre) + '</strong> — ' + r.puntos + ' pts<br><small>' +
-        r.juguetes + ' juguetes · ' + r.caramelos + ' fundas · ' + r.donantes + ' donantes únicos</small></p>';
-    }).join('');
-
-    document.getElementById('deseos-lista').innerHTML = state.deseos.filter(function (d) { return d.aprobado; }).map(function (d) {
-      return '<blockquote>“' + esc(d.frase) + '” — ' + esc(d.nombre) + '</blockquote>';
+    UI.renderRanking('ranking-detalle', ranking());
+    document.getElementById('deseos-lista').innerHTML = wishes().map(function (wish) {
+      return '<blockquote>“' + esc(wish.frase) + '” — ' + esc(wish.nombre) + '</blockquote>';
     }).join('') || '<p class="empty">Sin frases aprobadas.</p>';
-
-    document.getElementById('estado-relay').innerHTML = state.ignition.lastRun
-      ? '<span class="badge ok">Último disparo: ' + esc(UI.dateTime(state.ignition.lastRun)) + '</span>'
-      : '<span class="badge">Sin disparos registrados</span>';
+    document.getElementById('backup-download').disabled = !state.snapshot && !draw;
 
     renderRuleta();
     renderSequence();
@@ -458,7 +459,10 @@
     document.getElementById('mic-start').addEventListener('click', startMic);
     document.getElementById('mic-stop').addEventListener('click', stopMic);
     document.getElementById('aplauso-manual').addEventListener('input', function (event) {
-      aplauso.value = Number(event.target.value);
+      const value = Number(event.target.value);
+      if (aplauso.stream) stopMic();
+      event.target.value = value;
+      aplauso.value = value;
       document.getElementById('aplauso-bar').style.width = aplauso.value + '%';
       renderStage();
     });
@@ -467,69 +471,98 @@
     document.getElementById('form-score').addEventListener('submit', function (event) {
       event.preventDefault();
       const group = activeGroup();
-      if (!group) return UI.toast('No hay grupo seleccionado', 'bad');
-      const total = Data.cristalVillancicos.reduce(function (sum, c) {
-        return sum + Number(document.getElementById('score-' + c.id).value || 0);
-      }, 0);
-      const detalle = {};
-      Data.cristalVillancicos.forEach(function (c) {
-        detalle[c.id] = Number(document.getElementById('score-' + c.id).value || 0);
+      if (!group || localMode) return UI.toast('Selecciona un grupo en la consola conectada.', 'warn');
+      const criterios = {};
+      Data.cristalVillancicos.forEach(function (criterion) {
+        criterios[criterion.id] = Number(document.getElementById('score-' + criterion.id).value);
       });
-      Store.update(function (draft) {
-        draft.scores.push({
-          id: UI.uid('sc'),
-          grupoId: group.id,
-          total: total,
-          aplauso: Math.round(aplauso.value),
-          detalle: detalle,
-          creado: Date.now()
-        });
-      });
-      UI.toast('Calificación guardada: ' + total + ' / 100');
+      UI.submit(event, 'score', { subject: group.id, criterios }, true,
+        function () { UI.toast('Puntaje guardado.'); });
     });
 
     document.getElementById('deseos-play').addEventListener('click', startRotation);
     document.getElementById('deseos-stop').addEventListener('click', stopRotation);
     document.getElementById('serial-connect').addEventListener('click', connectSerial);
+    document.getElementById('serial-arm').onclick = function (event) {
+      Sound.enable();
+      serial.armed = !serial.armed;
+      event.currentTarget.textContent = serial.armed ? 'Desarmar disparo' : 'Armar disparo del sensor';
+    };
+    document.getElementById('project-fullscreen').onclick = async function () {
+      const screen = document.getElementById('stage-screen');
+      try {
+        if (screen.requestFullscreen) await screen.requestFullscreen();
+        screen.focus();
+      } catch {
+        UI.toast('Usa el modo de pantalla completa del navegador.', 'warn');
+      }
+    };
     document.getElementById('ignicion-manual').addEventListener('click', startIgnicion);
     document.getElementById('ruleta-girar').addEventListener('click', spin);
     document.addEventListener('keydown', function (event) {
       const tag = document.activeElement ? document.activeElement.tagName : '';
-      if (event.code === 'Space' && activeTab === 'encendido' && tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT') {
+      if (!event.repeat && event.code === 'Space' && activeTab === 'encendido' && !['INPUT','TEXTAREA','SELECT','BUTTON','A'].includes(tag)) {
         event.preventDefault();
         startIgnicion();
       }
     });
 
-    document.getElementById('backup-download').addEventListener('click', function () {
-      UI.download('ciya2026-respaldo-' + new Date().toISOString().slice(0, 10) + '.json', Store.exportJson());
-      UI.toast('Respaldo local descargado');
-    });
-    document.getElementById('backup-load').addEventListener('click', function () {
+    document.getElementById('backup-download').onclick = function () {
+      const snapshot = (draw && draw.snapshot) || Store.get().snapshot;
+      if (!snapshot) return UI.toast('Recepción debe sellar los datos a las 17:45.', 'warn');
+      UI.download('ciya2026-escenario-v2.json', JSON.stringify(snapshot, null, 2));
+    };
+    document.getElementById('backup-load').onclick = async function () {
       const file = document.getElementById('backup-file').files[0];
-      if (!file) return UI.toast('Selecciona un archivo JSON', 'bad');
-      const reader = new FileReader();
-      reader.onload = function () {
-        try {
-          Store.importJson(reader.result);
-          UI.toast('Respaldo restaurado');
-        } catch (error) {
-          UI.toast('Archivo no válido: ' + error.message, 'bad');
-        }
-      };
-      reader.readAsText(file);
+      if (!file) return UI.toast('Selecciona un archivo JSON.', 'warn');
+      try {
+        draw = Draw.install(JSON.parse(await file.text()), draw);
+        render(Store.get());
+        updateDraw();
+        UI.toast('Respaldo validado. Ranking y sorteo disponibles sin red.');
+      } catch (error) {
+        UI.toast(error.message, 'bad');
+      }
+    };
+  }
+
+  function claimLocalConsole() {
+    return new Promise(function (resolve, reject) {
+      navigator.locks.request('ciya-escenario-local', { ifAvailable: true }, function (lock) {
+        resolve(Boolean(lock));
+        if (lock) return new Promise(function () {});
+      }).catch(reject);
     });
   }
 
   async function init() {
-    const ok = await UI.pinGate('escenario', 'Consola de escenario');
-    if (!ok) {
+    if (localMode && (!navigator.locks || !await claimLocalConsole().catch(function () { return false; }))) {
+      const locked = document.getElementById('locked');
+      locked.textContent = 'La consola local requiere Chrome o Edge y una sola pestaña activa.';
+      locked.hidden = false;
+      return;
+    }
+    if (!localMode && !await UI.requireAccount('escenario', 'Consola de escenario')) {
       document.getElementById('locked').hidden = false;
       return;
     }
     document.getElementById('panel').hidden = false;
-    document.getElementById('logout').addEventListener('click', function () { UI.logout('escenario'); });
-    await Store.init();
+    document.getElementById('logout').hidden = localMode;
+    document.getElementById('logout').onclick = UI.logout;
+    document.getElementById('backup-load').disabled = !localMode;
+    document.getElementById('backup-file').disabled = !localMode;
+    document.getElementById('sync-status').textContent = localMode ? 'Escenario local' : 'Conectando';
+    if (localMode) {
+      const form = document.getElementById('form-score');
+      form.querySelector('[type=submit]').disabled = true;
+      drawSafely(function () { draw = Draw.load(); });
+      const timer = setInterval(function () {
+        if (!drawSafely(updateDraw)) clearInterval(timer);
+      }, 250);
+    } else {
+      UI.initNav('escenario');
+      await Store.init('escenario');
+    }
     setup();
     Store.subscribe(render);
   }

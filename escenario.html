@@ -25,9 +25,9 @@
   <main class="container">
     <div class="section-head">
       <div><span class="kicker">Laptop + proyector · 16:9</span><h1>Consola de Pantalla Gigante</h1></div>
-      <div class="row"><button class="btn small ghost" id="audio-toggle">Activar audio</button><button class="btn small ghost" id="logout">Cerrar sesión</button></div>
+      <div class="row"><button class="btn small ghost" id="audio-toggle">Activar audio</button><button class="btn small" id="project-fullscreen">Proyección a pantalla completa</button><button class="btn small ghost" id="logout">Cerrar sesión</button></div>
     </div>
-    <div id="locked" hidden><p class="empty">Esta consola requiere PIN del equipo organizador.</p></div>
+    <div id="locked" hidden><p class="empty">Esta consola requiere una cuenta de escenario.</p></div>
 
     <div id="panel" hidden>
       <div class="stage-tabs" role="tablist">
@@ -41,7 +41,7 @@
 
       <div class="stage-grid">
         <div>
-          <div class="stage-screen" id="stage-screen"></div>
+          <div class="stage-screen" id="stage-screen" tabindex="0"></div>
           <p class="hint" style="margin-top:0.6rem">Vista optimizada para proyector HD/Full HD. Mantén esta pestaña visible; el contenido se actualiza en tiempo real.</p>
         </div>
         <div>
@@ -78,20 +78,21 @@
           <section class="card tab-panel" data-panel="encendido" hidden>
             <h2>Encendido 5 en 1 (local/offline)</h2>
             <p class="muted">Reacción: Industrial → Hidráulica → Electromecánica → Sistemas → Electricidad. El sensor Arduino/ESP32 dispara la cuenta regresiva por puerto serial.</p>
-            <div class="row"><button class="btn small" id="serial-connect">Conectar sensor serial</button><span class="badge" id="serial-status">Sin conectar</span></div>
-            <p class="hint" id="serial-hint">Si el navegador no admite Web Serial (por ejemplo Safari), usa el botón manual o la barra espaciadora como tecla de emergencia.</p>
+            <div class="row"><button class="btn small" id="serial-connect">Conectar sensor serial</button><button class="btn small" id="serial-arm" disabled>Armar disparo del sensor</button><span class="badge" id="serial-status">Sin conectar</span></div>
+            <p class="hint" id="serial-hint">Usa Chrome o Edge de escritorio. Ante una falla de la conexión serial, coordina el disparo con el operador de Electricidad.</p>
             <button class="btn primary wide" id="ignicion-manual" style="margin-top:0.6rem">Disparar cuenta regresiva manualmente</button>
-            <p class="hint" style="margin-top:0.6rem"><strong>Tecla de emergencia:</strong> barra espaciadora equivale al interruptor manual oculto de Electricidad.</p>
+            <p class="hint" style="margin-top:0.6rem"><strong>Tecla de emergencia:</strong> barra espaciadora inicia la cuenta local. Electricidad dispone de un interruptor físico independiente.</p>
             <div id="secuencia-encendido" style="margin-top:1rem"></div>
             <div id="estado-relay" style="margin-top:0.8rem"></div>
           </section>
 
           <section class="card tab-panel" data-panel="ruleta" hidden>
             <h2>Gran Ruleta Digital</h2>
-            <p class="muted">Todos los boletos (base, muro, donaciones y QR Dorados) participan. Un estudiante solo puede ganar un premio.</p>
+            <p class="muted">Los boletos elegibles del respaldo sellado participan. Un estudiante solo puede ganar un premio.</p>
             <div class="row between"><span>Boletos válidos</span><strong id="ruleta-boletos">0</strong></div>
             <div class="row between"><span>Participantes</span><strong id="ruleta-personas">0</strong></div>
             <div class="row between"><span>Premios entregados</span><strong id="ruleta-entregados">0</strong></div>
+            <div class="field"><label for="ruleta-premio">Premio en juego</label><input id="ruleta-premio" maxlength="120" placeholder="Premio Sorpresa CIYA 2026"></div>
             <button class="btn primary wide" id="ruleta-girar" style="margin-top:0.9rem">Girar ruleta</button>
             <div id="ruleta-resultado" style="margin-top:1rem"></div>
             <div id="ruleta-historial" style="margin-top:1rem"></div>
@@ -103,7 +104,7 @@
             <button class="btn primary wide" id="backup-download">Descargar Respaldo Local (JSON)</button>
             <div class="field" style="margin-top:1rem"><label for="backup-file">Restaurar desde archivo</label><input id="backup-file" type="file" accept="application/json,.json"></div>
             <button class="btn wide" id="backup-load">Cargar respaldo</button>
-            <p class="hint" style="margin-top:1rem">El estado también se guarda automáticamente en LocalStorage y se sincroniza entre pestañas del mismo navegador.</p>
+            <p class="hint" style="margin-top:1rem">Importa el respaldo en la consola local. Usa una sola pestaña para operar el sorteo.</p>
           </section>
         </div>
       </div>
@@ -117,6 +118,7 @@
   <script src="assets/js/store.js"></script>
   <script src="assets/js/ui.js"></script>
   <script src="assets/js/sound.js"></script>
+  <script src="assets/js/draw.js"></script>
   <script src="assets/js/escenario.js"></script>
 </body>
 </html>

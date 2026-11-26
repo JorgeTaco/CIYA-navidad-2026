@@ -1,213 +1,90 @@
 # CIYA Navidad 2026
 
-Aplicación web responsive para la Facultad de Ciencias de la Ingeniería y Aplicadas (CIYA), desarrollada para el evento **“CIYA 4.0 Ingenio que Ilumina la Navidad 2026”** del viernes 4 de diciembre de 2026.
+Aplicación web responsive para el evento **CIYA 4.0 Ingenio que Ilumina la Navidad** del viernes 4 de diciembre de 2026, en la Facultad de Ciencias de la Ingeniería y Aplicadas. Las seis páginas se sirven como HTML, CSS y JavaScript. La recepción y los formularios usan Supabase. La laptop de escenario puede ejecutar el encendido, el ranking y la ruleta en local.
 
-El proyecto centraliza la operación logística, participativa y escénica del evento en una sola plataforma accesible desde el navegador del celular mediante QR o enlace directo, sin instalación de PWA ni APK. El núcleo del encendido del árbol funciona en modo local/offline.
+La versión 2.0 de la especificación, las Bases Oficiales de Concursos y Actividades y el documento Ruta de Códigos QR de CIYA Navidad 2026 son las fuentes funcionales. Se aplican los horarios del cronograma oficial, el plazo de inscripción del 3 de diciembre y la validación del QR Dorado con pantalla activa y credencial. Todas las horas indicadas corresponden a Ecuador continental (UTC−05:00).
 
-## Contexto general
+## Cambios de esta versión
 
-La solución se construyó a partir de tres documentos oficiales:
-
-1. **SISTEMA CIYA 4-0 — Aplicación Web Responsive V1** (especificación de requisitos, versión 2.0): define 17 requisitos funcionales, 7 no funcionales, 4 micro-equipos, stack gratuito y ensayo obligatorio del 3 de diciembre.
-2. **V1 — Bases Oficiales de Concursos y Actividades**: reglamento de las cinco actividades oficiales, ponderaciones, premios y cronograma.
-3. **Ruta de Códigos QR de CIYA Navidad 2026**: mensajes docentes, trivias, memes y tres QR Dorados.
-
-Cuando los documentos presentan horarios distintos, se aplica el cronograma de las **bases oficiales**: villancicos 17:45–18:25, acto central y encendido 18:25–18:55, sorteo 18:55–19:25. El protocolo técnico proyecta el QR del Mar de Linternas a las 18:20, cinco minutos antes del acto.
-
-## Tecnologías utilizadas
-
-| Capa | Tecnología | Uso |
-| --- | --- | --- |
-| Frontend | HTML5, CSS3, JavaScript ES2017 puro | Seis páginas estáticas, sin compilación ni dependencias externas. |
-| Diseño | CSS propio con variables, Grid/Flexbox y media queries | Mobile-first desde 360 px, consola de escenario 16:9 y optimización nocturna. |
-| Estado | LocalStorage + `BroadcastChannel` + evento `storage` | Persistencia local y sincronización instantánea entre pestañas del mismo navegador. |
-| Base de datos opcional | Supabase Free (REST sobre tabla `ciya_state`) | Sincronización entre dispositivos por sondeo de 3 segundos; última escritura ganante por `updatedAt`. |
-| Audio | Web Audio API | Beeps, cuenta regresiva, música de encendido y suspenso de la ruleta generados en el navegador. |
-| Micrófono | `getUserMedia` + `AnalyserNode` | Aplausómetro con respaldo manual. |
-| Hardware | Web Serial API | Lectura del sensor Arduino/ESP32 y pulso al relé de Electricidad. |
-| Despliegue | Vercel / Netlify (sitio estático) | Costo $0, sin build command; también funciona con cualquier servidor estático. |
-
-Se eligió la alternativa permitida por la especificación “HTML5 / CSS / JavaScript puro” en lugar de React + Vite porque no se requiere toolchain de Node, no hay dependencias que cargar en una red congestionada y el modo offline queda garantizado tras la primera carga.
-
-## Estructura del repositorio
-
-```text
-CIYA-navidad-2026/
-├── index.html            Portal estudiantil
-├── recepcion.html        Panel de recepción, donaciones y QR Dorados
-├── escenario.html        Consola de pantalla gigante
-├── admin.html            Curaduría y evaluación privada
-├── qr.html               Índice y vistas individuales de la Ruta QR
-├── bases.html            Bases oficiales completas
-├── supabase-schema.sql   Esquema y políticas RLS para Supabase
-└── assets/
-    ├── css/app.css       Sistema visual completo
-    └── js/
-        ├── config.js     Configuración editable
-        ├── data.js       Datos oficiales y contenido QR
-        ├── store.js      Estado, reglas de negocio y sincronización
-        ├── ui.js         Toasts, PIN, exportaciones y utilidades
-        ├── sound.js      Sonidos sintetizados
-        ├── portal.js     Lógica del portal
-        ├── recepcion.js  Lógica de recepción
-        ├── escenario.js  Lógica de escenario y hardware
-        ├── admin.js      Lógica administrativa
-        └── qr.js         Lógica de la Ruta QR
-```
-
-## Funcionalidades por interfaz
-
-### 1. Portal estudiantil (`index.html`)
-
-- **Mar de Linternas**: elección entre las cinco carreras con color y sigla propios, frases predefinidas, mensaje libre de hasta 60 caracteres, tipografía gigante, alto contraste y parpadeo suave sincronizado mediante desfase de animación.
-- **Pantalla completa**: uso de Fullscreen API con fallback de clase CSS para navegadores que no la soportan. Botón explícito de salida.
-- **Ejecución local**: colores, carrera, mensaje y parpadeo se procesan 100% en JavaScript del navegador; tras la carga no dependen del Wi-Fi.
-- **Registro para el sorteo**: nombre, cédula única, correo único, carrera y mensaje opcional para el Muro de la Empatía. Genera comprobante con desglose de boletos, botón `mailto:` y copia al portapapeles.
-- **Inscripción a villancicos**: nombre artístico, nómina de integrantes, carrera(s), canción y una de las tres modalidades oficiales. Muestra el orden de presentación y marca las inscripciones realizadas durante el evento si pasó el plazo del 3 de diciembre.
-- **Buzón Compilando Deseos 2027**: nombre, rol (estudiante/docente/personal), carrera/área y frase; los envíos quedan pendientes de curaduría.
-- **Muro de la Empatía**: mensajes breves asociados a una cédula registrada; cada mensaje suma 1 boleto.
-- **Puertas Decoradas**: espacios asignados por carrera y matriz de evaluación 30/30/25/15.
-- **Copa Solidaria**: ranking público en vivo con puntos, juguetes, fundas y regla de desempate.
-- **Resumen global**: contadores de asistentes, boletos, grupos y deseos.
-
-### 2. Panel de recepción (`recepcion.html`)
-
-- Acceso protegido por PIN.
-- **Registro rápido** en un solo flujo: asistente, carrera, correo, mensaje de muro y donación opcional (juguete o funda, cantidad y carrera beneficiada).
-- **Ranking en vivo** con desglose y exportación CSV.
-- **Validación de QR Dorados**: selección de `CIYA-ORO-01/02/03`, cédula del estudiante y declaración de juego limpio. Cada código se desactiva al primer canje; máximo un QR por estudiante; +3 boletos automáticos.
-- **Listados** de asistentes y donaciones con boletos calculados.
-- **Cierre de recepción** a las 17:45, que habilita operativamente el respaldo local desde escenario.
-
-### 3. Consola de escenario (`escenario.html`)
-
-Pantalla 16:9 con seis pestañas:
-
-- **Villancicos**: orden de presentación, cronómetro regresivo de 3 minutos, aplausómetro con micrófono o control manual, calificación del jurado 30/30/20/20 y guardado de puntajes.
-- **Ranking**: barras animadas con totales por carrera y desempate por juguetes operativos y donantes únicos.
-- **Deseos 2027**: rotación automática cada 8 segundos de las frases aprobadas durante la chocolatada.
-- **Encendido 5 en 1**: conexión serial con Arduino/ESP32, disparo por señal del sensor, cuenta regresiva de 10 segundos con audio, secuencia Industrial → Hidráulica → Electromecánica → Sistemas → Electricidad, pulso al relé y tecla de emergencia con barra espaciadora. Funciona sin red.
-- **Gran Ruleta Digital**: ponderación real de todos los boletos (base, muro, donaciones y QR Dorados), giro animado con audio de suspenso, conteo de 45 segundos para presentarse, control de premio entregado, control de ganador ausente con nuevo giro y registro histórico. Un estudiante solo puede ganar un premio.
-- **Respaldo local**: descarga e importación de JSON con todo el estado (boletos, donaciones, marcador, ganadores y configuración operativa).
-
-### 4. Panel administrativo (`admin.html`)
-
-- Acceso privado por PIN para docentes organizadores y asociación estudiantil.
-- **Curaduría del buzón**: aprobación o descarte de frases y exportación CSV de aprobadas o de todas.
-- **Evaluación de puertas**: matriz 30/30/25/15 por carrera, observaciones y ranking final.
-- **Revisión de calificaciones** de villancicos con desglose por criterio y nivel de aplauso.
-
-### 5. Ruta de Códigos QR (`qr.html`)
-
-Contenido de los códigos distribuidos en gradas, pasillos, bar, laboratorios y baños:
-
-- 7 mensajes navideños (general, una por carrera y solidario).
-- 5 trivias con opción correcta y respuesta inmediata.
-- 5 ideas de memes con plantillas.
-- 3 QR Dorados con código único, instrucciones de canje y estado `Disponible`/`Canjeado`.
-- Botón fijo en cada vista hacia el Buzón 2027 y el Modo Linterna.
-- Listado imprimible y URL base copiable para generar los códigos QR.
-
-### 6. Bases oficiales (`bases.html`)
-
-Transcripción íntegra de las cinco actividades, criterios, premios sugeridos, reglas de juego limpio, disposiciones finales y cronograma oficial.
-
-## Reglas de negocio implementadas
-
-| Concepto | Valor |
+| Requisito | Cambio y cómo comprobarlo |
 | --- | --- |
-| Boleto base | 1 por ingreso presencial con mensaje en el Muro de la Empatía |
-| Mensaje adicional en el muro | 1 boleto |
-| Juguete funcional | 5 puntos para la carrera y 5 boletos para el donante |
-| Funda de caramelos | 2 puntos para la carrera y 2 boletos para el donante |
-| QR Dorado | 3 boletos adicionales, válido solo para el primero en canjearlo |
-| Desempate solidario | Mayor cantidad de juguetes operativos y luego mayor número de donantes únicos |
-| Validez del sorteo | 45 segundos para presentarse con identificación; giro inmediato si hay ausencia |
-| Límite de premios | 1 premio por estudiante |
+| RF-01 a RF-05 · Portal y ruta | La URL `index.html?modo=linterna#linterna` abre una vista sin consultas ni dependencias externas. Incluye las cinco carreras con color e icono, seis frases, texto personal, destello alineado con el reloj del dispositivo, movimiento reducido y pantalla completa con vista CSS de respaldo. La ruta conserva siete mensajes, cinco trivias y cinco memes, actualiza sus referencias horarias y enlaza al Buzón y a la Linterna. Abrir desde un QR y desconectar la red después de cargar. |
+| RF-06 a RF-09 · Recepción | La acreditación requiere confirmar identidad y elegibilidad en el hall. Una acreditación con mensaje verificado da un boleto base, incluso si recepción confirma el mensaje en un segundo paso. Un juguete aporta **5 puntos y 2 boletos**. Una funda aporta **2 puntos y 1 boleto**. Un QR Dorado aporta **3 boletos**. Los aportes previos se asocian a la cédula y se habilitan para el sorteo al acreditar el ingreso. La mesa puede agregar aportes durante o después del registro. |
+| RF-06 a RF-09 · Comprobantes y Copa Solidaria | Cada boleto tiene un número estable. Acreditaciones y nuevos boletos generan un comprobante en pantalla, copiable y con estado del envío automático. El ranking y su CSV incluyen juguetes, fundas, total, puntos y donantes únicos. Los empates se resuelven por juguetes y luego por donantes únicos. Una igualdad persistente comparte puesto. |
+| RF-05 y RF-08 · QR Dorados | Administración obtiene las tres URL de impresión privadas. La página del hallazgo muestra una clave válida por dos minutos. Recepción confirma la pantalla activa, credencial y juego limpio. La base de datos acepta un único canje por impreso y uno por estudiante. |
+| RF-10 y RF-11 · Villancicos | El formulario solicita el representante y una carrera, guarda el orden de inscripción y cierra el 3 de diciembre a las 17:30. Escenario conserva el cronómetro de tres minutos, la rúbrica 30/30/20/20 y el aplausómetro. El micrófono muestra dBFS, una medida relativa de la señal del equipo, y hay control manual. |
+| RF-12 a RF-14 · Buzón y curaduría | Los deseos pendientes solo están disponibles en administración. Tras aprobarlos se pueden mostrar en el portal, rotar en escenario y exportar a CSV. Se conserva la evaluación de puertas. El CSV neutraliza entradas que una hoja de cálculo podría interpretar como fórmulas. |
+| RF-15 a RF-17 y RNF-04 · Escenario | Recepción sella el evento a las 17:45. Escenario descarga e importa el JSON versión 2 con el ranking, los boletos elegibles y los deseos aprobados al cierre. La ruleta usa los números de boleto, oculta el resultado durante el giro, recupera el avance tras recargar, da 45 segundos desde la primera visualización del resultado y excluye de futuros premios a quien ya recibió uno. La proyección es 16:9 y el encendido usa una cuenta local de 10 segundos, audio, puerto serial y barra espaciadora de respaldo. |
+| RNF-06 · Datos y permisos | Las escrituras usan transacciones y un identificador de reintento. Los datos de recepción solo se consultan con una cuenta autorizada. El público recibe resultados agregados, el orden sin nóminas y las frases aprobadas. La sincronización consulta el servidor cada tres segundos con la pestaña visible. Las políticas anónimas de la tabla de la primera versión se retiran al ejecutar el esquema. |
 
-## Configuración necesaria
+## Páginas
 
-### 1. PIN de acceso
+- `index.html` contiene el portal, el Mar de Linternas, los villancicos y el Buzón. `qr.html` contiene la ruta y `bases.html` publica las reglas del evento.
+- `recepcion.html` contiene acreditación, donaciones, canjes y cierre. `escenario.html` contiene la proyección, los módulos de escenario y el respaldo. `admin.html` contiene curaduría, evaluación de puertas, impresión privada e importación.
 
-Editar `assets/js/config.js`:
+## Instalación y configuración
 
-```js
-adminPin: 'ciya2026'
+1. **Frontend.** Publicar la carpeta raíz en un hospedaje estático con HTTPS. Para inspeccionarla en local, ejecutar `python3 -m http.server 8000 --bind 127.0.0.1`. La ruta informativa y la linterna funcionan sin configurar Supabase.
+2. **Supabase.** Crear un proyecto y ejecutar `supabase-schema.sql` en el SQL Editor. Si hay datos de la primera versión, respaldarlos antes. Ejecutar después `legacy-import.sql` para habilitar la importación privada. Para crear cuentas en producción, deshabilitar el registro público en Auth y crear cuentas de correo y contraseña desde el panel. Para cada usuario asignar el permiso correspondiente con su UUID real.
+
+   ```sql
+   insert into ciya.roles (user_id, panel)
+   values ('00000000-0000-0000-0000-000000000000', 'recepcion');
+   ```
+
+   Repetir con `escenario` o `admin` según corresponda. En `assets/js/config.js`, establecer `supabaseUrl` y `supabaseAnonKey` usando la URL y la clave publicable del proyecto. Las claves de servicio y de correo se guardan en el servidor.
+3. **Correo automático.** Configurar un remitente institucional verificado en Brevo. Guardar `BREVO_API_KEY`, `CIYA_SENDER_EMAIL` y un secreto aleatorio `CIYA_WORKER_SECRET` entre los secretos de la función. La función usa `SUPABASE_SERVICE_ROLE_KEY` del entorno o `CIYA_SERVICE_ROLE_KEY` si se configura explícitamente. Desde la raíz, desplegar con `supabase functions deploy ciya-receipts --project-ref TU_PROYECTO`. La función verifica el secreto del trabajador para aceptar invocaciones. La validación de JWT en la pasarela se deshabilita para esa función mediante `supabase/config.toml`.
+
+   Habilitar las extensiones `pg_cron` y `pg_net` y crear en Vault un secreto llamado `ciya_worker_secret` con el mismo valor de `CIYA_WORKER_SECRET`. Sustituir `TU_PROYECTO` y ejecutar en Supabase:
+
+   ```sql
+   select cron.schedule('ciya-receipts', '* * * * *', $job$
+     select net.http_post(
+       url := 'https://TU_PROYECTO.supabase.co/functions/v1/ciya-receipts',
+       headers := jsonb_build_object(
+         'Content-Type', 'application/json',
+         'x-ciya-worker-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'ciya_worker_secret')
+       ),
+       body := '{}'::jsonb,
+       timeout_milliseconds := 60000
+     );
+   $job$);
+   ```
+
+   La cola reintenta fallas transitorias y usa el ID del comprobante como clave de idempotencia de Brevo. Si el proveedor no confirma el envío en la ventana de reintento, recepción muestra «Envío sin confirmación». Verificar el registro de Brevo antes de un reenvío y usar la copia en pantalla si hace falta. «Aceptado por el proveedor» indica aceptación del correo por su API. El plan gratuito de Brevo incluye 300 envíos diarios. Contar las emisiones adicionales por aportes y canjes al estimar capacidad. [Cuota de Brevo](https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan) · [Idempotencia de Brevo](https://developers.brevo.com/docs/heterogenous-versions-batch-emails) · [Programación en Supabase](https://supabase.com/docs/guides/cron)
+
+## Migración desde la primera versión
+
+- Guardar el JSON local de la versión anterior usando su opción de respaldo o exportar el campo `data` de la fila `event` de `public.ciya_state` desde un acceso autorizado. Conservar ese archivo en un lugar privado. La migración deshabilita el acceso anónimo a la tabla anterior y conserva la fila.
+- Desde `admin.html`, abrir **Importar respaldo de la primera versión**, seleccionar el archivo y revisar los duplicados. Marcar solo las acreditaciones comprobadas presencialmente. Los demás registros conservan su cédula y los aportes vinculados, pendientes de acreditar en recepción. Para grupos con varias carreras se usa la primera y, si falta representante, el primer integrante. Los ganadores previos de registros confirmados quedan excluidos del nuevo sorteo.
+- Importar una sola vez en una instancia nueva y verificar las donaciones, canjes y boletos recalculados. La importación conserva los deseos y las evaluaciones reconocidas. Los números de boleto se generan durante la importación y los comprobantes previos quedan en el respaldo original. El historial anterior de la ruleta y de encendido se consulta en ese archivo. Importar los datos anteriores no genera correos retroactivos.
+
+## Impresión y operación del evento
+
+- **Ruta pública.** Usar `qr.html?id=…` con los IDs que enlaza el índice de la ruta. Para el buzón usar `index.html#buzon`. Desde **Administración → Impresión privada de los QR Dorados**, copiar las tres URL con fragmento `#dorado=…` y generar los impresos con un generador QR. Distribuir solo los impresos y guardar el listado en privado. Reemplazar cualquier impreso anterior que use `?id=oro-01`, `oro-02` u `oro-03`.
+- **Recepción.** Donaciones y canjes de 08:00 a 17:45; acreditación de 17:00 a 17:45. Si se pierde la conexión, conservar el formulario y reintentar la misma operación. A las 17:45, seleccionar **Marcar cierre de recepción** y esperar la confirmación de sellado. En la consola conectada, descargar **Respaldo Local (JSON)** en la pestaña Respaldo.
+- **Laptop local.** Iniciar `python3 tools/local-stage.py` desde la raíz del repositorio. Establecer una contraseña local de ocho caracteres ASCII o más. Con Chrome o Edge de escritorio, abrir `http://127.0.0.1:8080/escenario.html?modo=local` con el usuario `escenario` y esa contraseña. En **Respaldo**, importar el archivo sellado. La consola admite una única pestaña activa por perfil. Conservar el mismo perfil de navegador para recuperar el avance tras recargar. Usar un perfil separado para el ensayo. El archivo almacena nombres y números de boleto, por lo que debe quedar en la laptop del equipo.
+- **Encendido.** A las 18:20, proyectar el QR de linterna para que se cargue antes del acto central de 18:25 a 18:55. Dar permiso al puerto en la pestaña **Encendido**, activar el audio y armar el sensor. Configuración inicial: 9600 baudios. La placa envía una línea terminada en salto de línea con `SENSOR`, `TRIGGER`, `DISPARO`, `IGNITE` o `1`. La consola envía `RELAY_ON\n` al llegar a cero. La barra espaciadora inicia la cuenta si el área de proyección tiene el foco. Si falla la conexión serial, Electricidad dispone de su interruptor físico independiente. Confirmar el pulso físico durante el ensayo.
+- **Ruleta.** Entre 18:55 y 19:25, operar desde la consola local con el respaldo cargado. Ingresar el nombre del premio antes del giro. Marcar **Premio entregado** después de verificar identidad o **Ausente** para girar de nuevo por el mismo premio. Al vencerse los 45 segundos, la rueda gira de nuevo automáticamente si quedan candidatos. Usar la vista de proyección para mostrar únicamente el nombre del seleccionado y su boleto. A las 19:25, la consola conectada puede rotar las aprobaciones recientes y la local puede rotar las incluidas al sellar el JSON.
+
+## Verificación
+
+- `node --test tests/draw.test.cjs` verifica recuperación, reloj de comparecencia, ausencia, exclusión del ganador y rechazo de un respaldo con un boleto duplicado. `node --check` revisa todos los JavaScript del sitio.
+- Pruebas locales de PostgreSQL con hora simulada: permisos, límites horarios, donación y canje antes de acreditar, correo repetido, clave vencida, siete boletos por ingreso con mensaje más un juguete, una funda y un QR Dorado, siete puntos por los dos aportes, cola de comprobantes, sellado y migración. Dos conexiones simultáneas verificaron que se conservan ambos aportes y se aceptan solo un registro por correo y un canje por código.
+- Pruebas en Chromium: 360 px, linterna tras desconexión, trivia, formularios con respuestas simuladas, pantalla dorada, descarga del respaldo, ranking y recuperación del sorteo en el servidor local sin acceso externo. La tecla de respaldo se ensayó en simulación. La linterna quedó lista en 1,45 s con caché desactivada, 150 ms de latencia y 400 kbit/s de descarga simulados. La función de correo se comprobó con respuestas simuladas de Brevo, incluidos reintento, deduplicación y rechazo definitivo.
+- **Pendiente para el ensayo del 3 de diciembre.** Desplegar en el proyecto Supabase del evento y probar la entrega real de Brevo. Hacer un ensayo con dos puestos, Internet desconectado en escenario, proyector 16:9, audio, micrófono, placa, relé y respaldo manual. Abrir el QR real en Chrome para Android y Safari para iPhone y medir el objetivo de carga de menos de dos segundos en la red del hall.
+
+
+### Horarios del ensayo en una instancia separada
+
+Configurar cuentas y datos ficticios en otro proyecto Supabase. En ese proyecto, la siguiente consulta abre una ventana de 45 minutos para probar de extremo a extremo. El portal conserva los textos con las horas oficiales.
+
+```sql
+update ciya.event
+set donations_start = now() - interval '5 minutes',
+    checkin_start = now() - interval '1 minute',
+    reception_end = now() + interval '45 minutes',
+    group_deadline = now() + interval '45 minutes';
 ```
 
-Cambiar ese valor antes del evento. Aplica a recepción, escenario y administración. Las sesiones se guardan solo en `sessionStorage` y se cierran con “Cerrar sesión”.
-
-### 2. Supabase opcional (sincronización entre dispositivos)
-
-1. Crear un proyecto gratuito en Supabase.
-2. Ejecutar `supabase-schema.sql` en el SQL Editor. Crea la tabla `ciya_state` con `id`, `data jsonb` y `updated_at`, más políticas RLS para el rol `anon`.
-3. Copiar en `assets/js/config.js` los valores:
-
-```js
-supabaseUrl: 'https://TU-PROYECTO.supabase.co',
-supabaseAnonKey: 'TU-ANON-KEY'
-```
-
-Sin estos datos la aplicación funciona en modo local: guarda en `LocalStorage` y sincroniza entre pestañas del mismo navegador. Con ellos, sondea el estado remoto cada `syncIntervalMs` (3000 ms por defecto) y publica los cambios por REST.
-
-La clave `anon` es pública por diseño; el PIN protege la interfaz, no sustituye a autenticación ni a RLS. Para un evento abierto se usa una única fila compartida `id = event`; no almacenar credenciales ni datos sensibles reales en esa tabla.
-
-### 3. Hardware del encendido
-
-En `assets/js/config.js`:
-
-```js
-relayCommand: 'RELAY_ON\n',
-serialBaudRate: 9600
-```
-
-El Arduino/ESP32 debe enviar por puerto serial una línea que contenga `SENSOR`, `TRIGGER`, `DISPARO`, `IGNITE` o `1` para disparar la cuenta regresiva. La consola escribe `relayCommand` al llegar a cero. Web Serial está disponible en Chrome y Edge de escritorio; en Safari se usa el botón manual o la barra espaciadora.
-
-### 4. Códigos QR
-
-Generar los QR apuntando a la URL pública del sitio más el parámetro `id`:
-
-- Mensajes: `mensaje-general`, `mensaje-electricidad`, `mensaje-electromecanica`, `mensaje-industrial`, `mensaje-hidraulica`, `mensaje-sistemas`, `mensaje-solidario`.
-- Trivias: `trivia-gradas`, `trivia-bar`, `trivia-laboratorios`, `trivia-sistemas`, `trivia-banos`.
-- Memes: `meme-cheems`, `meme-drake`, `meme-botones`, `meme-spiderman`, `meme-gato`.
-- QR Dorados: `oro-01`, `oro-02`, `oro-03`.
-
-Ejemplo: `https://TU-DOMINIO/qr.html?id=oro-01`.
-
-El QR del Mar de Linternas debe proyectarse a las 18:20. La página `qr.html` incluye un botón para imprimir el listado completo.
-
-### 5. Despliegue
-
-El repositorio es un sitio estático: publicar la carpeta raíz en Vercel o Netlify sin comandos de build ni directorio de salida especial. Para probar localmente:
-
-```bash
-python3 -m http.server 8000
-```
-
-Luego abrir `http://localhost:8000`. El micrófono y Web Serial requieren `https://` o `localhost`.
-
-## Datos y persistencia
-
-- Clave principal: `ciya2026:state` en `LocalStorage`.
-- Preferencias de linterna: `ciya2026:linterna`.
-- Sesiones PIN: `ciya2026:auth:<scope>` en `sessionStorage`.
-- El estado contiene asistentes, donaciones, grupos, deseos, calificaciones, evaluaciones de puertas, QR canjeados, muro, ganadores e historial de ruleta.
-- El botón “Descargar Respaldo Local (JSON)” de escenario exporta ese estado completo; “Cargar respaldo” lo restaura.
-
-## Ensayo y operación del 4 de diciembre
-
-1. **3 de diciembre**: prueba integral de sensor, relé, tecla de emergencia, audio, proyección 16:9, respaldo JSON, carga por QR y linterna en Android/iPhone.
-2. **15:00–16:45**: evaluación de puertas desde administración.
-3. **17:45**: cerrar recepción y descargar respaldo local JSON desde escenario.
-4. **18:20**: proyectar QR del Mar de Linternas.
-5. **18:25**: acto central y encendido 5 en 1 en modo local.
-6. **18:55**: ruleta con boletos consolidados; respetar los 45 segundos de comparecencia y el límite de un premio por estudiante.
-7. **19:25**: rotación de deseos aprobados en pantalla gigante durante la chocolatada.
-
-## Limitaciones conocidas
-
-- El envío de comprobantes usa `mailto:` del dispositivo, no un servidor SMTP; no requiere credenciales ni costo.
-- Los códigos QR se generan externamente a partir de las URLs listadas; la app aloja el contenido, no un generador de imágenes QR.
-- Web Serial no existe en Safari/iOS; la operación crítica tiene disparo manual y respaldo local.
-- El PIN es una barrera de interfaz, no autenticación criptográfica.
-- No se incluye `manifest.json` ni service worker porque la versión 2.0 eliminó el alcance PWA instalable.
+Para ensayar el sellado al terminar los registros, ajustar `reception_end` a `now()` en la instancia de ensayo y pulsar **Marcar cierre de recepción**. Mantener las horas predeterminadas del esquema en el proyecto del evento.

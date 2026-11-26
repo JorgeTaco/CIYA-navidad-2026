@@ -1,0 +1,4 @@
+project_id = "ciya-navidad-2026"
+
+[functions.ciya-receipts]
+verify_jwt = false

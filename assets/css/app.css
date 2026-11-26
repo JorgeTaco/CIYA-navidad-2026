@@ -443,3 +443,23 @@ details p:last-child { margin-bottom: 0; }
   .card, .hero { border-color: #aaa; box-shadow: none; background: #fff; color: #000; }
   .print-only { display: block; }
 }
+
+[hidden] { display: none !important; }
+.break-url, .gold-code { overflow-wrap: anywhere; }
+.ticket-list { max-height: 12rem; overflow: auto; font-variant-numeric: tabular-nums; }
+#panel form + form, #panel form + .card { margin-top: 1rem; }
+#form-checkin details { margin: 1rem 0; }
+#form-checkin button, #form-donation button, #form-wall button { margin-top: .75rem; }
+.lantern-stage.live { min-height: 100%; min-height: 100dvh; }
+.lantern-message { overflow-wrap: anywhere; }
+.stage-screen:fullscreen { width: 100%; height: 100%; border-radius: 0; }
+.wheel.spinning { animation: draw-spin 4.1s cubic-bezier(.1,.6,.15,1) both; }
+@keyframes draw-spin { from { transform: rotate(0); } to { transform: rotate(1710deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .lantern-stage.blink .lantern-message { animation: none; }
+  .wheel.spinning { animation-duration: .01s; }
+}
+@media print {
+  body.print-gold header, body.print-gold footer, body.print-gold main > :not(#panel),
+  body.print-gold #panel > :not(#admin-gold), body.print-gold button { display: none !important; }
+}

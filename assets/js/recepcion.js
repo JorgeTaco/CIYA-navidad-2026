@@ -1,140 +1,124 @@
 (function () {
   const UI = window.CIYA_UI;
   const Store = window.CIYA_STORE;
-  const Data = window.CIYA_DATA;
   const esc = UI.escapeHtml;
+  const byId = function (id) { return document.getElementById(id); };
+  const value = function (id) { return byId(id).value.trim(); };
+  const checked = function (id) { return byId(id).checked; };
+  const receiptStatus = {
+    pending: 'Correo pendiente',
+    sending: 'Correo en proceso',
+    accepted: 'Correo aceptado por el proveedor',
+    failed: 'No se pudo enviar el correo. Copia el comprobante para entregarlo.',
+    uncertain: 'Envío sin confirmación. Revisa el registro de Brevo y usa el comprobante en pantalla.'
+  };
+  let displayedReceipt;
 
-  function carreraOptions() {
-    return Data.carreras.map(function (c) { return '<option value="' + c.id + '">' + esc(c.nombre) + '</option>'; }).join('');
+  function paintMailStatus(state) {
+    const status = byId('receipt-status');
+    if (status && displayedReceipt) {
+      const nextStatus = receiptStatus[state.receipts[displayedReceipt]];
+      if (nextStatus || !status.textContent) status.textContent = nextStatus || receiptStatus.pending;
+    }
   }
 
-  function setup() {
-    ['chk-carrera', 'don-carrera'].forEach(function (id) { document.getElementById(id).innerHTML = carreraOptions(); });
-    document.getElementById('oro-codigo').innerHTML = Data.dorados.map(function (d) {
-      return '<option value="' + d.codigo + '">' + d.codigo + ' — ' + esc(d.pista) + '</option>';
-    }).join('');
+  function showReceipt(result) {
+    displayedReceipt = result.id;
+    if (result.pendiente) {
+      byId('chk-result').textContent = 'Operación registrada. Los boletos serán válidos al acreditar el ingreso.';
+      return;
+    }
+    const text = result.nombre + ' · ' + result.tickets.length + ' boletos\n' + result.tickets.join('\n');
+    byId('chk-result').innerHTML = '<p><strong>' + esc(result.nombre) + '</strong> · ' + result.tickets.length +
+      ' boletos</p><p class="ticket-list">' + result.tickets.map(esc).join('<br>') +
+      '</p><p id="receipt-status"></p><button class="btn small" id="copy-receipt">Copiar comprobante</button>';
+    byId('copy-receipt').onclick = function () { UI.copy(text); };
+    paintMailStatus(Store.get());
+  }
 
-    document.getElementById('form-checkin').addEventListener('submit', function (event) {
-      event.preventDefault();
-      const nombre = document.getElementById('chk-nombre').value.trim();
-      const cedula = document.getElementById('chk-cedula').value.trim();
-      const email = document.getElementById('chk-email').value.trim();
-      const carrera = document.getElementById('chk-carrera').value;
-      const mensaje = document.getElementById('chk-muro').value.trim();
-      const tipo = document.getElementById('don-tipo').value;
-      const cantidad = Math.max(1, Number(document.getElementById('don-cantidad').value) || 1);
-      const carreraDonacion = document.getElementById('don-carrera').value;
-      const state = Store.get();
+  function donation(prefix) {
+    return {
+      tipo: value(prefix + 'tipo'), cantidad: Number(value(prefix + 'cantidad')),
+      carrera: value(prefix + 'carrera'), confirmed: checked(prefix + 'confirm')
+    };
+  }
 
-      if (state.attendees.some(function (a) { return a.cedula === cedula; })) return UI.toast('La cédula ya está registrada', 'bad');
-      if (state.attendees.some(function (a) { return a.email.toLowerCase() === email.toLowerCase(); })) return UI.toast('El correo ya está registrado', 'bad');
-
-      Store.update(function (draft) {
-        draft.attendees.push({ id: UI.uid('as'), nombre: nombre, cedula: cedula, email: email, carrera: carrera, checkin: true, creado: Date.now() });
-        if (mensaje) draft.muro.push({ id: UI.uid('mu'), cedula: cedula, nombre: nombre, carrera: carrera, mensaje: mensaje, creado: Date.now() });
-        if (tipo) {
-          const puntos = (tipo === 'juguete' ? Data.ponderaciones.juguete : Data.ponderaciones.caramelos) * cantidad;
-          draft.donations.push({ id: UI.uid('do'), cedula: cedula, nombre: nombre, tipo: tipo, cantidad: cantidad, carrera: carreraDonacion, puntos: puntos, creado: Date.now() });
-        }
+  function bind(id, action, payload) {
+    const form = byId(id);
+    form.addEventListener('submit', function (event) {
+      UI.submit(event, action, payload(), true, function (result) {
+        showReceipt(result);
+        form.reset();
+        UI.toast('Operación registrada.');
       });
-
-      const tickets = Store.ticketBreakdown(cedula);
-      document.getElementById('chk-result').innerHTML =
-        '<p><strong>' + esc(nombre) + '</strong> · ' + tickets.total + ' boletos</p>' +
-        '<p class="muted">Ingreso ' + tickets.base + ' · Muro ' + tickets.muro + ' · Donaciones ' + tickets.donaciones + ' · QR Dorados ' + tickets.dorados + '</p>' +
-        '<div class="row"><button class="btn small" id="chk-mail">Enviar al correo</button><button class="btn small ghost" id="chk-copy">Copiar</button></div>';
-      const body = 'CIYA Navidad 2026 — comprobante de inscripción\nNombre: ' + nombre + '\nCédula: ' + cedula +
-        '\nCarrera: ' + Store.carrera(carrera).nombre + '\nBoletos: ' + tickets.total + '\nPresenta tu identificación antes de las 17:45.';
-      document.getElementById('chk-mail').addEventListener('click', function () {
-        location.href = 'mailto:' + encodeURIComponent(email) + '?subject=' + encodeURIComponent('Comprobante CIYA 2026') + '&body=' + encodeURIComponent(body);
-      });
-      document.getElementById('chk-copy').addEventListener('click', function () { UI.copy(body); });
-      event.target.reset();
-      document.getElementById('chk-carrera').value = carrera;
-      document.getElementById('don-carrera').value = carreraDonacion;
-      document.getElementById('don-cantidad').value = 1;
-      UI.toast('Asistente registrado' + (tipo ? ' y donación contabilizada' : ''));
     });
-
-    document.getElementById('btn-oro').addEventListener('click', function () {
-      const codigo = document.getElementById('oro-codigo').value;
-      const cedula = document.getElementById('oro-cedula').value.trim();
-      if (!document.getElementById('oro-declaracion').checked) return UI.toast('Debes confirmar la declaración de juego limpio', 'bad');
-      const state = Store.get();
-      const asistente = state.attendees.find(function (a) { return a.cedula === cedula; });
-      if (!asistente) return UI.toast('El asistente debe registrarse primero', 'bad');
-      if (state.qrClaims.some(function (q) { return q.codigo === codigo && q.canjeado; })) return UI.toast('Ese QR Dorado ya fue canjeado', 'bad');
-      if (state.qrClaims.some(function (q) { return q.cedula === cedula && q.canjeado; })) return UI.toast('Este estudiante ya canjeó un QR Dorado', 'bad');
-      Store.update(function (draft) {
-        draft.qrClaims.push({ id: UI.uid('qr'), codigo: codigo, cedula: cedula, nombre: asistente.nombre, canjeado: true, creado: Date.now() });
-      });
-      document.getElementById('oro-cedula').value = '';
-      document.getElementById('oro-declaracion').checked = false;
-      UI.toast('QR Dorado validado: +3 boletos para ' + asistente.nombre);
-    });
-
-    document.getElementById('btn-cerrar').addEventListener('click', function () {
-      if (!confirm('¿Cerrar formalmente la recepción a las 17:45?')) return;
-      Store.update(function (draft) { draft.recepcionCerrada = true; });
-      UI.toast('Recepción cerrada');
-    });
-
-    document.getElementById('export-ranking').addEventListener('click', function () {
-      const filas = [['Carrera', 'Puntos', 'Juguetes', 'Fundas', 'Donantes únicos']];
-      Store.ranking().forEach(function (r) { filas.push([r.nombre, r.puntos, r.juguetes, r.caramelos, r.donantes]); });
-      const csv = filas.map(function (fila) { return fila.map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(','); }).join('\n');
-      UI.download('ciya2026-ranking.csv', '\ufeff' + csv, 'text/csv;charset=utf-8');
-    });
-
-    UI.initNav('recepcion');
-    Store.subscribe(render);
   }
 
   function render(state) {
-    const rows = Store.ranking();
-    const max = Math.max(1, rows.reduce(function (sum, r) { return sum + r.puntos; }, 0));
-    document.getElementById('ranking-recepcion').innerHTML = rows.map(function (r, index) {
-      return '<div class="ranking-row"><div class="ranking-head"><span>' + (index + 1) + '. ' + esc(r.nombre) + '</span><strong>' + r.puntos + ' pts</strong></div>' +
-        '<div class="bar"><span style="width:' + Math.round((r.puntos / max) * 100) + '%;--bar-color:' + r.color + '"></span></div>' +
-        '<small>' + r.juguetes + ' juguetes · ' + r.caramelos + ' fundas · ' + r.donantes + ' donantes únicos</small></div>';
+    UI.renderRanking('ranking-recepcion', Store.ranking());
+    byId('count-asistentes').textContent = state.counts.attendees ?? '—';
+    byId('count-donaciones').textContent = state.counts.donations ?? '—';
+    byId('lista-asistentes').innerHTML = UI.table(['Estudiante', 'Cédula', 'Carrera', 'Acreditación'],
+      state.attendees.filter(function (person) { return person.checked_in_at; }).map(function (person) {
+        return [esc(person.nombre), esc(person.cedula), esc(Store.carrera(person.carrera).nombre), esc(UI.dateTime(person.checked_in_at))];
+      }));
+    byId('lista-donaciones').innerHTML = UI.table(['Donante', 'Carrera', 'Tipo', 'Cantidad', 'Puntos'],
+      state.donations.map(function (item) {
+        return [esc(item.nombre || item.cedula), esc(Store.carrera(item.carrera).nombre), esc(item.tipo), item.cantidad, item.puntos];
+      }));
+    byId('estado-dorados').innerHTML = state.qrClaims.map(function (gold) {
+      return '<p>QR Dorado ' + gold.slot + ' · ' + (gold.canjeado ? 'Canjeado' : 'Sin canjear') + '</p>';
     }).join('');
+    const sealed = state.sealed === true;
+    byId('estado-cierre').textContent = sealed ? 'Datos sellados. El respaldo está disponible en escenario.' :
+      state.recepcionCerrada ? 'Horario terminado. Sella los datos para generar el respaldo.' : 'Cierre programado a las 17:45.';
+    byId('btn-cerrar').disabled = sealed || !state.recepcionCerrada;
+    document.querySelectorAll('#form-checkin button, #form-wall button, #form-donation button, #form-gold button')
+      .forEach(function (button) { button.closest('form').hidden = state.recepcionCerrada; });
+    paintMailStatus(state);
+  }
 
-    document.getElementById('count-asistentes').textContent = state.attendees.length;
-    document.getElementById('count-donaciones').textContent = state.donations.length;
-    document.getElementById('lista-asistentes').innerHTML = UI.table(
-      ['Nombre', 'Cédula', 'Carrera', 'Boletos'],
-      state.attendees.slice(-12).reverse().map(function (a) {
-        return [esc(a.nombre), esc(a.cedula), esc(Store.carrera(a.carrera).sigla), Store.ticketBreakdown(a.cedula).total];
-      })
-    );
-    document.getElementById('lista-donaciones').innerHTML = UI.table(
-      ['Donante', 'Tipo', 'Cant.', 'Beneficiada', 'Puntos'],
-      state.donations.slice(-12).reverse().map(function (d) {
-        return [esc(d.nombre), d.tipo === 'juguete' ? 'Juguete' : 'Caramelos', d.cantidad, esc(Store.carrera(d.carrera).sigla), d.puntos];
-      })
-    );
-
-    document.getElementById('estado-dorados').innerHTML = Data.dorados.map(function (d) {
-      const claim = state.qrClaims.find(function (q) { return q.codigo === d.codigo; });
-      return '<div class="row between"><span><strong>' + d.codigo + '</strong></span>' +
-        '<span class="badge ' + (claim ? 'bad' : 'ok') + '">' + (claim ? 'Canjeado' : 'Disponible') + '</span></div>';
+  function setup() {
+    const options = window.CIYA_DATA.carreras.map(function (career) {
+      return '<option value="' + esc(career.id) + '">' + esc(career.nombre) + '</option>';
     }).join('');
-
-    document.getElementById('estado-cierre').innerHTML = state.recepcionCerrada
-      ? '<span class="badge warn">Recepción cerrada · ' + esc(UI.dateTime(state.updatedAt)) + '</span>'
-      : '<span class="badge ok">Recepción abierta</span>';
+    ['chk-carrera', 'chk-don-carrera', 'don-carrera'].forEach(function (id) { byId(id).innerHTML = options; });
+    byId('chk-carrera').onchange = function () { byId('chk-don-carrera').value = value('chk-carrera'); };
+    bind('form-checkin', 'checkin', function () {
+      return { cedula: value('chk-cedula'), nombre: value('chk-nombre'), email: value('chk-email'),
+        carrera: value('chk-carrera'), wall: value('chk-muro'), confirmed: checked('chk-confirm'),
+        donation: value('chk-don-tipo') ? donation('chk-don-') : null };
+    });
+    bind('form-wall', 'checkin', function () {
+      return { cedula: value('wall-cedula'), wall: value('wall-mensaje'), confirmOnly: true };
+    });
+    bind('form-donation', 'donate', function () { return { ...donation('don-'), cedula: value('don-cedula') }; });
+    bind('form-gold', 'redeem', function () {
+      return { cedula: value('oro-cedula'), code: value('oro-codigo').toUpperCase(), confirmed: checked('oro-declaracion') };
+    });
+    byId('btn-cerrar').onclick = async function (event) {
+      if (!confirm('¿Sellar el registro final para el respaldo de escenario?')) return;
+      await UI.submit(event, 'seal', {}, true, function () { UI.toast('Recepción sellada.'); });
+      render(Store.get());
+    };
+    byId('export-ranking').onclick = function () {
+      const rows = Store.ranking().map(function (r) { return [r.puesto, r.nombre, r.puntos, r.juguetes, r.caramelos, r.total, r.donantes]; });
+      rows.unshift(['Puesto', 'Carrera', 'Puntos', 'Juguetes', 'Fundas', 'Total', 'Donantes únicos']);
+      UI.download('ciya2026-ranking.csv', UI.csv(rows), 'text/csv;charset=utf-8');
+    };
   }
 
   async function init() {
-    const ok = await UI.pinGate('recepcion', 'Panel de recepción');
-    if (!ok) {
-      document.getElementById('locked').hidden = false;
+    if (!await UI.requireAccount('recepcion', 'Panel de recepción')) {
+      byId('locked').hidden = false;
       return;
     }
-    document.getElementById('panel').hidden = false;
-    document.getElementById('logout').addEventListener('click', function () { UI.logout('recepcion'); });
-    await Store.init();
+    byId('panel').hidden = false;
+    byId('logout').onclick = UI.logout;
+    UI.initNav('recepcion');
+    await Store.init('recepcion');
     setup();
+    Store.subscribe(render);
   }
 
   init();

@@ -28,42 +28,64 @@
       <div><span class="kicker">Mesa de ingreso · delegados de Industrial</span><h1>Panel de Recepción y Donaciones</h1></div>
       <button class="btn ghost small" id="logout">Cerrar sesión</button>
     </div>
-    <div id="locked" hidden><p class="empty">Esta consola requiere PIN del equipo organizador.</p></div>
+    <div id="locked" hidden><p class="empty">Inicia sesión con una cuenta de recepción.</p></div>
 
     <div id="panel" hidden>
       <section class="grid cols-2">
-        <form class="card" id="form-checkin">
-          <h2>Registro rápido de asistente</h2>
-          <div class="field"><label for="chk-nombre">Nombre completo</label><input id="chk-nombre" required autocomplete="name"></div>
-          <div class="row">
-            <div class="grow field"><label for="chk-cedula">Cédula</label><input id="chk-cedula" required inputmode="numeric"></div>
-            <div class="grow field"><label for="chk-carrera">Carrera</label><select id="chk-carrera" required></select></div>
-          </div>
-          <div class="field"><label for="chk-email">Correo para el comprobante</label><input id="chk-email" type="email" required></div>
-          <div class="field"><label for="chk-muro">Mensaje en el Muro de la Empatía (opcional)</label><input id="chk-muro" maxlength="140"></div>
-          <hr style="border:none;border-top:1px solid var(--line);margin:1rem 0">
-          <h3>Donación en el mismo flujo (opcional)</h3>
-          <div class="row">
-            <div class="grow field"><label for="don-tipo">Tipo de donación</label><select id="don-tipo"><option value="">Sin donación</option><option value="juguete">Juguete funcional (5 pts)</option><option value="caramelos">Funda de caramelos (2 pts)</option></select></div>
-            <div class="grow field"><label for="don-cantidad">Cantidad</label><input id="don-cantidad" type="number" min="1" value="1"></div>
-          </div>
-          <div class="field"><label for="don-carrera">Carrera beneficiada</label><select id="don-carrera" required></select></div>
-          <button class="btn primary wide" type="submit">Registrar ingreso / donación y generar boletos</button>
-        </form>
+        <div>
+          <form class="card" id="form-checkin">
+            <h2>Acreditación presencial</h2>
+            <p class="hint">De 17:00 a 17:45. Verifica la identidad y matrícula del estudiante.</p>
+            <div class="field"><label for="chk-nombre">Nombre completo</label><input id="chk-nombre" maxlength="120" required autocomplete="name"></div>
+            <div class="row">
+              <div class="grow field"><label for="chk-cedula">Cédula</label><input id="chk-cedula" required inputmode="numeric" pattern="[0-9]{10}"></div>
+              <div class="grow field"><label for="chk-carrera">Carrera</label><select id="chk-carrera" required></select></div>
+            </div>
+            <div class="field"><label for="chk-email">Correo para el comprobante</label><input id="chk-email" type="email" maxlength="254" required></div>
+            <div class="field"><label for="chk-muro">Mensaje verificado en el Muro de la Empatía</label><input id="chk-muro" maxlength="140"></div>
+            <label><input id="chk-confirm" type="checkbox" required> Identidad y elegibilidad verificadas en persona</label>
+            <details>
+              <summary>Agregar una donación a este registro</summary>
+              <div class="field"><label for="chk-don-tipo">Tipo</label><select id="chk-don-tipo"><option value="">Sin donación</option><option value="juguete">Juguete funcional</option><option value="caramelos">Funda de caramelos</option></select></div>
+              <div class="field"><label for="chk-don-cantidad">Cantidad</label><input id="chk-don-cantidad" type="number" min="1" max="1000" value="1"></div>
+              <div class="field"><label for="chk-don-carrera">Carrera beneficiada</label><select id="chk-don-carrera"></select></div>
+              <label><input id="chk-don-confirm" type="checkbox"> Aporte válido con mensaje de empatía</label>
+            </details>
+            <button class="btn primary wide" type="submit">Acreditar y emitir comprobante</button>
+          </form>
+
+          <form class="card" id="form-wall">
+            <h2>Confirmar mensaje del muro después del ingreso</h2>
+            <div class="field"><label for="wall-cedula">Cédula acreditada</label><input id="wall-cedula" required inputmode="numeric" pattern="[0-9]{10}"></div>
+            <div class="field"><label for="wall-mensaje">Mensaje verificado</label><input id="wall-mensaje" maxlength="140" required></div>
+            <button class="btn" type="submit">Confirmar mensaje</button>
+          </form>
+        </div>
 
         <div>
-          <div class="card">
-            <h2>Validación de QR Dorados</h2>
-            <p class="muted">Tres códigos únicos. Cada uno se desactiva al ser canjeado por el primer estudiante presente. Máximo un QR Dorado por estudiante y +3 boletos.</p>
-            <div class="field"><label for="oro-codigo">Código de canje</label><select id="oro-codigo"></select></div>
-            <div class="field"><label for="oro-cedula">Cédula del estudiante</label><input id="oro-cedula" inputmode="numeric" required></div>
-            <label class="row" style="font-weight:400;align-items:flex-start"><input id="oro-declaracion" type="checkbox" style="margin-top:0.25rem"><span>No soy integrante del equipo de Software ni de la Comisión Organizadora con información sobre las ubicaciones.</span></label>
-            <button class="btn primary wide" id="btn-oro" style="margin-top:0.7rem">Validar y asignar boletos</button>
+          <form class="card" id="form-donation">
+            <h2>Registrar una donación</h2>
+            <p class="hint">De 08:00 a 17:45. Juguete funcional y completo o funda industrial sellada de al menos 200 g. Cada aporte debe llevar un mensaje de empatía.</p>
+            <div class="field"><label for="don-cedula">Cédula del donante</label><input id="don-cedula" required inputmode="numeric" pattern="[0-9]{10}"></div>
+            <div class="row">
+              <div class="grow field"><label for="don-tipo">Tipo</label><select id="don-tipo"><option value="juguete">Juguete funcional</option><option value="caramelos">Funda de caramelos</option></select></div>
+              <div class="grow field"><label for="don-cantidad">Cantidad</label><input id="don-cantidad" type="number" min="1" max="1000" value="1" required></div>
+            </div>
+            <div class="field"><label for="don-carrera">Carrera beneficiada</label><select id="don-carrera"></select></div>
+            <label><input id="don-confirm" type="checkbox" required> Aporte válido con mensaje de empatía</label>
+            <button class="btn primary wide" type="submit">Contabilizar donación</button>
+          </form>
+          <form class="card" id="form-gold">
+            <h2>Validar QR Dorado</h2>
+            <div class="field"><label for="oro-codigo">Clave de la pantalla activa</label><input id="oro-codigo" required maxlength="16" pattern="[A-Fa-f0-9]{16}" autocomplete="off" autocapitalize="characters"></div>
+            <div class="field"><label for="oro-cedula">Cédula del estudiante</label><input id="oro-cedula" inputmode="numeric" pattern="[0-9]{10}" required></div>
+            <label><input id="oro-declaracion" type="checkbox" required> Pantalla activa, credencial estudiantil y juego limpio verificados</label>
+            <button class="btn primary wide" type="submit">Validar y asignar 3 boletos</button>
             <div id="estado-dorados" style="margin-top:1rem"></div>
-          </div>
-          <div class="card" style="margin-top:1rem">
-            <h3>Comprobante rápido</h3>
-            <div id="chk-result"><p class="empty">El comprobante aparecerá aquí.</p></div>
+          </form>
+          <div class="card">
+            <h3>Comprobante</h3>
+            <div id="chk-result" aria-live="polite"><p class="empty">El comprobante aparecerá aquí.</p></div>
           </div>
         </div>
       </section>
