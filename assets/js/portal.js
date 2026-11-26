@@ -19,12 +19,10 @@
     }).join('');
   }
 
-  function renderChips(containerId, items, selectedId, onChange) {
+  function renderChips(containerId, items, onChange) {
     const container = document.getElementById(containerId);
-    if (!container) return;
     container.innerHTML = items.map(function (c) {
-      const active = selectedId === c.id;
-      return '<button type="button" class="chip' + (active ? ' active' : '') + '" data-id="' + c.id + '" style="--chip-color:' + (c.color || 'var(--line)') + '" aria-pressed="' + active + '">' +
+      return '<button type="button" class="chip" data-id="' + esc(c.id) + '" style="--chip-color:' + (c.color || 'var(--gold)') + '" aria-pressed="false">' +
         (c.color ? '<span class="carrera-dot" style="--dot-color:' + c.color + '"></span>' : '') + esc(c.nombre) + '</button>';
     }).join('');
     container.querySelectorAll('.chip').forEach(function (button) {
@@ -39,12 +37,16 @@
     const message = document.getElementById('lantern-message');
     const meta = document.getElementById('lantern-carrera');
     const carrera = Store.carrera(linterna.carrera);
-    stage.style.background = 'radial-gradient(circle at 50% 38%, ' + carrera.color + ', #040a14 78%)';
+    stage.style.setProperty('--lantern-color', carrera.color);
     message.textContent = linterna.frase;
     meta.textContent = carrera.icono + ' ' + carrera.nombre;
     if (stage.classList.contains('blink') !== linterna.blink) syncLantern();
-    document.getElementById('lantern-preview').textContent = linterna.frase;
-    document.getElementById('lantern-blink').textContent = 'Parpadeo: ' + (linterna.blink ? 'activo' : 'apagado');
+    document.getElementById('lantern-blink').setAttribute('aria-pressed', linterna.blink);
+    document.querySelectorAll('#linterna-carreras .chip, #linterna-frases .chip').forEach(function (button) {
+      const selected = button.dataset.id === (button.parentElement.id === 'linterna-carreras' ? linterna.carrera : linterna.frase);
+      button.classList.toggle('active', selected);
+      button.setAttribute('aria-pressed', selected);
+    });
     try { localStorage.setItem('ciya2026:linterna', JSON.stringify(linterna)); } catch (error) { console.warn(error); }
   }
 
@@ -61,20 +63,13 @@
 
   function chooseLanternCarrera(id) {
     linterna.carrera = id;
-    renderChips('linterna-carreras', Data.carreras, id, chooseLanternCarrera);
     applyLantern();
   }
 
   function chooseLanternFrase(frase) {
     linterna.frase = frase;
     document.getElementById('linterna-custom').value = '';
-    renderPhrases();
     applyLantern();
-  }
-
-  function renderPhrases() {
-    const phrases = Data.frasesLinterna.map(function (phrase) { return { id: phrase, nombre: phrase }; });
-    renderChips('linterna-frases', phrases, linterna.frase, chooseLanternFrase);
   }
 
   function setupLantern() {
@@ -87,12 +82,15 @@
       }
     } catch (error) { console.warn(error); }
 
-    renderChips('linterna-carreras', Data.carreras, linterna.carrera, chooseLanternCarrera);
-    renderPhrases();
+    renderChips('linterna-carreras', Data.carreras, chooseLanternCarrera);
+    renderChips('linterna-frases', Data.frasesLinterna.map(function (phrase) {
+      return { id: phrase, nombre: phrase };
+    }), chooseLanternFrase);
 
-    document.getElementById('linterna-custom').addEventListener('input', function (event) {
+    const customMessage = document.getElementById('linterna-custom');
+    if (!Data.frasesLinterna.includes(linterna.frase)) customMessage.value = linterna.frase;
+    customMessage.addEventListener('input', function (event) {
       linterna.frase = event.target.value.trim() || Data.frasesLinterna[0];
-      renderPhrases();
       applyLantern();
     });
 
@@ -108,24 +106,29 @@
 
     const stage = document.getElementById('lantern-stage');
     const exit = document.getElementById('lantern-exit');
-    document.getElementById('lantern-fullscreen').addEventListener('click', async function () {
+    const fullscreen = document.getElementById('lantern-fullscreen');
+    fullscreen.addEventListener('click', async function () {
       stage.classList.add('live');
       exit.hidden = false;
+      exit.focus({ preventScroll: true });
       try {
         if (stage.requestFullscreen) await stage.requestFullscreen();
       } catch { /* The CSS view is available with or without fullscreen permission. */ }
     });
-    exit.addEventListener('click', function () {
+    function closePreview() {
       stage.classList.remove('live');
       exit.hidden = true;
-      if (document.fullscreenElement) document.exitFullscreen();
-      document.getElementById('lantern-fullscreen').focus();
+      fullscreen.focus({ preventScroll: true });
+    }
+    exit.addEventListener('click', async function () {
+      if (document.fullscreenElement === stage) await document.exitFullscreen();
+      else closePreview();
     });
     document.addEventListener('fullscreenchange', function () {
-      if (!document.fullscreenElement) {
-        stage.classList.remove('live');
-        exit.hidden = true;
-      }
+      if (!document.fullscreenElement && stage.classList.contains('live')) closePreview();
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && !document.fullscreenElement && stage.classList.contains('live')) closePreview();
     });
     document.getElementById('copy-url').addEventListener('click', function () {
       UI.copy(new URL('index.html?modo=linterna#linterna', location.href).href);
@@ -171,6 +174,12 @@
     Object.keys(counters).forEach(function (id) {
       document.getElementById('stat-' + id).textContent = state.counts[counters[id]] ?? '—';
     });
+    if (!state.ranking.length) {
+      document.getElementById('lista-grupos').textContent = 'Orden de presentación aún no disponible.';
+      document.getElementById('frases-aprobadas').textContent = 'Frases aprobadas aún no disponibles.';
+      document.getElementById('ranking-portal').textContent = 'Marcador aún no disponible.';
+      return;
+    }
     document.getElementById('lista-grupos').innerHTML = state.groups.map(function (group) {
       return '<div class="timeline-step"><span class="step-index">' + group.orden + '</span><div><strong>' +
         esc(group.nombre) + '</strong><br><small>' + esc(group.categoria) + ' · ' +
@@ -185,7 +194,13 @@
   async function init() {
     setupLantern();
     if (new URLSearchParams(location.search).get('modo') === 'linterna') {
+      document.body.classList.add('lantern-page');
       document.querySelectorAll('main > section:not(#linterna), #sync-status').forEach(function (node) { node.hidden = true; });
+      const sectionTitle = document.querySelector('#linterna h2');
+      const title = document.createElement('h1');
+      title.textContent = sectionTitle.textContent;
+      sectionTitle.replaceWith(title);
+      document.title = 'Mar de Linternas | CIYA Navidad 2026';
       return;
     }
     fillSelects();

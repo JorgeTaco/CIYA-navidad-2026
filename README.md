@@ -4,6 +4,12 @@ Aplicación web responsive para el evento **CIYA 4.0 Ingenio que Ilumina la Navi
 
 La versión 2.0 de la especificación, las Bases Oficiales de Concursos y Actividades y el documento Ruta de Códigos QR de CIYA Navidad 2026 son las fuentes funcionales. Se aplican los horarios del cronograma oficial, el plazo de inscripción del 3 de diciembre y la validación del QR Dorado con pantalla activa y credencial. Todas las horas indicadas corresponden a Ecuador continental (UTC−05:00).
 
+## Entrega inicial para el ensayo
+
+El portal abre con accesos directos a Linterna, Ruta QR, Buzón y Villancicos. El menú reúne el cronograma, las bases y los paneles de organización. Desde un QR se abre su contenido y quedan accesibles el buzón y la linterna. En recepción, **Acreditar**, **Donar** y **Canjear** conservan sus formularios al cambiar de pestaña y muestran el último comprobante tras completar una operación.
+
+Para el ensayo con datos ficticios se podrá canjear desde las 08:00 y seleccionar una carrera representada por grupo de villancicos. Queda por confirmar con la Comisión si el canje abrirá antes de la acreditación y cómo inscribir a los grupos que representen a más de una carrera.
+
 ## Cambios de esta versión
 
 | Requisito | Cambio y cómo comprobarlo |
@@ -71,7 +77,8 @@ La versión 2.0 de la especificación, las Bases Oficiales de Concursos y Activi
 
 - `node --test tests/draw.test.cjs` verifica recuperación, reloj de comparecencia, ausencia, exclusión del ganador y rechazo de un respaldo con un boleto duplicado. `node --check` revisa todos los JavaScript del sitio.
 - Pruebas locales de PostgreSQL con hora simulada: permisos, límites horarios, donación y canje antes de acreditar, correo repetido, clave vencida, siete boletos por ingreso con mensaje más un juguete, una funda y un QR Dorado, siete puntos por los dos aportes, cola de comprobantes, sellado y migración. Dos conexiones simultáneas verificaron que se conservan ambos aportes y se aceptan solo un registro por correo y un canje por código.
-- Pruebas en Chromium: 360 px, linterna tras desconexión, trivia, formularios con respuestas simuladas, pantalla dorada, descarga del respaldo, ranking y recuperación del sorteo en el servidor local sin acceso externo. La tecla de respaldo se ensayó en simulación. La linterna quedó lista en 1,45 s con caché desactivada, 150 ms de latencia y 400 kbit/s de descarga simulados. La función de correo se comprobó con respuestas simuladas de Brevo, incluidos reintento, deduplicación y rechazo definitivo.
+- Pruebas en Chromium y WebKit a 360 px: acceso a las actividades, enlaces de la ruta, trivia y linterna tras desconectar la red. En Chromium, la linterna quedó lista en 1,71 s con caché desactivada, 150 ms de latencia y 400 kbit/s de descarga simulados.
+- Pruebas de operación en Chromium con datos ficticios: formularios, canje, curaduría y CSV, descarga del respaldo, ranking y recuperación del sorteo en el servidor local sin acceso externo. La tecla de respaldo se ensayó en simulación. La función de correo se comprobó con respuestas simuladas de Brevo, incluidos reintento, deduplicación y rechazo definitivo.
 - **Pendiente para el ensayo del 3 de diciembre.** Desplegar en el proyecto Supabase del evento y probar la entrega real de Brevo. Hacer un ensayo con dos puestos, Internet desconectado en escenario, proyector 16:9, audio, micrófono, placa, relé y respaldo manual. Abrir el QR real en Chrome para Android y Safari para iPhone y medir el objetivo de carga de menos de dos segundos en la red del hall.
 
 

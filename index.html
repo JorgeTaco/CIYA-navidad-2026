@@ -3,82 +3,90 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#061224">
+  <meta name="theme-color" content="#07151c">
   <title>CIYA Navidad 2026 | Portal estudiantil</title>
   <link rel="stylesheet" href="assets/css/app.css">
 </head>
-<body>
-  <header class="topbar">
+<body class="portal-page">
+  <header class="topbar event-topbar">
     <div class="topbar-inner">
       <a class="brand" href="index.html"><span class="brand-mark">CIYA</span><span>Navidad 2026</span></a>
-      <nav class="nav-links" aria-label="Navegación principal">
-        <a href="#inicio" data-nav="inicio">Inicio</a>
-        <a href="#linterna" data-nav="linterna">Linterna</a>
-        <a href="#registro" data-nav="registro">Registro</a>
-        <a href="#villancicos" data-nav="villancicos">Villancicos</a>
-        <a href="#buzon" data-nav="buzon">Buzón 2027</a>
-        <a href="#muro" data-nav="muro">Muro</a>
-        <a href="qr.html">Ruta QR</a>
-        <a href="bases.html">Bases</a>
-        <a href="recepcion.html">Recepción</a>
-        <a href="escenario.html">Escenario</a>
-        <a href="admin.html">Admin</a>
-      </nav>
-      <span class="sync-pill" id="sync-status">Modo local</span>
+      <details class="site-menu">
+        <summary>Menú</summary>
+        <nav aria-label="Información y organización">
+          <a href="index.html#registro">Gran Sorteo</a>
+          <a href="index.html#muro">Muro de la Empatía</a>
+          <a href="index.html#puertas">Puertas Decoradas</a>
+          <a href="index.html#ranking">Copa Solidaria</a>
+          <a href="bases.html#cronograma">Cronograma</a>
+          <a href="bases.html">Bases oficiales</a>
+          <div class="menu-divider">Organización</div>
+          <a href="recepcion.html">Recepción</a>
+          <a href="escenario.html">Escenario</a>
+          <a href="admin.html">Administración</a>
+        </nav>
+      </details>
     </div>
   </header>
 
   <main class="container">
-    <section class="hero" id="inicio">
-      <span class="kicker">Viernes 4 de diciembre de 2026</span>
-      <h1>CIYA 4.0: ingenio que ilumina la Navidad</h1>
-      <p>Cinco carreras, una energía solidaria. Regístrate en el hall, apoya la Copa Solidaria, busca los QR Dorados y participa en el Gran Sorteo Digital desde tu celular, sin instalar nada.</p>
-      <div class="row">
-        <a class="btn primary" href="index.html?modo=linterna#linterna">Abrir Mar de Linternas</a>
-        <a class="btn ghost" href="bases.html">Ver bases oficiales</a>
-      </div>
-      <div class="row" style="margin-top:1.4rem">
-        <span class="badge">Hall principal CIYA</span>
-        <span class="badge">Respuesta web desde 360 px</span>
-        <span class="badge warn">Costo $0</span>
-      </div>
+    <section class="event-hero" id="inicio">
+      <div class="event-art" aria-hidden="true"><span></span></div>
+      <span class="kicker">4 de diciembre de 2026 · Hall principal CIYA</span>
+      <h1>Ingenio que ilumina <em>la Navidad</em></h1>
+      <nav class="event-actions" aria-label="Actividades principales">
+        <a class="event-action lantern-link" href="index.html?modo=linterna#linterna">
+          <span class="action-icon" aria-hidden="true">✦</span><span>Mar de Linternas</span>
+        </a>
+        <a class="event-action route-link" href="qr.html">
+          <span class="action-icon" aria-hidden="true">▦</span><span>Ruta QR</span>
+        </a>
+        <a class="event-action wishes-link" href="#buzon">
+          <span class="action-icon" aria-hidden="true">✉</span><span>Buzón 2027</span>
+        </a>
+        <a class="event-action music-link" href="#villancicos">
+          <span class="action-icon" aria-hidden="true">♫</span><span>Villancicos</span>
+        </a>
+      </nav>
     </section>
 
-    <section class="grid auto" aria-label="Resumen en vivo">
-      <div class="card"><div class="label">Asistentes registrados</div><div class="stat" id="stat-asistentes">0</div></div>
-      <div class="card"><div class="label">Boletos emitidos</div><div class="stat" id="stat-boletos">0</div></div>
-      <div class="card"><div class="label">Grupos de villancicos</div><div class="stat" id="stat-grupos">0</div></div>
-      <div class="card"><div class="label">Deseos 2027 aprobados</div><div class="stat" id="stat-deseos">0</div></div>
+    <section class="event-summary" aria-label="Resumen en vivo">
+      <div><div class="label">Asistentes</div><div class="stat" id="stat-asistentes">—</div></div>
+      <div><div class="label">Boletos</div><div class="stat" id="stat-boletos">—</div></div>
+      <div><div class="label">Grupos</div><div class="stat" id="stat-grupos">—</div></div>
+      <div><div class="label">Deseos aprobados</div><div class="stat" id="stat-deseos">—</div></div>
     </section>
 
     <section class="section" id="linterna">
       <div class="section-head">
         <div><span class="kicker">Acto central · 18:25 – 18:55</span><h2>Mar de Linternas</h2></div>
-        <span class="muted">Coloca tu mensaje y elige tu carrera. Todo se ejecuta en tu navegador.</span>
       </div>
-      <div class="grid cols-2">
+      <div class="lantern-layout">
+        <div class="card lantern-setup">
+          <fieldset class="field">
+            <legend>Carrera</legend>
+            <div class="chips" id="linterna-carreras"></div>
+          </fieldset>
+          <fieldset class="field">
+            <legend>Mensaje</legend>
+            <div class="chips" id="linterna-frases"></div>
+            <label class="custom-message" for="linterna-custom">O escribe tu mensaje (hasta 60 caracteres)</label>
+            <input id="linterna-custom" maxlength="60" placeholder="Tu mensaje navideño">
+          </fieldset>
+        </div>
         <div>
+          <p class="label">Vista previa</p>
           <div class="lantern-stage" id="lantern-stage">
             <div class="lantern-message" id="lantern-message">Feliz Navidad CIYA</div>
-            <div class="lantern-meta"><span id="lantern-carrera">Selecciona tu carrera</span><span>Modo local · sin Wi-Fi requerido tras la carga</span></div>
+            <div class="lantern-meta" id="lantern-carrera">Selecciona tu carrera</div>
             <button class="btn small ghost lantern-exit" id="lantern-exit" hidden>Salir de pantalla completa</button>
           </div>
-          <div class="row" style="margin-top:0.8rem">
-            <button class="btn primary" id="lantern-fullscreen">Pantalla completa</button>
-            <button class="btn" id="lantern-blink">Parpadeo: activo</button>
+          <div class="lantern-controls">
+            <button class="btn primary wide" id="lantern-fullscreen">Pantalla completa</button>
+            <button class="btn" id="lantern-blink" aria-pressed="true">Parpadeo</button>
             <button class="btn ghost" id="lantern-sync">Sincronizar destello</button>
           </div>
-          <p class="hint">Comparte el enlace del Mar de Linternas. <button class="btn small ghost" id="copy-url">Copiar URL</button></p>
-        </div>
-        <div class="card">
-          <h3>Configura tu linterna</h3>
-          <div class="field"><label>Carrera</label><div class="chips" id="linterna-carreras"></div></div>
-          <div class="field"><label>Frases predefinidas</label><div class="chips" id="linterna-frases"></div></div>
-          <div class="field"><label for="linterna-custom">Mensaje propio (máx. 60 caracteres)</label><input id="linterna-custom" maxlength="60" placeholder="Escribe tu mensaje navideño"></div>
-          <div class="card" style="background:rgba(255,255,255,0.04)">
-            <div class="label">Vista previa</div>
-            <p id="lantern-preview" style="font-weight:800;margin:0.4rem 0 0">Feliz Navidad CIYA</p>
-          </div>
+          <button class="btn small ghost" id="copy-url">Copiar enlace de la linterna</button>
         </div>
       </div>
     </section>
@@ -107,7 +115,7 @@
           <button class="btn primary wide" type="submit">Inscribir grupo</button>
           <p class="hint">Inscripción oficial abierta hasta el jueves 3 de diciembre de 2026, 17:30. Evaluación: 30% creatividad, 30% musicalidad, 20% puesta en escena y 20% aplausómetro.</p>
         </form>
-        <div class="card"><h3>Orden de presentación</h3><div id="lista-grupos"></div></div>
+        <div class="card"><h3>Orden de presentación</h3><div id="lista-grupos"><p class="empty">Consultando los grupos inscritos…</p></div></div>
       </div>
     </section>
 
@@ -122,7 +130,7 @@
           <button class="btn primary wide" type="submit">Enviar al buzón</button>
           <p class="hint">Las frases quedan pendientes de aprobación y podrán proyectarse durante la chocolatada final.</p>
         </form>
-        <div class="card"><h3>Frases aprobadas</h3><div class="frases-aprobadas" id="frases-aprobadas" style="margin-top:1rem"></div></div>
+        <div class="card"><h3>Frases aprobadas</h3><div class="frases-aprobadas" id="frases-aprobadas"><p class="empty">Consultando las frases aprobadas…</p></div></div>
       </div>
     </section>
 
@@ -142,12 +150,12 @@
     </section>
 
     <section class="section" id="ranking">
-      <div class="section-head"><div><span class="kicker">Actividad III · en vivo</span><h2>Copa Solidaria Inter-Carreras</h2></div></div>
-      <div class="card" id="ranking-portal"></div>
+      <div class="section-head"><h2>Copa Solidaria Inter-Carreras</h2><span class="sync-pill" id="sync-status">Consultando marcador</span></div>
+      <div class="card" id="ranking-portal"><p class="empty">Consultando los aportes por carrera…</p></div>
     </section>
   </main>
 
-  <footer class="footer">CIYA Navidad 2026 · Plataforma web responsive de costo cero · Desarrollada por Carrera de Sistemas y Software</footer>
+  <footer class="footer">Facultad CIYA · Carrera de Sistemas y Software</footer>
 
   <script src="assets/js/config.js"></script>
   <script src="assets/js/data.js"></script>

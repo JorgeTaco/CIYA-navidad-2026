@@ -2,42 +2,54 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#061224">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#07151c">
   <title>CIYA Navidad 2026 | Panel de recepción</title>
   <link rel="stylesheet" href="assets/css/app.css">
 </head>
-<body>
-  <header class="topbar">
+<body class="reception-page">
+  <header class="topbar event-topbar">
     <div class="topbar-inner">
       <a class="brand" href="index.html"><span class="brand-mark">CIYA</span><span>Navidad 2026</span></a>
-      <nav class="nav-links" aria-label="Navegación principal">
-        <a href="index.html">Portal</a>
-        <a href="qr.html">Ruta QR</a>
-        <a href="bases.html">Bases</a>
-        <a href="recepcion.html" data-nav="recepcion">Recepción</a>
-        <a href="escenario.html">Escenario</a>
-        <a href="admin.html">Admin</a>
-      </nav>
-      <span class="sync-pill" id="sync-status">Modo local</span>
+      <details class="site-menu">
+        <summary>Menú</summary>
+        <nav aria-label="Información y organización">
+          <a href="index.html">Portal</a>
+          <a href="qr.html">Ruta QR</a>
+          <a href="bases.html#cronograma">Cronograma</a>
+          <a href="bases.html">Bases oficiales</a>
+          <div class="menu-divider">Organización</div>
+          <a href="recepcion.html" data-nav="recepcion">Recepción</a>
+          <a href="escenario.html">Escenario</a>
+          <a href="admin.html">Administración</a>
+        </nav>
+      </details>
     </div>
   </header>
 
   <main class="container">
-    <div class="section-head">
-      <div><span class="kicker">Mesa de ingreso · delegados de Industrial</span><h1>Panel de Recepción y Donaciones</h1></div>
-      <button class="btn ghost small" id="logout">Cerrar sesión</button>
+    <div class="section-head reception-heading">
+      <h1>Recepción solidaria</h1>
+      <div class="row" id="reception-session" hidden>
+        <span class="sync-pill" id="sync-status">Conectando</span>
+        <button class="btn ghost small" id="logout">Cerrar sesión</button>
+      </div>
     </div>
     <div id="locked" hidden><p class="empty">Inicia sesión con una cuenta de recepción.</p></div>
 
     <div id="panel" hidden>
-      <section class="grid cols-2">
-        <div>
+      <section class="reception-workspace" id="reception-workspace" aria-label="Operaciones de recepción">
+        <div class="reception-tabs" role="tablist" aria-label="Operaciones">
+          <button id="tab-acreditar" type="button" role="tab" aria-controls="panel-acreditar" aria-selected="true">Acreditar</button>
+          <button id="tab-donar" type="button" role="tab" aria-controls="panel-donar" aria-selected="false" tabindex="-1">Donar</button>
+          <button id="tab-canjear" type="button" role="tab" aria-controls="panel-canjear" aria-selected="false" tabindex="-1">Canjear</button>
+        </div>
+        <div id="panel-acreditar" role="tabpanel" aria-labelledby="tab-acreditar">
           <form class="card" id="form-checkin">
             <h2>Acreditación presencial</h2>
             <p class="hint">De 17:00 a 17:45. Verifica la identidad y matrícula del estudiante.</p>
             <div class="field"><label for="chk-nombre">Nombre completo</label><input id="chk-nombre" maxlength="120" required autocomplete="name"></div>
-            <div class="row">
+            <div class="form-row">
               <div class="grow field"><label for="chk-cedula">Cédula</label><input id="chk-cedula" required inputmode="numeric" pattern="[0-9]{10}"></div>
               <div class="grow field"><label for="chk-carrera">Carrera</label><select id="chk-carrera" required></select></div>
             </div>
@@ -47,27 +59,31 @@
             <details>
               <summary>Agregar una donación a este registro</summary>
               <div class="field"><label for="chk-don-tipo">Tipo</label><select id="chk-don-tipo"><option value="">Sin donación</option><option value="juguete">Juguete funcional</option><option value="caramelos">Funda de caramelos</option></select></div>
-              <div class="field"><label for="chk-don-cantidad">Cantidad</label><input id="chk-don-cantidad" type="number" min="1" max="1000" value="1"></div>
-              <div class="field"><label for="chk-don-carrera">Carrera beneficiada</label><select id="chk-don-carrera"></select></div>
-              <label><input id="chk-don-confirm" type="checkbox"> Aporte válido con mensaje de empatía</label>
+              <fieldset id="chk-donation-fields" disabled hidden>
+                <div class="field"><label for="chk-don-cantidad">Cantidad</label><input id="chk-don-cantidad" type="number" min="1" max="1000" value="1" required></div>
+                <div class="field"><label for="chk-don-carrera">Carrera beneficiada</label><select id="chk-don-carrera" required></select></div>
+                <label><input id="chk-don-confirm" type="checkbox" required> Aporte válido con mensaje de empatía</label>
+              </fieldset>
             </details>
             <button class="btn primary wide" type="submit">Acreditar y emitir comprobante</button>
           </form>
 
-          <form class="card" id="form-wall">
-            <h2>Confirmar mensaje del muro después del ingreso</h2>
-            <div class="field"><label for="wall-cedula">Cédula acreditada</label><input id="wall-cedula" required inputmode="numeric" pattern="[0-9]{10}"></div>
-            <div class="field"><label for="wall-mensaje">Mensaje verificado</label><input id="wall-mensaje" maxlength="140" required></div>
-            <button class="btn" type="submit">Confirmar mensaje</button>
-          </form>
+          <details class="card wall-confirmation">
+            <summary>Confirmar mensaje del muro después del ingreso</summary>
+            <form id="form-wall">
+              <div class="field"><label for="wall-cedula">Cédula acreditada</label><input id="wall-cedula" required inputmode="numeric" pattern="[0-9]{10}"></div>
+              <div class="field"><label for="wall-mensaje">Mensaje verificado</label><input id="wall-mensaje" maxlength="140" required></div>
+              <button class="btn primary wide" type="submit">Confirmar mensaje</button>
+            </form>
+          </details>
         </div>
 
-        <div>
+        <div id="panel-donar" role="tabpanel" aria-labelledby="tab-donar" hidden>
           <form class="card" id="form-donation">
             <h2>Registrar una donación</h2>
             <p class="hint">De 08:00 a 17:45. Juguete funcional y completo o funda industrial sellada de al menos 200 g. Cada aporte debe llevar un mensaje de empatía.</p>
             <div class="field"><label for="don-cedula">Cédula del donante</label><input id="don-cedula" required inputmode="numeric" pattern="[0-9]{10}"></div>
-            <div class="row">
+            <div class="form-row">
               <div class="grow field"><label for="don-tipo">Tipo</label><select id="don-tipo"><option value="juguete">Juguete funcional</option><option value="caramelos">Funda de caramelos</option></select></div>
               <div class="grow field"><label for="don-cantidad">Cantidad</label><input id="don-cantidad" type="number" min="1" max="1000" value="1" required></div>
             </div>
@@ -75,19 +91,23 @@
             <label><input id="don-confirm" type="checkbox" required> Aporte válido con mensaje de empatía</label>
             <button class="btn primary wide" type="submit">Contabilizar donación</button>
           </form>
+        </div>
+        <div id="panel-canjear" role="tabpanel" aria-labelledby="tab-canjear" hidden>
           <form class="card" id="form-gold">
             <h2>Validar QR Dorado</h2>
+            <p class="hint">Verifica la pantalla activa y la credencial estudiantil antes de las 17:45.</p>
             <div class="field"><label for="oro-codigo">Clave de la pantalla activa</label><input id="oro-codigo" required maxlength="16" pattern="[A-Fa-f0-9]{16}" autocomplete="off" autocapitalize="characters"></div>
             <div class="field"><label for="oro-cedula">Cédula del estudiante</label><input id="oro-cedula" inputmode="numeric" pattern="[0-9]{10}" required></div>
             <label><input id="oro-declaracion" type="checkbox" required> Pantalla activa, credencial estudiantil y juego limpio verificados</label>
             <button class="btn primary wide" type="submit">Validar y asignar 3 boletos</button>
-            <div id="estado-dorados" style="margin-top:1rem"></div>
           </form>
-          <div class="card">
-            <h3>Comprobante</h3>
-            <div id="chk-result" aria-live="polite"><p class="empty">El comprobante aparecerá aquí.</p></div>
-          </div>
+          <div class="gold-availability" id="estado-dorados" aria-label="Estado de los QR Dorados"></div>
         </div>
+      </section>
+
+      <section class="card receipt-card" id="receipt-card" aria-labelledby="receipt-heading" hidden>
+        <h2 id="receipt-heading">Último comprobante</h2>
+        <div id="chk-result" tabindex="-1" aria-live="polite"></div>
       </section>
 
       <section class="section">
@@ -95,9 +115,9 @@
         <div class="card" id="ranking-recepcion"></div>
       </section>
 
-      <section class="section grid cols-2">
-        <div class="card"><div class="section-head"><h3>Asistentes registrados</h3><span class="badge" id="count-asistentes">0</span></div><div id="lista-asistentes"></div></div>
-        <div class="card"><div class="section-head"><h3>Donaciones registradas</h3><span class="badge" id="count-donaciones">0</span></div><div id="lista-donaciones"></div></div>
+      <section class="section grid cols-2" aria-label="Registros de recepción">
+        <details class="card record-list"><summary>Asistentes registrados <span class="badge" id="count-asistentes">—</span></summary><div id="lista-asistentes"></div></details>
+        <details class="card record-list"><summary>Donaciones registradas <span class="badge" id="count-donaciones">—</span></summary><div id="lista-donaciones"></div></details>
       </section>
 
       <section class="section card">

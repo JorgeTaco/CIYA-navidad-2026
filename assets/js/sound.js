@@ -1,17 +1,31 @@
 (function () {
   let context = null;
+  let starting = null;
 
-  function ensure() {
+  function getContext() {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) return null;
-    if (!context) context = new AudioContextClass();
-    if (context.state === 'suspended') context.resume();
+    try {
+      if (!context || context.state === 'closed') context = new AudioContextClass();
+    } catch { return null; }
     return context;
   }
 
-  function tone(frequency, duration, options) {
-    const ctx = ensure();
+  async function enable() {
+    const ctx = getContext();
+    if (!ctx) return false;
+    if (ctx.state === 'running') return true;
+    try {
+      if (!starting) starting = ctx.resume().finally(function () { starting = null; });
+      await starting;
+      return ctx.state === 'running';
+    } catch { return false; }
+  }
+
+  async function tone(frequency, duration, options) {
+    const ctx = getContext();
     if (!ctx) return;
+    if (ctx.state !== 'running' && !await enable()) return;
     const opts = options || {};
     const oscillator = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -37,7 +51,7 @@
   }
 
   const Sound = {
-    enable() { return Boolean(ensure()); },
+    enable,
     beep() { tone(880, 0.12, { type: 'square', volume: 0.07 }); },
     countdown() { tone(520, 0.18, { type: 'square', volume: 0.11 }); },
     go() { tone(1200, 0.45, { type: 'sawtooth', volume: 0.14, slideTo: 1800 }); },

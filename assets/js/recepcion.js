@@ -24,13 +24,16 @@
 
   function showReceipt(result) {
     displayedReceipt = result.id;
+    byId('receipt-card').hidden = false;
     if (result.pendiente) {
       byId('chk-result').textContent = 'Operación registrada. Los boletos serán válidos al acreditar el ingreso.';
       return;
     }
-    const text = result.nombre + ' · ' + result.tickets.length + ' boletos\n' + result.tickets.join('\n');
-    byId('chk-result').innerHTML = '<p><strong>' + esc(result.nombre) + '</strong> · ' + result.tickets.length +
-      ' boletos</p><p class="ticket-list">' + result.tickets.map(esc).join('<br>') +
+    const count = result.tickets.length;
+    const summary = count + (count === 1 ? ' boleto' : ' boletos');
+    const text = result.nombre + ' · ' + summary + '\n' + result.tickets.join('\n');
+    byId('chk-result').innerHTML = '<p><strong>' + esc(result.nombre) + '</strong> · ' + summary +
+      '</p><p class="ticket-list">' + result.tickets.map(esc).join('<br>') +
       '</p><p id="receipt-status"></p><button class="btn small" id="copy-receipt">Copiar comprobante</button>';
     byId('copy-receipt').onclick = function () { UI.copy(text); };
     paintMailStatus(Store.get());
@@ -43,51 +46,90 @@
     };
   }
 
-  function bind(id, action, payload) {
+  function bind(id, action, payload, reset) {
     const form = byId(id);
     form.addEventListener('submit', function (event) {
       UI.submit(event, action, payload(), true, function (result) {
         showReceipt(result);
         form.reset();
+        if (reset) reset();
+        if (form.getClientRects().length) byId('chk-result').focus();
         UI.toast('Operación registrada.');
       });
     });
   }
 
+  function setupTabs() {
+    const tablist = document.querySelector('.reception-tabs');
+    const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+
+    function selectTab(selected) {
+      tabs.forEach(function (tab) {
+        const active = tab === selected;
+        tab.setAttribute('aria-selected', active);
+        tab.tabIndex = active ? 0 : -1;
+        byId(tab.getAttribute('aria-controls')).hidden = !active;
+      });
+    }
+
+    tabs.forEach(function (tab) { tab.onclick = function () { selectTab(tab); }; });
+    tablist.addEventListener('keydown', function (event) {
+      const index = tabs.indexOf(event.target);
+      const last = tabs.length - 1;
+      const targets = { ArrowLeft: (index + last) % tabs.length, ArrowRight: (index + 1) % tabs.length,
+        Home: 0, End: last };
+      const next = tabs[targets[event.key]];
+      if (!next) return;
+      event.preventDefault();
+      selectTab(next);
+      next.focus();
+    });
+  }
+
   function render(state) {
-    UI.renderRanking('ranking-recepcion', Store.ranking());
+    if (state.ranking.length) UI.renderRanking('ranking-recepcion', Store.ranking());
+    else byId('ranking-recepcion').textContent = 'Marcador aún no disponible.';
     byId('count-asistentes').textContent = state.counts.attendees ?? '—';
     byId('count-donaciones').textContent = state.counts.donations ?? '—';
     byId('lista-asistentes').innerHTML = UI.table(['Estudiante', 'Cédula', 'Carrera', 'Acreditación'],
       state.attendees.filter(function (person) { return person.checked_in_at; }).map(function (person) {
         return [esc(person.nombre), esc(person.cedula), esc(Store.carrera(person.carrera).nombre), esc(UI.dateTime(person.checked_in_at))];
-      }));
+      }), true);
     byId('lista-donaciones').innerHTML = UI.table(['Donante', 'Carrera', 'Tipo', 'Cantidad', 'Puntos'],
       state.donations.map(function (item) {
         return [esc(item.nombre || item.cedula), esc(Store.carrera(item.carrera).nombre), esc(item.tipo), item.cantidad, item.puntos];
-      }));
+      }), true);
     byId('estado-dorados').innerHTML = state.qrClaims.map(function (gold) {
-      return '<p>QR Dorado ' + gold.slot + ' · ' + (gold.canjeado ? 'Canjeado' : 'Sin canjear') + '</p>';
+      return '<span class="badge ' + (gold.canjeado ? 'warn' : 'ok') + '">QR ' + gold.slot + ' · ' + (gold.canjeado ? 'Canjeado' : 'Sin canjear') + '</span>';
     }).join('');
     const sealed = state.sealed === true;
     byId('estado-cierre').textContent = sealed ? 'Datos sellados. El respaldo está disponible en escenario.' :
       state.recepcionCerrada ? 'Horario terminado. Sella los datos para generar el respaldo.' : 'Cierre programado a las 17:45.';
     byId('btn-cerrar').disabled = sealed || !state.recepcionCerrada;
-    document.querySelectorAll('#form-checkin button, #form-wall button, #form-donation button, #form-gold button')
-      .forEach(function (button) { button.closest('form').hidden = state.recepcionCerrada; });
+    byId('reception-workspace').hidden = state.recepcionCerrada;
     paintMailStatus(state);
   }
 
   function setup() {
+    setupTabs();
     const options = window.CIYA_DATA.carreras.map(function (career) {
       return '<option value="' + esc(career.id) + '">' + esc(career.nombre) + '</option>';
     }).join('');
     ['chk-carrera', 'chk-don-carrera', 'don-carrera'].forEach(function (id) { byId(id).innerHTML = options; });
     byId('chk-carrera').onchange = function () { byId('chk-don-carrera').value = value('chk-carrera'); };
+    const checkinDonation = byId('chk-donation-fields');
+    function revealCheckinDonation() {
+      checkinDonation.disabled = !value('chk-don-tipo');
+      checkinDonation.hidden = checkinDonation.disabled;
+    }
+    byId('chk-don-tipo').onchange = revealCheckinDonation;
     bind('form-checkin', 'checkin', function () {
       return { cedula: value('chk-cedula'), nombre: value('chk-nombre'), email: value('chk-email'),
         carrera: value('chk-carrera'), wall: value('chk-muro'), confirmed: checked('chk-confirm'),
         donation: value('chk-don-tipo') ? donation('chk-don-') : null };
+    }, function () {
+      checkinDonation.closest('details').open = false;
+      revealCheckinDonation();
     });
     bind('form-wall', 'checkin', function () {
       return { cedula: value('wall-cedula'), wall: value('wall-mensaje'), confirmOnly: true };
@@ -109,13 +151,14 @@
   }
 
   async function init() {
+    UI.initNav('recepcion');
     if (!await UI.requireAccount('recepcion', 'Panel de recepción')) {
       byId('locked').hidden = false;
       return;
     }
     byId('panel').hidden = false;
+    byId('reception-session').hidden = false;
     byId('logout').onclick = UI.logout;
-    UI.initNav('recepcion');
     await Store.init('recepcion');
     setup();
     Store.subscribe(render);

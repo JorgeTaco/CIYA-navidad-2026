@@ -17,6 +17,7 @@
     }
     const item = document.createElement('div');
     item.className = 'toast-item ' + (kind || 'ok');
+    item.setAttribute('role', kind === 'bad' ? 'alert' : 'status');
     item.textContent = message;
     box.appendChild(item);
     setTimeout(function () { item.classList.add('leaving'); }, 3200);
@@ -119,8 +120,26 @@
   function initNav(active) {
     const links = document.querySelectorAll('[data-nav]');
     links.forEach(function (link) {
-      if (link.dataset.nav === active) link.classList.add('active');
+      if (link.dataset.nav === active) {
+        link.classList.add('active');
+        link.setAttribute('aria-current', 'page');
+      }
     });
+    const menu = document.querySelector('.site-menu');
+    if (menu) {
+      menu.addEventListener('click', function (event) {
+        if (event.target.closest('a')) menu.open = false;
+      });
+      document.addEventListener('click', function (event) {
+        if (menu.open && !menu.contains(event.target)) menu.open = false;
+      });
+      document.addEventListener('keydown', function (event) {
+        if (menu.open && event.key === 'Escape') {
+          menu.open = false;
+          menu.querySelector('summary').focus();
+        }
+      });
+    }
     const status = document.getElementById('sync-status');
     if (status) {
       const paint = function () {
@@ -133,12 +152,16 @@
     }
   }
 
-  function table(headers, rows) {
+  function table(headers, rows, stacked = false) {
     if (!rows.length) return '<p class="empty">Sin registros todavía.</p>';
-    return '<div class="table-wrap"><table><thead><tr>' + headers.map(function (h) {
-      return '<th>' + escapeHtml(h) + '</th>';
-    }).join('') + '</tr></thead><tbody>' + rows.map(function (row) {
-      return '<tr>' + row.map(function (cell) { return '<td>' + cell + '</td>'; }).join('') + '</tr>';
+    const layout = stacked ? ' table-stack' : '';
+    return '<div class="table-wrap' + layout + '"><table role="table"><thead role="rowgroup"><tr role="row">' + headers.map(function (h) {
+      return '<th scope="col">' + escapeHtml(h) + '</th>';
+    }).join('') + '</tr></thead><tbody role="rowgroup">' + rows.map(function (row) {
+      return '<tr role="row">' + row.map(function (cell, index) {
+        const label = stacked ? '<span class="table-label" aria-hidden="true">' + escapeHtml(headers[index]) + '</span>' : '';
+        return '<td role="cell">' + label + '<span>' + cell + '</span></td>';
+      }).join('') + '</tr>';
     }).join('') + '</tbody></table></div>';
   }
 

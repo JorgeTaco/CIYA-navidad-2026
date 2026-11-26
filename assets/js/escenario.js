@@ -449,9 +449,9 @@
       });
     });
 
-    document.getElementById('audio-toggle').addEventListener('click', function () {
-      Sound.enable();
-      UI.toast('Audio del navegador habilitado');
+    document.getElementById('audio-toggle').addEventListener('click', async function () {
+      if (await Sound.enable()) UI.toast('Audio del navegador habilitado');
+      else UI.toast('El navegador no pudo activar el audio.', 'warn');
     });
     document.getElementById('cronometro-start').addEventListener('click', startCronometro);
     document.getElementById('cronometro-pause').addEventListener('click', stopCronometro);
