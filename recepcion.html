@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#061224">
+  <title>CIYA Navidad 2026 | Panel de recepción</title>
+  <link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html"><span class="brand-mark">CIYA</span><span>Navidad 2026</span></a>
+      <nav class="nav-links" aria-label="Navegación principal">
+        <a href="index.html">Portal</a>
+        <a href="qr.html">Ruta QR</a>
+        <a href="bases.html">Bases</a>
+        <a href="recepcion.html" data-nav="recepcion">Recepción</a>
+        <a href="escenario.html">Escenario</a>
+        <a href="admin.html">Admin</a>
+      </nav>
+      <span class="sync-pill" id="sync-status">Modo local</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="section-head">
+      <div><span class="kicker">Mesa de ingreso · delegados de Industrial</span><h1>Panel de Recepción y Donaciones</h1></div>
+      <button class="btn ghost small" id="logout">Cerrar sesión</button>
+    </div>
+    <div id="locked" hidden><p class="empty">Esta consola requiere PIN del equipo organizador.</p></div>
+
+    <div id="panel" hidden>
+      <section class="grid cols-2">
+        <form class="card" id="form-checkin">
+          <h2>Registro rápido de asistente</h2>
+          <div class="field"><label for="chk-nombre">Nombre completo</label><input id="chk-nombre" required autocomplete="name"></div>
+          <div class="row">
+            <div class="grow field"><label for="chk-cedula">Cédula</label><input id="chk-cedula" required inputmode="numeric"></div>
+            <div class="grow field"><label for="chk-carrera">Carrera</label><select id="chk-carrera" required></select></div>
+          </div>
+          <div class="field"><label for="chk-email">Correo para el comprobante</label><input id="chk-email" type="email" required></div>
+          <div class="field"><label for="chk-muro">Mensaje en el Muro de la Empatía (opcional)</label><input id="chk-muro" maxlength="140"></div>
+          <hr style="border:none;border-top:1px solid var(--line);margin:1rem 0">
+          <h3>Donación en el mismo flujo (opcional)</h3>
+          <div class="row">
+            <div class="grow field"><label for="don-tipo">Tipo de donación</label><select id="don-tipo"><option value="">Sin donación</option><option value="juguete">Juguete funcional (5 pts)</option><option value="caramelos">Funda de caramelos (2 pts)</option></select></div>
+            <div class="grow field"><label for="don-cantidad">Cantidad</label><input id="don-cantidad" type="number" min="1" value="1"></div>
+          </div>
+          <div class="field"><label for="don-carrera">Carrera beneficiada</label><select id="don-carrera" required></select></div>
+          <button class="btn primary wide" type="submit">Registrar ingreso / donación y generar boletos</button>
+        </form>
+
+        <div>
+          <div class="card">
+            <h2>Validación de QR Dorados</h2>
+            <p class="muted">Tres códigos únicos. Cada uno se desactiva al ser canjeado por el primer estudiante presente. Máximo un QR Dorado por estudiante y +3 boletos.</p>
+            <div class="field"><label for="oro-codigo">Código de canje</label><select id="oro-codigo"></select></div>
+            <div class="field"><label for="oro-cedula">Cédula del estudiante</label><input id="oro-cedula" inputmode="numeric" required></div>
+            <label class="row" style="font-weight:400;align-items:flex-start"><input id="oro-declaracion" type="checkbox" style="margin-top:0.25rem"><span>No soy integrante del equipo de Software ni de la Comisión Organizadora con información sobre las ubicaciones.</span></label>
+            <button class="btn primary wide" id="btn-oro" style="margin-top:0.7rem">Validar y asignar boletos</button>
+            <div id="estado-dorados" style="margin-top:1rem"></div>
+          </div>
+          <div class="card" style="margin-top:1rem">
+            <h3>Comprobante rápido</h3>
+            <div id="chk-result"><p class="empty">El comprobante aparecerá aquí.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><div><span class="kicker">En vivo</span><h2>Copa Solidaria Inter-Carreras</h2></div><button class="btn small" id="export-ranking">Descargar ranking CSV</button></div>
+        <div class="card" id="ranking-recepcion"></div>
+      </section>
+
+      <section class="section grid cols-2">
+        <div class="card"><div class="section-head"><h3>Asistentes registrados</h3><span class="badge" id="count-asistentes">0</span></div><div id="lista-asistentes"></div></div>
+        <div class="card"><div class="section-head"><h3>Donaciones registradas</h3><span class="badge" id="count-donaciones">0</span></div><div id="lista-donaciones"></div></div>
+      </section>
+
+      <section class="section card">
+        <div class="row between"><div><h3>Cierre de recepción</h3><p class="muted">El cierre formal es a las 17:45. Al cerrar, la consola de escenario puede descargar el respaldo local JSON de la ruleta y el ranking.</p></div><button class="btn danger" id="btn-cerrar">Marcar cierre de recepción</button></div>
+        <p id="estado-cierre"></p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">CIYA Navidad 2026 · Panel operativo de recepción</footer>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/sound.js"></script>
+  <script src="assets/js/recepcion.js"></script>
+</body>
+</html>

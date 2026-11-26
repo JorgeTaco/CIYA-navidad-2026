@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#061224">
+  <title>CIYA Navidad 2026 | Panel administrativo</title>
+  <link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html"><span class="brand-mark">CIYA</span><span>Navidad 2026</span></a>
+      <nav class="nav-links" aria-label="Navegación principal">
+        <a href="index.html">Portal</a>
+        <a href="bases.html">Bases</a>
+        <a href="recepcion.html">Recepción</a>
+        <a href="escenario.html">Escenario</a>
+        <a href="admin.html" data-nav="admin">Admin</a>
+      </nav>
+      <span class="sync-pill" id="sync-status">Modo local</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="section-head">
+      <div><span class="kicker">Docentes organizadores y Asociación Estudiantil</span><h1>Curaduría y Evaluación</h1></div>
+      <button class="btn ghost small" id="logout">Cerrar sesión</button>
+    </div>
+    <div id="locked" hidden><p class="empty">Esta vista privada requiere PIN del equipo organizador.</p></div>
+
+    <div id="panel" hidden>
+      <section class="section">
+        <div class="section-head"><div><h2>Buzón “Compilando Deseos 2027”</h2><p class="muted">Revisa, aprueba o descarta las frases. Las aprobadas podrán proyectarse en la chocolatada y exportarse para redes de CIYA en enero.</p></div>
+          <div class="row"><button class="btn small" id="export-aprobados">Exportar aprobados CSV</button><button class="btn small ghost" id="export-todos">Exportar todos CSV</button></div>
+        </div>
+        <div class="card"><div id="lista-deseos"></div></div>
+      </section>
+
+      <section class="section grid cols-2">
+        <div class="card">
+          <h2>Evaluación de Puertas Decoradas</h2>
+          <p class="muted">Jurado: viernes 4 de diciembre, 15:30 – 16:45. Matriz de 100 puntos.</p>
+          <div class="field"><label for="puerta-carrera">Carrera evaluada</label><select id="puerta-carrera"></select></div>
+          <div id="puerta-criterios"></div>
+          <div class="field"><label for="puerta-notas">Observaciones</label><textarea id="puerta-notas" maxlength="400"></textarea></div>
+          <button class="btn primary wide" id="guardar-puerta">Guardar evaluación</button>
+        </div>
+        <div class="card"><h3>Resultado de puertas</h3><div id="ranking-puertas"></div></div>
+      </section>
+
+      <section class="section card">
+        <h2>Calificaciones de villancicos registradas</h2>
+        <div id="lista-scores"></div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">CIYA Navidad 2026 · Panel administrativo privado</footer>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/sound.js"></script>
+  <script src="assets/js/admin.js"></script>
+</body>
+</html>

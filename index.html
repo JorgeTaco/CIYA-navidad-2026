@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#061224">
+  <title>CIYA Navidad 2026 | Portal estudiantil</title>
+  <link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html"><span class="brand-mark">CIYA</span><span>Navidad 2026</span></a>
+      <nav class="nav-links" aria-label="Navegación principal">
+        <a href="#inicio" data-nav="inicio">Inicio</a>
+        <a href="#linterna" data-nav="linterna">Linterna</a>
+        <a href="#registro" data-nav="registro">Registro</a>
+        <a href="#villancicos" data-nav="villancicos">Villancicos</a>
+        <a href="#buzon" data-nav="buzon">Buzón 2027</a>
+        <a href="#muro" data-nav="muro">Muro</a>
+        <a href="qr.html">Ruta QR</a>
+        <a href="bases.html">Bases</a>
+        <a href="recepcion.html">Recepción</a>
+        <a href="escenario.html">Escenario</a>
+        <a href="admin.html">Admin</a>
+      </nav>
+      <span class="sync-pill" id="sync-status">Modo local</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero" id="inicio">
+      <span class="kicker">Viernes 4 de diciembre de 2026</span>
+      <h1>CIYA 4.0: ingenio que ilumina la Navidad</h1>
+      <p>Cinco carreras, una energía solidaria. Regístrate en el hall, apoya la Copa Solidaria, busca los QR Dorados y participa en el Gran Sorteo Digital desde tu celular, sin instalar nada.</p>
+      <div class="row">
+        <a class="btn primary" href="#linterna">Abrir Mar de Linternas</a>
+        <a class="btn ghost" href="bases.html">Ver bases oficiales</a>
+      </div>
+      <div class="row" style="margin-top:1.4rem">
+        <span class="badge">Hall principal CIYA</span>
+        <span class="badge">Respuesta web desde 360 px</span>
+        <span class="badge warn">Costo $0</span>
+      </div>
+    </section>
+
+    <section class="grid auto" aria-label="Resumen en vivo">
+      <div class="card"><div class="label">Asistentes registrados</div><div class="stat" id="stat-asistentes">0</div></div>
+      <div class="card"><div class="label">Boletos emitidos</div><div class="stat" id="stat-boletos">0</div></div>
+      <div class="card"><div class="label">Grupos de villancicos</div><div class="stat" id="stat-grupos">0</div></div>
+      <div class="card"><div class="label">Deseos 2027 enviados</div><div class="stat" id="stat-deseos">0</div></div>
+    </section>
+
+    <section class="section" id="linterna">
+      <div class="section-head">
+        <div><span class="kicker">Acto central · 18:25 – 18:55</span><h2>Mar de Linternas</h2></div>
+        <span class="muted">Coloca tu mensaje y elige tu carrera. Todo se ejecuta en tu navegador.</span>
+      </div>
+      <div class="grid cols-2">
+        <div>
+          <div class="lantern-stage" id="lantern-stage">
+            <div class="lantern-message" id="lantern-message">Feliz Navidad CIYA</div>
+            <div class="lantern-meta"><span id="lantern-carrera">Selecciona tu carrera</span><span>Modo local · sin Wi-Fi requerido tras la carga</span></div>
+            <button class="btn small ghost lantern-exit" id="lantern-exit" hidden>Salir de pantalla completa</button>
+          </div>
+          <div class="row" style="margin-top:0.8rem">
+            <button class="btn primary" id="lantern-fullscreen">Pantalla completa</button>
+            <button class="btn" id="lantern-blink">Parpadeo: activo</button>
+            <button class="btn ghost" id="lantern-sync">Sincronizar destello</button>
+          </div>
+          <p class="hint">Proyecta el QR de esta página al menos 5 minutos antes del apagón (18:20) para precargar la vista en los navegadores. Comparte el enlace: <button class="btn small ghost" id="copy-url">Copiar URL</button></p>
+        </div>
+        <div class="card">
+          <h3>Configura tu linterna</h3>
+          <div class="field"><label>Carrera</label><div class="chips" id="linterna-carreras"></div></div>
+          <div class="field"><label>Frases predefinidas</label><div class="chips" id="linterna-frases"></div></div>
+          <div class="field"><label for="linterna-custom">Mensaje propio (máx. 60 caracteres)</label><input id="linterna-custom" maxlength="60" placeholder="Escribe tu mensaje navideño"></div>
+          <div class="card" style="background:rgba(255,255,255,0.04)">
+            <div class="label">Vista previa</div>
+            <p id="lantern-preview" style="font-weight:800;margin:0.4rem 0 0">Feliz Navidad CIYA</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="registro">
+      <div class="section-head"><div><span class="kicker">Recepción · 08:00 – 17:45</span><h2>Registro para el Gran Sorteo</h2></div></div>
+      <div class="grid cols-2">
+        <form class="card" id="form-registro">
+          <div class="field"><label for="reg-nombre">Nombre completo</label><input id="reg-nombre" required autocomplete="name"></div>
+          <div class="field"><label for="reg-cedula">Cédula (identificador único)</label><input id="reg-cedula" required inputmode="numeric" autocomplete="off"></div>
+          <div class="field"><label for="reg-email">Correo electrónico</label><input id="reg-email" type="email" required autocomplete="email"></div>
+          <div class="field"><label for="reg-carrera">Carrera</label><select id="reg-carrera" required></select></div>
+          <div class="field"><label for="reg-muro">Mensaje para el Muro de la Empatía (opcional, +1 boleto)</label><textarea id="reg-muro" maxlength="140" placeholder="Escribe tu mensaje de empatía"></textarea></div>
+          <button class="btn primary wide" type="submit">Registrar ingreso y generar boletos</button>
+          <p class="hint">Cada cédula y cada correo solo pueden registrarse una vez. El comprobante puede enviarse a tu correo mediante tu app de correo.</p>
+        </form>
+        <div class="card">
+          <h3>Comprobante</h3>
+          <div id="reg-result"><p class="empty">Completa el formulario para ver tus boletos.</p></div>
+          <h3 style="margin-top:1.2rem">Cómo se obtienen boletos</h3>
+          <table><tbody>
+            <tr><td>Ingreso presencial con mensaje en el Muro</td><td><strong>1</strong></td></tr>
+            <tr><td>Juguete funcional donado</td><td><strong>5</strong></td></tr>
+            <tr><td>Funda de caramelos donada</td><td><strong>2</strong></td></tr>
+            <tr><td>Cada QR Dorado canjeado</td><td><strong>3</strong></td></tr>
+            <tr><td>Mensaje adicional en el Muro de la Empatía</td><td><strong>1</strong></td></tr>
+          </tbody></table>
+          <p class="hint" style="margin-top:0.8rem">Un mismo estudiante puede ganar un solo premio. El ganador tiene 45 segundos para presentarse con su identificación.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="villancicos">
+      <div class="section-head"><div><span class="kicker">Actividad I · 17:45 – 18:25</span><h2>Concurso de Villancicos “CIYA tiene Talento”</h2></div></div>
+      <div class="grid cols-2">
+        <form class="card" id="form-villancicos">
+          <div class="field"><label for="vil-grupo">Nombre artístico del grupo</label><input id="vil-grupo" required></div>
+          <div class="field"><label for="vil-integrantes">Nómina de integrantes (uno por línea)</label><textarea id="vil-integrantes" required placeholder="Nombre 1&#10;Nombre 2"></textarea></div>
+          <div class="field"><label>Carrera(s) representada(s)</label><div class="chips" id="vil-carreras"></div></div>
+          <div class="field"><label for="vil-cancion">Obra musical seleccionada</label><input id="vil-cancion" required></div>
+          <div class="field"><label for="vil-categoria">Modalidad</label><select id="vil-categoria" required></select></div>
+          <button class="btn primary wide" type="submit">Inscribir grupo</button>
+          <p class="hint">Inscripción oficial abierta hasta el jueves 3 de diciembre de 2026, 17:30. Evaluación: 30% creatividad, 30% musicalidad, 20% puesta en escena y 20% aplausómetro.</p>
+        </form>
+        <div class="card"><h3>Orden de presentación</h3><div id="lista-grupos"></div></div>
+      </div>
+    </section>
+
+    <section class="section" id="buzon">
+      <div class="section-head"><div><span class="kicker">QR junto al Rincón Instagrameable</span><h2>Buzón “Compilando Deseos 2027”</h2></div></div>
+      <div class="grid cols-2">
+        <form class="card" id="form-deseo">
+          <div class="field"><label for="des-nombre">Nombre del autor</label><input id="des-nombre" required></div>
+          <div class="field"><label for="des-rol">Rol</label><select id="des-rol" required><option>Estudiante</option><option>Docente</option><option>Personal</option></select></div>
+          <div class="field"><label for="des-carrera">Carrera / Área</label><input id="des-carrera" required></div>
+          <div class="field"><label for="des-frase">Frase inspiradora o meta para 2027</label><textarea id="des-frase" maxlength="280" required></textarea></div>
+          <button class="btn primary wide" type="submit">Enviar al buzón</button>
+          <p class="hint">Las frases quedan pendientes de aprobación y podrán proyectarse durante la chocolatada final.</p>
+        </form>
+        <div class="card"><h3>Estado de tus envíos</h3><div id="deseo-estado"><p class="empty">Aún no envías frases.</p></div><div class="frases-aprobadas" id="frases-aprobadas" style="margin-top:1rem"></div></div>
+      </div>
+    </section>
+
+    <section class="section" id="muro">
+      <div class="section-head"><div><span class="kicker">Boleto base del sorteo</span><h2>Muro de la Empatía</h2></div></div>
+      <div class="grid cols-2">
+        <form class="card" id="form-muro">
+          <div class="field"><label for="muro-cedula">Cédula del asistente</label><input id="muro-cedula" required inputmode="numeric"></div>
+          <div class="field"><label for="muro-carrera">Carrera</label><select id="muro-carrera" required></select></div>
+          <div class="field"><label for="muro-mensaje">Mensaje de empatía</label><textarea id="muro-mensaje" maxlength="140" required></textarea></div>
+          <button class="btn primary wide" type="submit">Publicar mensaje (+1 boleto)</button>
+        </form>
+        <div class="card"><h3>Últimos mensajes</h3><div id="lista-muro"></div></div>
+      </div>
+    </section>
+
+    <section class="section" id="puertas">
+      <div class="section-head"><div><span class="kicker">Actividad II</span><h2>Puertas Decoradas por Carrera</h2></div></div>
+      <div class="card">
+        <div class="grid cols-2">
+          <div><h3>Espacios asignados</h3><div id="espacios-puertas"></div></div>
+          <div><h3>Matriz de evaluación (100 puntos)</h3><div id="criterios-puertas"></div><p class="hint">Instalación hasta las 15:00. Jurado: 15:30 – 16:45. Se prioriza reciclaje, bajo costo y protección de bienes institucionales.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="ranking">
+      <div class="section-head"><div><span class="kicker">Actividad III · en vivo</span><h2>Copa Solidaria Inter-Carreras</h2></div><a class="btn small ghost" href="escenario.html">Ver pantalla gigante</a></div>
+      <div class="card" id="ranking-portal"></div>
+    </section>
+  </main>
+
+  <footer class="footer">CIYA Navidad 2026 · Plataforma web responsive de costo cero · Desarrollada por Carrera de Sistemas y Software</footer>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/sound.js"></script>
+  <script src="assets/js/portal.js"></script>
+</body>
+</html>

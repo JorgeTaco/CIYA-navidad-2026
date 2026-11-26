@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#061224">
+  <title>CIYA Navidad 2026 | Ruta de Códigos QR</title>
+  <link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html"><span class="brand-mark">CIYA</span><span>Navidad 2026</span></a>
+      <nav class="nav-links" aria-label="Navegación principal">
+        <a href="index.html">Portal</a>
+        <a href="qr.html" data-nav="qr">Ruta QR</a>
+        <a href="bases.html">Bases</a>
+        <a href="recepcion.html">Recepción</a>
+        <a href="escenario.html">Escenario</a>
+        <a href="admin.html">Admin</a>
+      </nav>
+      <span class="sync-pill" id="sync-status">Modo local</span>
+    </div>
+  </header>
+
+  <main class="container" id="ruta-index">
+    <div class="hero">
+      <span class="kicker">Gradas, pasillos, bar, laboratorios y baños</span>
+      <h1>Ruta de Códigos QR</h1>
+      <p>Mensajes de los docentes, trivias relámpago, memes de ingeniería y tres QR Dorados con premio instantáneo. Todos los códigos sirven además como puerta de entrada al Buzón 2027 y al Modo Linterna.</p>
+      <div class="row"><a class="btn primary" href="index.html#linterna">Abrir Modo Linterna</a><a class="btn ghost" href="index.html#buzon">Ir al Buzón 2027</a></div>
+    </div>
+
+    <section class="section">
+      <div class="section-head"><div><h2>Mensajes navideños</h2><p class="muted">Cercanía docente con guiños técnicos de las cinco carreras.</p></div></div>
+      <div class="grid auto" id="lista-mensajes"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><div><h2>Trivias relámpago</h2><p class="muted">Elige una opción y recibe la respuesta inmediata en pantalla.</p></div></div>
+      <div class="grid auto" id="lista-trivias"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><div><h2>Memes de la Ruta QR</h2><p class="muted">Plantillas listas para armar en cinco minutos con bajo costo.</p></div></div>
+      <div class="grid auto" id="lista-memes"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><div><h2>QR Dorados</h2><p class="muted">Tres códigos únicos, válidos solo para el primer estudiante que los canjee en la Mesa de Recepción antes de las 17:45.</p></div></div>
+      <div class="grid cols-3" id="lista-dorados"></div>
+    </section>
+
+    <section class="section card">
+      <h2>Impresión de la ruta</h2>
+      <p class="muted">Cada tarjeta enlaza a una vista ligera con el mismo contenido. Genera los códigos QR apuntando a la URL publicada de cada vista (<code>qr.html?id=…</code>) y colócalos en los puntos sugeridos. No se requiere instalación ni conexión continua para la linterna.</p>
+      <div class="row"><button class="btn" onclick="window.print()">Imprimir listado</button><button class="btn ghost" id="copiar-base">Copiar URL base de la ruta</button></div>
+    </section>
+  </main>
+
+  <main class="container narrow" id="ruta-detalle" hidden></main>
+
+  <footer class="footer">CIYA Navidad 2026 · Ruta de Códigos QR</footer>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/sound.js"></script>
+  <script src="assets/js/qr.js"></script>
+</body>
+</html>
