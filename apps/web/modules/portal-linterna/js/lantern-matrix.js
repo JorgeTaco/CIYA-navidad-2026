@@ -134,6 +134,15 @@
     return { mode: 'scroll', lines: [compiled.columns], capacity };
   }
 
+  function mixWithWhite(color, fraction) {
+    const rgb = Number.parseInt(color.slice(1), 16);
+    const channels = [16, 8, 0].map(function (shift) {
+      const channel = (rgb >> shift) & 255;
+      return Math.round(channel + (255 - channel) * fraction);
+    });
+    return 'rgb(' + channels.join(', ') + ')';
+  }
+
   function create(canvas, onStateChange) {
     const context = canvas.getContext('2d');
     if (!context) return null;
@@ -214,9 +223,10 @@
         context.fill();
       }
 
-      fillLights(dotSpace * 0.55, color, 0.37);
-      fillLights(dotSpace * 0.37, color, 1);
-      fillLights(dotSpace * 0.18, '#fffdf2', 0.92);
+      const lightTone = mixWithWhite(color, 0.36);
+      fillLights(dotSpace * 0.55, lightTone, 0.42);
+      fillLights(dotSpace * 0.37, lightTone, 1);
+      fillLights(dotSpace * 0.18, mixWithWhite(color, 0.82), 1);
       context.globalAlpha = 1;
     }
 
