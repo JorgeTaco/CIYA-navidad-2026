@@ -117,9 +117,9 @@ exportar antes, porque la curaduría puede realizarse apenas se reciben las fras
 | RF | Cumplimiento | Evidencia |
 | --- | --- | --- |
 | RF-01 Acceso inmediato sin instalación | Sí | Sitio estático servido por URL/QR desde GitHub Pages; HTML/CSS/JS puro, sin build, `manifest`, service worker ni tiendas de aplicaciones. |
-| RF-02 Selección de carrera | Sí | Las 5 carreras están en `apps/web/shared/js/data.js:9` con `color` e `icono`; `applyLantern()` aplica `--lantern-color` y muestra el icono en `#lantern-carrera`. |
-| RF-03 Mensajes personalizables | Sí | Frases predefinidas (“Feliz Navidad CIYA”, “Orgullo Industrial”, “Compilando el 2027”) y campo libre de 60 caracteres; tipografía `clamp(2rem, 9vw, 7rem)`, halo de brillo fuerte, alto contraste y animación `lanternPulse` de 1,6 s con botón “Sincronizar destello”. |
-| RF-04 Pantalla completa y ejecución local | Sí | El botón “Pantalla completa” usa `requestFullscreen()` con vista CSS de respaldo. En `portal.html?modo=linterna#linterna` (o `index.html?modo=linterna#linterna`), `init()` termina antes de `Store.init()`: color, carrera, mensaje y parpadeo se resuelven solo en JS/CSS del navegador. |
+| RF-02 Selección de carrera | Sí | Los focos del letrero y su rótulo usan el color de la carrera seleccionada. |
+| RF-03 Mensajes personalizables | Sí | Frases predefinidas o texto libre de hasta 60 caracteres en una matriz de focos. El formato automático sigue el giro del dispositivo. El formato horizontal usa una línea y el vertical aprovecha hasta tres. Los mensajes que exceden el espacio se desplazan con pausa o se muestran por partes si el dispositivo solicita movimiento reducido. |
+| RF-04 Pantalla completa y ejecución local | Sí | El botón “Pantalla completa” usa `requestFullscreen()` con vista CSS de respaldo. El QR `portal.html?modo=linterna#linterna` abre el letrero y el navegador dibuja los focos con recursos locales. |
 | RF-05 Ruta de códigos QR | Sí | `qr.html` y `qr.js` sirven mensajes, trivias y memes; `ciya.gold` tiene 3 ranuras y admin genera las URLs `qr.html#dorado=<secret>` para los QR Dorados. |
 
 Matiz de RF-04: al no existir service worker —la PWA fue excluida del SRS—, la

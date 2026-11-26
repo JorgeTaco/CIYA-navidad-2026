@@ -64,6 +64,9 @@ def main():
         if page.name == "portal.html":
             try:
                 portal_idx = inspector.scripts.index("modules/portal-linterna/js/portal.js")
+                matrix_idx = inspector.scripts.index("modules/portal-linterna/js/lantern-matrix.js")
+                if matrix_idx > portal_idx:
+                    errors.append("portal.html: lantern-matrix.js debe cargarse antes que portal.js")
                 for child in (
                     "modules/formularios-datos/js/inscripciones.js",
                     "modules/formularios-datos/js/buzon.js",

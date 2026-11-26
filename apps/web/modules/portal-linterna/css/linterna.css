@@ -1,68 +1,104 @@
 .lantern-stage {
   position: relative;
-  min-height: 54vh;
-  border-radius: 24px;
+  min-inline-size: 0;
+  display: grid;
+  gap: .65rem;
+  padding: .7rem;
   border: 1px solid var(--line);
-  overflow: hidden;
+  border-radius: 18px;
+  background: #090f13;
+}
+
+.lantern-board {
+  position: relative;
   display: grid;
   place-items: center;
-  text-align: center;
-  padding: 1.4rem;
-  background:
-    radial-gradient(circle at 50% 45%, #fff 0%, var(--lantern-color, #ffd166) 24%, #07121f 78%),
-    #040a14;
-  box-shadow: inset 0 0 90px 24px var(--lantern-color, #ffd166);
-  transition: background 0.35s ease;
-  isolation: isolate;
-}
-.lantern-stage::before {
-  content: "";
-  position: absolute;
-  inset: -18%;
-  z-index: -1;
-  background: radial-gradient(circle at 50% 45%, var(--lantern-color, #ffd166) 0%, transparent 62%);
-  filter: blur(36px);
-  opacity: 0.85;
+  min-inline-size: 0;
+  block-size: clamp(7rem, 18vw, 12rem);
+  border: 1px solid #293237;
+  border-radius: 12px;
+  background: #05090b;
 }
 
-.lantern-stage.live { position: fixed; inset: 0; z-index: 80; min-height: 100vh; border-radius: 0; border: none; }
-.lantern-stage .lantern-message {
-  position: relative;
-  z-index: 1;
-  font-size: clamp(2rem, 9vw, 7rem);
+.lantern-stage[data-format="vertical"] .lantern-board {
+  block-size: clamp(12rem, 35vw, 17rem);
+}
+
+@media (orientation: portrait) {
+  .lantern-stage[data-format="auto"] .lantern-board {
+    block-size: clamp(12rem, 35vw, 17rem);
+  }
+}
+
+#lantern-canvas {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  min-block-size: 0;
+}
+
+.lantern-message {
+  margin: 0;
+  padding: .7rem;
+  color: var(--lantern-color, #ffd166);
+  font-size: clamp(1.7rem, 7vw, 4rem);
   font-weight: 900;
-  letter-spacing: -0.05em;
-  text-wrap: balance;
-  color: #fff;
-  text-shadow: 0 0 10px #fff, 0 0 34px var(--lantern-color, #ffd166), 0 0 78px var(--lantern-color, #ffd166), 0 4px 18px rgba(0, 0, 0, 0.55);
+  overflow-wrap: anywhere;
+  text-align: center;
 }
-.lantern-stage.blink .lantern-message { animation: lanternPulse 1.6s ease-in-out infinite; }
-.lantern-stage.blink::before { animation: lanternGlow 1.6s ease-in-out infinite; }
-.lantern-stage .lantern-meta { position: absolute; z-index: 1; bottom: 1.2rem; left: 1rem; right: 1rem; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font-size: 0.8rem; text-shadow: 0 2px 8px #000; }
-.lantern-exit { position: absolute; top: 1rem; right: 1rem; z-index: 2; }
 
-@keyframes lanternPulse { 0%, 100% { opacity: 1; transform: scale(1); filter: brightness(1.15); } 50% { opacity: 0.86; transform: scale(1.02); filter: brightness(1.45); } }
-@keyframes lanternGlow { 0%, 100% { opacity: 0.75; transform: scale(1); } 50% { opacity: 1; transform: scale(1.1); } }
+.lantern-message.is-drawn {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
 
-.lantern-stage.live { min-height: 100%; min-height: 100dvh; }
-.lantern-message { overflow-wrap: anywhere; }
+.lantern-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem .75rem;
+  justify-content: center;
+}
+
+.lantern-meta { color: var(--lantern-color, #ffd166); font-size: .9rem; }
+.lantern-progress { color: var(--muted); font-size: .85rem; }
+.lantern-exit { justify-self: end; background: #090f13; }
+.lantern-bar .btn, .lantern-exit { min-height: 44px; }
+
+.lantern-stage.live {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  inline-size: 100%;
+  block-size: 100vh;
+  block-size: 100dvh;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  padding: max(.55rem, env(safe-area-inset-top)) max(.55rem, env(safe-area-inset-right))
+    max(.55rem, env(safe-area-inset-bottom)) max(.55rem, env(safe-area-inset-left));
+  border: 0;
+  border-radius: 0;
+  background: #030607;
+}
+
+.lantern-stage.live .lantern-board {
+  block-size: auto;
+  min-block-size: 0;
+  border-color: #151b1e;
+}
 
 .lantern-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.18fr); gap: 1rem; align-items: start; }
 .lantern-setup fieldset, #chk-donation-fields { margin: 0; padding: 0; border: 0; min-inline-size: 0; }
-.lantern-setup fieldset + fieldset { margin-top: 1.2rem; }
+.lantern-setup fieldset + fieldset, .lantern-format { margin-top: 1.2rem; }
 .lantern-setup legend { margin-bottom: .6rem; padding: 0; font-weight: 750; }
 .lantern-setup .chip { min-height: 44px; }
 .custom-message { margin-top: .8rem; }
 .lantern-layout .label { margin-bottom: .45rem; }
-.lantern-layout .lantern-stage { min-height: clamp(10rem, 34vh, 16rem); background: radial-gradient(circle at 50% 45%, #fff 0%, var(--lantern-color, #ffd166) 28%, #07121f 82%), #040a14; }
-.lantern-layout .lantern-stage:not(.live) .lantern-message { font-size: clamp(1.7rem, 6vw, 3.5rem); }
-.lantern-layout .lantern-stage .lantern-message { min-width: 0; text-shadow: 0 0 8px #fff, 0 0 26px var(--lantern-color, #ffd166), 0 0 54px var(--lantern-color, #ffd166); }
-.lantern-layout .lantern-stage .lantern-meta { justify-content: center; bottom: max(.65rem, env(safe-area-inset-bottom)); }
-.lantern-layout .lantern-stage.live { min-height: 100%; min-height: 100dvh; }
-.lantern-exit { top: max(1rem, env(safe-area-inset-top)); background: #07151c; }
-.lantern-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; margin: .7rem 0; }
-.lantern-controls .primary { grid-column: 1 / -1; }
+.lantern-controls { display: grid; gap: .55rem; margin: .7rem 0; }
 .lantern-controls .btn { min-height: 44px; padding-inline: .5rem; }
-#lantern-blink[aria-pressed="true"] { border-color: var(--green); color: var(--green); }
+#copy-url { justify-self: center; }
 .lantern-page .site-menu { display: none; }
 .lantern-page .section { margin-top: .5rem; }

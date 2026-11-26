@@ -3,7 +3,8 @@
   const Store = window.CIYA_STORE;
   const Data = window.CIYA_DATA;
   const esc = UI.escapeHtml;
-  const linterna = { carrera: 'sistemas', frase: 'Feliz Navidad CIYA', blink: true };
+  const linterna = { carrera: 'sistemas', frase: 'Feliz Navidad CIYA', orientacion: 'auto' };
+  let lanternMatrix;
 
   function template() {
     return `
@@ -48,22 +49,37 @@
               <legend>Mensaje</legend>
               <div class="chips" id="linterna-frases"></div>
               <label class="custom-message" for="linterna-custom">O escribe tu mensaje (hasta 60 caracteres)</label>
-              <input id="linterna-custom" maxlength="60" placeholder="Tu mensaje navideño">
+              <input id="linterna-custom" maxlength="60" placeholder="Tu mensaje navideño" aria-describedby="linterna-feedback">
+              <p class="hint" id="linterna-feedback" role="status" hidden></p>
             </fieldset>
+            <div class="lantern-format">
+              <label for="linterna-format">Formato del letrero</label>
+              <select id="linterna-format">
+                <option value="auto">Automático (según el giro)</option>
+                <option value="horizontal">Horizontal (una línea)</option>
+                <option value="vertical">Vertical (varias líneas)</option>
+              </select>
+            </div>
           </div>
           <div>
             <p class="label">Vista previa</p>
             <div class="lantern-stage" id="lantern-stage">
-              <div class="lantern-message" id="lantern-message">Feliz Navidad CIYA</div>
-              <div class="lantern-meta" id="lantern-carrera">Selecciona tu carrera</div>
               <button class="btn small ghost lantern-exit" id="lantern-exit" hidden>Salir de pantalla completa</button>
+              <div class="lantern-board">
+                <canvas id="lantern-canvas" aria-hidden="true" hidden></canvas>
+                <p class="lantern-message" id="lantern-message">Feliz Navidad CIYA</p>
+              </div>
+              <div class="lantern-bar">
+                <span class="lantern-meta" id="lantern-carrera">Selecciona tu carrera</span>
+                <span class="lantern-progress" id="lantern-part" role="status" hidden></span>
+                <button class="btn small" id="lantern-pause" hidden>Pausar</button>
+                <button class="btn small" id="lantern-next" hidden>Siguiente parte</button>
+              </div>
             </div>
             <div class="lantern-controls">
               <button class="btn primary wide" id="lantern-fullscreen">Pantalla completa</button>
-              <button class="btn" id="lantern-blink" aria-pressed="true">Parpadeo</button>
-              <button class="btn ghost" id="lantern-sync">Sincronizar destello</button>
+              <button class="btn small ghost" id="copy-url">Copiar enlace de la linterna</button>
             </div>
-            <button class="btn small ghost" id="copy-url">Copiar enlace de la linterna</button>
           </div>
         </div>
       </section>
@@ -135,26 +151,16 @@
     const meta = document.getElementById('lantern-carrera');
     const carrera = Store.carrera(linterna.carrera);
     stage.style.setProperty('--lantern-color', carrera.color);
+    stage.dataset.format = linterna.orientacion;
     message.textContent = linterna.frase;
     meta.textContent = carrera.icono + ' ' + carrera.nombre;
-    if (stage.classList.contains('blink') !== linterna.blink) syncLantern();
-    document.getElementById('lantern-blink').setAttribute('aria-pressed', linterna.blink);
+    if (lanternMatrix) lanternMatrix.show(linterna.frase, carrera.color, linterna.orientacion);
     document.querySelectorAll('#linterna-carreras .chip, #linterna-frases .chip').forEach(function (button) {
       const selected = button.dataset.id === (button.parentElement.id === 'linterna-carreras' ? linterna.carrera : linterna.frase);
       button.classList.toggle('active', selected);
       button.setAttribute('aria-pressed', selected);
     });
     try { localStorage.setItem('ciya2026:linterna', JSON.stringify(linterna)); } catch (error) { console.warn(error); }
-  }
-
-  function syncLantern() {
-    const stage = document.getElementById('lantern-stage');
-    const message = document.getElementById('lantern-message');
-    stage.classList.remove('blink');
-    if (!linterna.blink) return;
-    void message.offsetWidth;
-    message.style.animationDelay = -((Date.now() % 1600) / 1000) + 's';
-    stage.classList.add('blink');
   }
 
   function chooseLanternCarrera(id) {
@@ -174,7 +180,7 @@
       if (saved && typeof saved.frase === 'string' && Data.carreras.some(function (career) { return career.id === saved.carrera; })) {
         linterna.carrera = saved.carrera;
         linterna.frase = saved.frase.trim().slice(0, 60) || Data.frasesLinterna[0];
-        linterna.blink = saved.blink !== false;
+        if (['auto', 'horizontal', 'vertical'].includes(saved.orientacion)) linterna.orientacion = saved.orientacion;
       }
     } catch (error) { console.warn(error); }
 
@@ -190,18 +196,37 @@
       applyLantern();
     });
 
-    document.getElementById('lantern-blink').addEventListener('click', function () {
-      linterna.blink = !linterna.blink;
+    const format = document.getElementById('linterna-format');
+    format.value = linterna.orientacion;
+    format.addEventListener('change', function () {
+      linterna.orientacion = format.value;
       applyLantern();
-    });
-
-    document.getElementById('lantern-sync').addEventListener('click', function () {
-      syncLantern();
-      UI.toast(linterna.blink ? 'Destello alineado con el reloj del dispositivo.' : 'Activa el parpadeo para ver el destello.');
     });
 
     const stage = document.getElementById('lantern-stage');
     const exit = document.getElementById('lantern-exit');
+    const canvas = document.getElementById('lantern-canvas');
+    const pause = document.getElementById('lantern-pause');
+    const next = document.getElementById('lantern-next');
+    const progress = document.getElementById('lantern-part');
+    const feedback = document.getElementById('linterna-feedback');
+    lanternMatrix = window.CIYA_LANTERN_MATRIX.create(canvas, function (state) {
+      stage.dataset.orientation = state.orientation;
+      pause.hidden = state.mode !== 'scroll';
+      pause.textContent = state.paused ? 'Reanudar' : 'Pausar';
+      next.hidden = progress.hidden = state.mode !== 'parts';
+      progress.textContent = next.hidden ? '' : 'Parte ' + state.part + ' de ' + state.count;
+      feedback.hidden = state.missing.size === 0;
+      feedback.textContent = feedback.hidden ? '' : 'Algunos símbolos se representan con un signo de interrogación.';
+    });
+    if (lanternMatrix) {
+      canvas.hidden = false;
+      document.getElementById('lantern-message').classList.add('is-drawn');
+      pause.addEventListener('click', lanternMatrix.togglePlaying);
+      next.addEventListener('click', lanternMatrix.nextPart);
+    } else {
+      format.disabled = true;
+    }
     const fullscreen = document.getElementById('lantern-fullscreen');
     fullscreen.addEventListener('click', async function () {
       stage.classList.add('live');

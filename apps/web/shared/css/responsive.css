@@ -49,7 +49,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .lantern-stage.blink .lantern-message { animation: none; }
   .wheel.spinning { animation-duration: .01s; }
 }
 @media print {
