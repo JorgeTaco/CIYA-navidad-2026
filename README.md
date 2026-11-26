@@ -348,8 +348,8 @@ bash scripts/check.sh
 ```
 
 Ese comando revisa la sintaxis de todos los JS, valida IDs duplicados, recursos
-locales, orden de carga y migraciones. Si hay `node`, ejecuta `node --test
-tests/unit`; si no, usa `esprima` para verificar la sintaxis. Las pruebas
+locales, orden de carga y migraciones. Si hay `node`, ejecuta
+`node --test tests/unit/*.test.cjs`. La alternativa usa `esprima` para verificar la sintaxis. Las pruebas
 unitarias usan una configuración simulada en memoria y comprueban también que
 sin configuración no haya sesión ni operaciones disponibles.
 

@@ -5,7 +5,7 @@ if command -v node >/dev/null 2>&1; then
   for file in $(find apps/web -type f -name '*.js' | sort); do
     node --check "$file"
   done
-  node --test tests/unit
+  node --test tests/unit/*.test.cjs
 else
   python3 - <<'PY'
 from pathlib import Path
