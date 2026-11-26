@@ -161,3 +161,15 @@ test('sin configuración no hay sesión, Roles ni operaciones', async () => {
   await assert.rejects(() => sinConfig.store.loginAccount('correo@example.test', 'clave'), /Falta la configuración/);
   await assert.rejects(() => sinConfig.store.action('wish', {}), /Falta la configuración/);
 });
+
+test('la navegación pública funciona sin sesión ni configuración de Supabase', () => {
+  const { ui, roleLinksEl, logoutBtn } = loadShared({ configured: false });
+  for (const page of ['portal', 'qr', 'bases']) {
+    ui.initNav(page);
+    assert.match(roleLinksEl.innerHTML, /portal\.html/);
+    assert.match(roleLinksEl.innerHTML, /qr\.html/);
+    assert.match(roleLinksEl.innerHTML, /bases\.html/);
+    assert.doesNotMatch(roleLinksEl.innerHTML, /recepcion\.html|escenario\.html|admin\.html/);
+    assert.equal(logoutBtn.hidden, true);
+  }
+});

@@ -1,6 +1,6 @@
 (function () {
   const UI = window.CIYA_UI;
-  const esc = UI.escapeHtml;
+  const Store = window.CIYA_STORE;
 
   function template() {
     return `
@@ -9,7 +9,8 @@
         <div class="field"><label for="des-rol">Rol</label><select id="des-rol" required><option value="estudiante">Estudiante</option><option value="docente">Docente</option><option value="personal">Personal</option></select></div>
         <div class="field"><label for="des-carrera">Carrera / Área</label><input id="des-carrera" maxlength="120" required></div>
         <div class="field"><label for="des-frase">Frase inspiradora o meta para 2027</label><textarea id="des-frase" maxlength="280" required></textarea></div>
-        <button class="btn primary wide" type="submit">Enviar al buzón</button>
+        <button class="btn primary wide" type="submit"${Store.configured() ? '' : ' disabled'}>Enviar al buzón</button>
+        ${Store.configured() ? '' : '<p class="hint">El envío de deseos estará disponible cuando se configure la conexión.</p>'}
         <p class="hint">Las frases quedan pendientes de aprobación y podrán proyectarse durante la chocolatada final.</p>
       </form>`;
   }

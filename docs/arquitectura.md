@@ -16,6 +16,13 @@ Las RPC están definidas en `supabase/migrations/0002_rpc_read_write.sql` y
 `0005_role_discovery.sql`. El acceso se controla con `ciya.roles`,
 `ciya_access(panel)` y `ciya_my_roles()`.
 
+| Vista | Datos que entrega `ciya_read` |
+| --- | --- |
+| Pública | Marcador de las cinco carreras, totales, estado del cierre, orden de los grupos inscritos y deseos aprobados. |
+| Recepción | Hasta 30 registros recientes de acreditación y donación por lista, estado de los QR Dorados y de los últimos 100 comprobantes. |
+| Escenario | Grupos, evaluaciones, deseos aprobados y respaldo sellado con los boletos elegibles. |
+| Administración | Grupos, evaluaciones, deseos para moderar y enlaces privados de los QR Dorados. |
+
 ## Contratos entre módulos
 
 - Cada HTML funcional en `apps/web/` es un shell delgado con un punto de montaje:
@@ -23,10 +30,10 @@ Las RPC están definidas en `supabase/migrations/0002_rpc_read_write.sql` y
   `#recepcion-root`, `#admin-root` y `#escenario-root`. El JS dueño renderiza allí
   todo el markup dinámico. `bases.html` es contenido oficial estático y no tiene
   JS propio.
-- `index.html` autentica la cuenta mediante `CIYA_STORE.loginAccount()` (o
-  `CIYA_STORE.enterAsistente()` para participantes) y redirige exclusivamente hacia
-  el/los panel(es) asignados al rol; los menús de navegación filtran las pestañas
-  mediante `CIYA_UI.initNav()`.
+- `index.html` autentica las cuentas de organización mediante
+  `CIYA_STORE.loginAccount()` y muestra los paneles asignados al rol. El portal y
+  la ruta QR admiten acceso directo. `CIYA_UI.initNav()` adapta el menú al rol y
+  permite navegar entre las páginas públicas sin sesión.
 - `CIYA_PORTAL.mount()` crea además `#inscripciones-root` y `#buzon-root`, donde
   `CIYA_INSCRIPCIONES.init()` y `CIYA_BUZON.init()` colocan sus formularios.
 - `CIYA_RECEPCION.mount()` y `CIYA_ADMIN.mount()` renderizan sus paneles antes de

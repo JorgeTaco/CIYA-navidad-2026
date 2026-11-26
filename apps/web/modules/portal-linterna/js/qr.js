@@ -130,6 +130,11 @@
     const button = document.getElementById('gold-refresh');
     const status = document.getElementById('gold-status');
     const code = document.getElementById('gold-code');
+    if (!Store.configured()) {
+      status.textContent = 'La clave de canje no está disponible en este momento.';
+      button.disabled = true;
+      return;
+    }
     async function refresh() {
       clearTimeout(goldExpiryTimer);
       code.textContent = '';
@@ -173,16 +178,8 @@
     document.getElementById('qr-root').innerHTML = shell();
   }
 
-  const hasDeepQr = Boolean(id || new URLSearchParams(location.hash.slice(1)).get('dorado'));
-  if (!Store.configured()) {
-    location.replace('index.html');
-  } else if (!hasDeepQr && !Store.hasAccessSession()) {
-    location.replace('index.html');
-  } else {
-    if (hasDeepQr && !Store.hasAccessSession()) Store.enterAsistente();
-    mount();
-    UI.initNav('qr');
-    window.addEventListener('hashchange', renderRoute);
-    renderRoute();
-  }
+  mount();
+  UI.initNav('qr');
+  window.addEventListener('hashchange', renderRoute);
+  renderRoute();
 })();

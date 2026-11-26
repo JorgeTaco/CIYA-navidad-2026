@@ -34,7 +34,7 @@
         <section class="card" id="acceso-config" hidden>
           <span class="badge">Configuración pendiente</span>
           <h2 style="margin-top:0.65rem">Supabase no está configurado</h2>
-          <p class="muted">Completa <code>apps/web/shared/js/config.js</code> con la URL y la anon key del proyecto, y aplica las migraciones antes de usar la aplicación.</p>
+          <p class="muted">El acceso de organización estará disponible cuando se configure la conexión con Supabase.</p>
         </section>
 
         <section class="card" id="acceso-asistente">
@@ -126,17 +126,17 @@
     mount();
     UI.initNav('acceso');
 
+    byId('acceso-logout').addEventListener('click', UI.logout);
+    byId('btn-asistente').addEventListener('click', function () {
+      if (Store.configured()) Store.enterAsistente();
+      location.replace('portal.html');
+    });
+
     if (!Store.configured()) {
-      byId('acceso-grid').hidden = true;
+      byId('acceso-login').hidden = true;
       byId('acceso-config').hidden = false;
       return;
     }
-
-    byId('acceso-logout').addEventListener('click', UI.logout);
-    byId('btn-asistente').addEventListener('click', function () {
-      Store.enterAsistente();
-      location.replace('portal.html');
-    });
 
     byId('form-acceso').addEventListener('submit', function (event) {
       event.preventDefault();

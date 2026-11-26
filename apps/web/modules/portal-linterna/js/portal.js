@@ -268,18 +268,7 @@
   }
 
   async function init() {
-    if (!Store.configured()) {
-      location.replace('index.html');
-      return;
-    }
     const isLanternMode = new URLSearchParams(location.search).get('modo') === 'linterna';
-    if (!isLanternMode && !Store.hasAccessSession()) {
-      location.replace('index.html');
-      return;
-    }
-    if (isLanternMode && !Store.hasAccessSession()) {
-      Store.enterAsistente();
-    }
     mount();
     setupLantern();
     if (isLanternMode) {
@@ -290,12 +279,13 @@
       title.textContent = sectionTitle.textContent;
       sectionTitle.replaceWith(title);
       document.title = 'Mar de Linternas | CIYA Navidad 2026';
+      document.getElementById('sync-status').hidden = true;
       UI.initNav('portal');
       return;
     }
     setupEstaticos();
     UI.initNav('portal');
-    await Store.init();
+    if (Store.configured()) await Store.init();
     Store.subscribe(render);
   }
 

@@ -1,5 +1,6 @@
 (function () {
   const UI = window.CIYA_UI;
+  const Store = window.CIYA_STORE;
   const Data = window.CIYA_DATA;
   const esc = UI.escapeHtml;
 
@@ -18,7 +19,8 @@
         <div class="field"><label for="vil-carrera">Carrera representada</label><select id="vil-carrera" required>${carreras}</select></div>
         <div class="field"><label for="vil-cancion">Obra musical seleccionada</label><input id="vil-cancion" maxlength="160" required></div>
         <div class="field"><label for="vil-categoria">Modalidad</label><select id="vil-categoria" required>${categorias}</select></div>
-        <button class="btn primary wide" type="submit">Inscribir grupo</button>
+        <button class="btn primary wide" type="submit"${Store.configured() ? '' : ' disabled'}>Inscribir grupo</button>
+        ${Store.configured() ? '' : '<p class="hint">La inscripción estará disponible cuando se configure la conexión.</p>'}
         <p class="hint">Inscripción oficial abierta hasta el jueves 3 de diciembre de 2026, 17:30. Evaluación: 30% creatividad, 30% musicalidad, 20% puesta en escena y 20% aplausómetro.</p>
       </form>`;
   }

@@ -156,7 +156,7 @@ seguir. Si alguno ya está aplicado, omitirlo y continuar desde el siguiente;
 nunca editar una migración ya aplicada. Con esto listo, seguir con el servidor
 estático de abajo.
 
-### Estado actual: Supabase configurado y con datos
+### Ejecutar el sitio con Supabase configurado
 
 No se necesita Node, npm ni build. Con el repositorio ya clonado:
 
@@ -167,10 +167,9 @@ cd apps/web
 python3 -m http.server 8000
 ```
 
-Abrir `http://127.0.0.1:8000/index.html`. La barra superior pasa de
-`Verificando` a **Sincronización activa** cuando `ciya_read` responde. Si las
-claves están puestas pero el proyecto no responde, muestra **Sin sincronización**
-y las operaciones devuelven el error de conexión.
+Abrir `http://127.0.0.1:8000/index.html`. En el portal y los paneles conectados,
+el indicador muestra **Sincronización activa** cuando `ciya_read` responde y
+**Sin sincronización** si se pierde la conexión.
 
 En la pantalla de acceso hay dos entradas:
 
@@ -198,9 +197,9 @@ cd /home/eser/Documentos/GitHub/CIYA-navidad-2026
 bash scripts/deploy-static.sh /ruta/al/destino
 ```
 
-Ese script copia `apps/web/` tal cual dentro de `/ruta/al/destino`; no ejecuta
-migraciones ni despliega la Edge Function. Publicar en GitHub Pages es un push a
-`main` con el workflow indicado más abajo.
+El script prepara el frontend y las redirecciones de compatibilidad en
+`/ruta/al/destino`. El esquema de Supabase y la Edge Function se despliegan por
+separado.
 
 Para la consola de escenario sin red:
 
@@ -310,10 +309,11 @@ La programación con `pg_cron`/`pg_net` y el resto de la operación están en
 
 ### Sin modo demo
 
-La aplicación no tiene datos de prueba ni acceso simulado. Si faltan `supabaseUrl`
-o `supabaseAnonKey`, `index.html` muestra **Configuración requerida** y las demás
-vistas redirigen allí. El único modo sin red es la consola local de escenario con
-`tools/local-stage.py`, que es operativa y no usa datos de ejemplo.
+El portal, la linterna, las bases y los QR informativos pueden abrirse sin
+cuenta ni configuración de Supabase. El ranking en vivo, los formularios, el
+canje y los paneles de organización requieren conexión al proyecto configurado.
+La consola de escenario puede importar un respaldo sellado y operar sin red
+mediante `tools/local-stage.py`.
 
 ### Publicación en GitHub Pages
 
@@ -323,9 +323,10 @@ and deployment → Source** y elegir **GitHub Actions**. Después, cada push a
 `main` —o la ejecución manual del workflow— actualiza
 `https://jorgetaco.github.io/CIYA-navidad-2026/`.
 
-Antes aparecía el `README.md` porque GitHub Pages buscaba `index.html` en la
-raíz y el archivo quedó en `apps/web/index.html:1`. Para dominio propio, agregar
-un archivo `CNAME` dentro de `apps/web/` con el dominio deseado.
+El workflow ejecuta `scripts/check.sh`, empaqueta el frontend y comprueba las
+rutas publicadas. La entrada está en `/` y el portal en `/portal.html`, ambos
+bajo la URL del proyecto. Los enlaces anteriores bajo `/apps/web/` redirigen a
+la ruta correspondiente y conservan sus parámetros y fragmentos.
 
 ## Operación
 

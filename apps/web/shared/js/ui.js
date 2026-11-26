@@ -230,6 +230,10 @@
     }
     if (!roles.length) {
       if (active === 'acceso') return '<a href="bases.html" data-nav="bases">Bases oficiales</a>';
+      if (active === 'portal' || active === 'qr' || active === 'bases') {
+        return '<a href="portal.html" data-nav="portal">Portal</a><a href="qr.html" data-nav="qr">Ruta QR</a>' +
+          '<a href="bases.html" data-nav="bases">Bases oficiales</a><a href="index.html" data-nav="acceso">Acceso</a>';
+      }
       return '<a href="index.html" data-nav="acceso">Iniciar sesión</a><a href="bases.html" data-nav="bases">Bases oficiales</a>';
     }
     const items = [];
@@ -300,7 +304,7 @@
       });
     }
     const status = document.getElementById('sync-status');
-    if (status) {
+    if (status && !status.hidden) {
       if (syncPaintTimer) {
         clearInterval(syncPaintTimer);
         syncPaintTimer = null;
