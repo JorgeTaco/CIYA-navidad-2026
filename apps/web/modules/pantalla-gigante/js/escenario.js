@@ -491,6 +491,10 @@
 
   async function init() {
     mount();
+    if (!localMode && !Store.configured()) {
+      location.replace('index.html');
+      return;
+    }
     if (localMode && (!navigator.locks || !await claimLocalConsole().catch(function () { return false; }))) {
       const locked = document.getElementById('locked');
       locked.textContent = 'La consola local requiere Chrome o Edge y una sola pestaña activa.';

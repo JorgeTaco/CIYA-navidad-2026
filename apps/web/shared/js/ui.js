@@ -61,6 +61,7 @@
   }
 
   async function requireAccount(scope, title) {
+    if (!Store.configured()) return showConfigRequired(title);
     if (Store.hasSession()) {
       try {
         await Store.authorize(scope);
@@ -78,6 +79,23 @@
       return showRoleRestricted(title, { email: 'Estudiante / Docente', roles: ['asistente'] });
     }
     return promptLogin(scope, title);
+  }
+
+  function showConfigRequired(title) {
+    return new Promise(function (resolve) {
+      const overlay = document.createElement('div');
+      overlay.className = 'pin-overlay';
+      overlay.innerHTML =
+        '<div class="pin-card"><h2>Configuración requerida</h2>' +
+        '<p class="muted">No se puede abrir <strong>' + escapeHtml(title) + '</strong> hasta completar la configuración de Supabase en <code>apps/web/shared/js/config.js</code>.</p>' +
+        '<div class="row"><a class="btn primary" href="index.html">Ir al inicio</a>' +
+        '<button class="btn ghost" type="button" data-cancel>Cerrar</button></div></div>';
+      document.body.appendChild(overlay);
+      overlay.querySelector('[data-cancel]').addEventListener('click', function () {
+        overlay.remove();
+        resolve(false);
+      });
+    });
   }
 
   function showRoleRestricted(title, info) {
@@ -112,16 +130,12 @@
     return new Promise(function (resolve) {
       const overlay = document.createElement('div');
       overlay.className = 'pin-overlay';
-      const demoHint = !Store.configured()
-        ? '<p class="hint">Modo demo local: usa <code>' + escapeHtml(scope) + '@ciya.local</code> (clave <code>ciya2026</code>).</p>'
-        : '';
       overlay.innerHTML =
         '<div class="pin-card"><h2>' + escapeHtml(title) + '</h2>' +
         '<form><label for="auth-email">Correo de organización</label>' +
         '<input id="auth-email" type="email" autocomplete="username" required>' +
         '<label for="auth-password">Contraseña</label>' +
         '<input id="auth-password" type="password" autocomplete="current-password" required>' +
-        demoHint +
         '<p class="pin-error" role="alert" hidden></p>' +
         '<div class="row"><button class="btn primary" type="submit">Entrar</button>' +
         '<button class="btn ghost" type="button" data-cancel>Cancelar</button></div>' +
@@ -298,14 +312,11 @@
       }
       const paint = function () {
         const remote = window.CIYA_STORE.isRemote();
-        const hasDemo = typeof Store.sessionRoles === 'function' && Store.sessionRoles().length > 0 && !Store.configured();
         status.textContent = remote
           ? 'Sincronización activa'
           : Store.configured()
             ? 'Sin sincronización'
-            : hasDemo
-              ? 'Modo demo local'
-              : 'Sin configurar';
+            : 'Configuración requerida';
         status.classList.toggle('online', remote);
       };
       paint();

@@ -236,6 +236,10 @@
   }
 
   async function init() {
+    if (!Store.configured()) {
+      location.replace('index.html');
+      return;
+    }
     mount();
     UI.initNav('admin');
     const ok = await UI.requireAccount('admin', 'Panel administrativo');

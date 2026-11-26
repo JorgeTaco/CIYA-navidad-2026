@@ -4,12 +4,12 @@ const { join } = require('node:path');
 const { test } = require('node:test');
 const { createContext, runInContext } = require('node:vm');
 
-function loadShared({ syncText = '', storedSession = null, storedRoles = null, supabaseUrl = '' } = {}) {
+function loadShared({ configured = true, storedSession = null, storedRoles = null } = {}) {
   const storage = new Map();
   if (storedSession) storage.set('ciya2026:session:v2', JSON.stringify(storedSession));
   if (storedRoles) storage.set('ciya2026:roles:v1', JSON.stringify(storedRoles));
   const statusEl = {
-    textContent: syncText,
+    textContent: '',
     classes: new Set(),
     classList: {
       toggle(cls, force) {
@@ -54,10 +54,8 @@ function loadShared({ syncText = '', storedSession = null, storedRoles = null, s
   for (const filename of files) {
     runInContext(readFileSync(filename, 'utf8'), context);
   }
-  if (supabaseUrl) {
-    context.CIYA_CONFIG.supabaseUrl = supabaseUrl;
-    context.CIYA_CONFIG.supabaseAnonKey = 'eyJdemo';
-  }
+  context.CIYA_CONFIG.supabaseUrl = configured ? 'https://ciya.supabase.co' : '';
+  context.CIYA_CONFIG.supabaseAnonKey = configured ? 'eyJtest' : '';
   return {
     ui: context.CIYA_UI,
     store: context.CIYA_STORE,
@@ -112,7 +110,7 @@ test('initNav es idempotente y respeta el modo escenario local', () => {
 
   ui.initNav('acceso');
   ui.initNav('acceso');
-  assert.equal(statusEl.textContent, 'Sin configurar');
+  assert.equal(statusEl.textContent, 'Sin sincronización');
   assert.equal(docListeners.length, 2);
 });
 
@@ -124,7 +122,7 @@ test('store resuelve carreras conocidas, desconocidas y ranking inicial', () => 
   assert.equal(store.ranking().every(r => r.puntos === 0 && r.puesto === 1), true);
 });
 
-test('initNav oculta pestañas de otros roles en asistente, recepción y modo local', async () => {
+test('initNav oculta pestañas de otros roles en asistente, recepción y modo local', () => {
   const guest = loadShared();
   guest.ui.initNav('acceso');
   assert.equal(guest.roleLinksEl.innerHTML, '<a href="bases.html" data-nav="bases">Bases oficiales</a>');
@@ -137,16 +135,15 @@ test('initNav oculta pestañas de otros roles en asistente, recepción y modo lo
   assert.doesNotMatch(guest.roleLinksEl.innerHTML, /recepcion\.html|escenario\.html|admin\.html/);
   assert.equal(guest.logoutBtn.hidden, false);
 
-  const recepcion = loadShared();
-  const info = await recepcion.store.loginAccount('recepcion@ciya.local', 'ciya2026');
-  assert.deepEqual(Array.from(info.roles), ['recepcion']);
+  const recepcion = loadShared({
+    storedSession: { access_token: 'token', expires_at: 4102444800 },
+    storedRoles: { email: 'recepcion@example.test', roles: ['recepcion'], mode: 'staff' }
+  });
+  assert.deepEqual(Array.from(recepcion.store.sessionRoles()), ['recepcion']);
   recepcion.ui.initNav('recepcion');
   assert.match(recepcion.roleLinksEl.innerHTML, /recepcion\.html/);
   assert.doesNotMatch(recepcion.roleLinksEl.innerHTML, /portal\.html|qr\.html|escenario\.html|admin\.html/);
-  assert.equal(recepcion.statusEl.textContent, 'Modo demo local');
-
-  await recepcion.store.logout();
-  assert.deepEqual(Array.from(recepcion.store.sessionRoles()), []);
+  assert.equal(recepcion.statusEl.textContent, 'Sin sincronización');
 
   const localStage = loadShared();
   localStage.ui.initNav('escenario', { local: true });
@@ -154,10 +151,13 @@ test('initNav oculta pestañas de otros roles en asistente, recepción y modo lo
   assert.equal(localStage.logoutBtn.hidden, true);
 });
 
-test('cuentas demo quedan deshabilitadas cuando Supabase está configurado', async () => {
-  const prod = loadShared({ supabaseUrl: 'https://demo.supabase.co' });
-  await assert.rejects(
-    () => prod.store.authorize('recepcion'),
-    /Inicia sesión con tu cuenta de organización/
-  );
+test('sin configuración no hay sesión, Roles ni operaciones', async () => {
+  const sinConfig = loadShared({ configured: false });
+  assert.equal(sinConfig.store.configured(), false);
+  assert.equal(sinConfig.store.hasSession(), false);
+  assert.equal(sinConfig.store.hasAccessSession(), false);
+  assert.deepEqual(Array.from(sinConfig.store.sessionRoles()), []);
+  assert.throws(() => sinConfig.store.enterAsistente(), /Falta la configuración/);
+  await assert.rejects(() => sinConfig.store.loginAccount('correo@example.test', 'clave'), /Falta la configuración/);
+  await assert.rejects(() => sinConfig.store.action('wish', {}), /Falta la configuración/);
 });

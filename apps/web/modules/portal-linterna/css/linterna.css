@@ -8,24 +8,41 @@
   place-items: center;
   text-align: center;
   padding: 1.4rem;
-  background: #040a14;
+  background:
+    radial-gradient(circle at 50% 45%, #fff 0%, var(--lantern-color, #ffd166) 24%, #07121f 78%),
+    #040a14;
+  box-shadow: inset 0 0 90px 24px var(--lantern-color, #ffd166);
   transition: background 0.35s ease;
+  isolation: isolate;
+}
+.lantern-stage::before {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  z-index: -1;
+  background: radial-gradient(circle at 50% 45%, var(--lantern-color, #ffd166) 0%, transparent 62%);
+  filter: blur(36px);
+  opacity: 0.85;
 }
 
 .lantern-stage.live { position: fixed; inset: 0; z-index: 80; min-height: 100vh; border-radius: 0; border: none; }
 .lantern-stage .lantern-message {
+  position: relative;
+  z-index: 1;
   font-size: clamp(2rem, 9vw, 7rem);
   font-weight: 900;
   letter-spacing: -0.05em;
   text-wrap: balance;
   color: #fff;
-  text-shadow: 0 0 28px currentColor, 0 4px 18px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 0 10px #fff, 0 0 34px var(--lantern-color, #ffd166), 0 0 78px var(--lantern-color, #ffd166), 0 4px 18px rgba(0, 0, 0, 0.55);
 }
 .lantern-stage.blink .lantern-message { animation: lanternPulse 1.6s ease-in-out infinite; }
-.lantern-stage .lantern-meta { position: absolute; bottom: 1.2rem; left: 1rem; right: 1rem; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font-size: 0.8rem; }
+.lantern-stage.blink::before { animation: lanternGlow 1.6s ease-in-out infinite; }
+.lantern-stage .lantern-meta { position: absolute; z-index: 1; bottom: 1.2rem; left: 1rem; right: 1rem; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font-size: 0.8rem; text-shadow: 0 2px 8px #000; }
 .lantern-exit { position: absolute; top: 1rem; right: 1rem; z-index: 2; }
 
-@keyframes lanternPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.55; transform: scale(0.985); } }
+@keyframes lanternPulse { 0%, 100% { opacity: 1; transform: scale(1); filter: brightness(1.15); } 50% { opacity: 0.86; transform: scale(1.02); filter: brightness(1.45); } }
+@keyframes lanternGlow { 0%, 100% { opacity: 0.75; transform: scale(1); } 50% { opacity: 1; transform: scale(1.1); } }
 
 .lantern-stage.live { min-height: 100%; min-height: 100dvh; }
 .lantern-message { overflow-wrap: anywhere; }
@@ -37,9 +54,9 @@
 .lantern-setup .chip { min-height: 44px; }
 .custom-message { margin-top: .8rem; }
 .lantern-layout .label { margin-bottom: .45rem; }
-.lantern-layout .lantern-stage { min-height: clamp(10rem, 34vh, 16rem); background: radial-gradient(ellipse at 50% 40%, var(--lantern-color, #f5b65e), #040a14 84%); }
+.lantern-layout .lantern-stage { min-height: clamp(10rem, 34vh, 16rem); background: radial-gradient(circle at 50% 45%, #fff 0%, var(--lantern-color, #ffd166) 28%, #07121f 82%), #040a14; }
 .lantern-layout .lantern-stage:not(.live) .lantern-message { font-size: clamp(1.7rem, 6vw, 3.5rem); }
-.lantern-layout .lantern-stage .lantern-message { min-width: 0; text-shadow: 0 2px 9px #070a12, 0 0 18px #070a12; }
+.lantern-layout .lantern-stage .lantern-message { min-width: 0; text-shadow: 0 0 8px #fff, 0 0 26px var(--lantern-color, #ffd166), 0 0 54px var(--lantern-color, #ffd166); }
 .lantern-layout .lantern-stage .lantern-meta { justify-content: center; bottom: max(.65rem, env(safe-area-inset-bottom)); }
 .lantern-layout .lantern-stage.live { min-height: 100%; min-height: 100dvh; }
 .lantern-exit { top: max(1rem, env(safe-area-inset-top)); background: #07151c; }

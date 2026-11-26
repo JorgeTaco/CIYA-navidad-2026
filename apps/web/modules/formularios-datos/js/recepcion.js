@@ -245,6 +245,10 @@
   }
 
   async function init() {
+    if (!Store.configured()) {
+      location.replace('index.html');
+      return;
+    }
     mount();
     UI.initNav('recepcion');
     if (!await UI.requireAccount('recepcion', 'Panel de recepción')) {

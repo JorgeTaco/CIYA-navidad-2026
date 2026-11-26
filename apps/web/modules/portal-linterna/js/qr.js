@@ -174,7 +174,9 @@
   }
 
   const hasDeepQr = Boolean(id || new URLSearchParams(location.hash.slice(1)).get('dorado'));
-  if (!hasDeepQr && !Store.hasAccessSession()) {
+  if (!Store.configured()) {
+    location.replace('index.html');
+  } else if (!hasDeepQr && !Store.hasAccessSession()) {
     location.replace('index.html');
   } else {
     if (hasDeepQr && !Store.hasAccessSession()) Store.enterAsistente();

@@ -19,7 +19,7 @@
           <form id="form-acceso">
             <div class="field">
               <label for="acceso-email">Correo de organización</label>
-              <input id="acceso-email" type="email" autocomplete="username" required placeholder="usuario@ciya.local">
+              <input id="acceso-email" type="email" autocomplete="username" required placeholder="usuario@organizacion.ec">
             </div>
             <div class="field">
               <label for="acceso-password">Contraseña</label>
@@ -29,15 +29,12 @@
             <button class="btn primary wide" type="submit">Iniciar sesión</button>
           </form>
 
-          <div class="section" id="demo-accounts" style="margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--line)" hidden>
-            <p class="label">Modo demo local (Supabase sin configurar)</p>
-            <p class="hint" style="margin-bottom:0.6rem">Prueba cada rol visualmente con un clic (clave: <code>ciya2026</code>):</p>
-            <div class="row">
-              <button class="btn small" type="button" data-demo-email="recepcion@ciya.local">Recepción</button>
-              <button class="btn small" type="button" data-demo-email="escenario@ciya.local">Escenario</button>
-              <button class="btn small" type="button" data-demo-email="admin@ciya.local">Administración</button>
-            </div>
-          </div>
+        </section>
+
+        <section class="card" id="acceso-config" hidden>
+          <span class="badge">Configuración pendiente</span>
+          <h2 style="margin-top:0.65rem">Supabase no está configurado</h2>
+          <p class="muted">Completa <code>apps/web/shared/js/config.js</code> con la URL y la anon key del proyecto, y aplica las migraciones antes de usar la aplicación.</p>
         </section>
 
         <section class="card" id="acceso-asistente">
@@ -78,6 +75,7 @@
 
   function showAuthorized(info) {
     UI.initNav('acceso');
+    byId('acceso-config').hidden = true;
     byId('acceso-grid').hidden = true;
     byId('acceso-panels').hidden = false;
     byId('acceso-user').textContent = (info.email ? info.email + ' · ' : '') +
@@ -94,9 +92,9 @@
 
   function showLogin() {
     UI.initNav('acceso');
+    byId('acceso-config').hidden = true;
     byId('acceso-panels').hidden = true;
     byId('acceso-grid').hidden = false;
-    if (!Store.configured()) byId('demo-accounts').hidden = false;
   }
 
   async function submitCredentials(email, password) {
@@ -128,6 +126,12 @@
     mount();
     UI.initNav('acceso');
 
+    if (!Store.configured()) {
+      byId('acceso-grid').hidden = true;
+      byId('acceso-config').hidden = false;
+      return;
+    }
+
     byId('acceso-logout').addEventListener('click', UI.logout);
     byId('btn-asistente').addEventListener('click', function () {
       Store.enterAsistente();
@@ -137,15 +141,6 @@
     byId('form-acceso').addEventListener('submit', function (event) {
       event.preventDefault();
       submitCredentials(byId('acceso-email').value.trim(), byId('acceso-password').value);
-    });
-
-    document.querySelectorAll('[data-demo-email]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        if (Store.configured()) return;
-        byId('acceso-email').value = btn.dataset.demoEmail;
-        byId('acceso-password').value = 'ciya2026';
-        submitCredentials(btn.dataset.demoEmail, 'ciya2026');
-      });
     });
 
     if (Store.hasSession()) {

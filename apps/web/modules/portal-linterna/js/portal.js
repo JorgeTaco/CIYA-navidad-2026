@@ -268,6 +268,10 @@
   }
 
   async function init() {
+    if (!Store.configured()) {
+      location.replace('index.html');
+      return;
+    }
     const isLanternMode = new URLSearchParams(location.search).get('modo') === 'linterna';
     if (!isLanternMode && !Store.hasAccessSession()) {
       location.replace('index.html');

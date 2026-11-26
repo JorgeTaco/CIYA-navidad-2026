@@ -20,8 +20,9 @@ cada archivo:
   de inscripción y buzón salió de `portal.js` hacia `formularios-datos/`, y la
   lógica de puerto serial/cuenta/relé salió de `escenario.js` hacia
   `hardware-encendido/js/encendido.js`.
-- `supabase-schema.sql` se dividió en tres migraciones ordenadas; `legacy-import.sql`
-  pasó a ser la cuarta. Cada migración es una transacción independiente.
+- `supabase-schema.sql` se dividió en migraciones ordenadas; `legacy-import.sql`
+  pasó a ser la cuarta y `0005_role_discovery.sql` la quinta. Cada migración es
+  una transacción independiente.
 - `tests/draw.test.cjs` pasó a `tests/unit/` y ahora apunta a las nuevas rutas.
 - `tools/local-stage.py` sirve `apps/web/` en `127.0.0.1:8080` y su lista de
   archivos permitidos incluye los nuevos CSS y JS.
@@ -51,7 +52,6 @@ CIYA-navidad-2026/
 │  ├─ recepcion.html               # acreditación, donaciones, canjes y cierre
 │  ├─ admin.html                   # curaduría, puertas, impresión e importación
 │  ├─ escenario.html               # proyección, ranking, villancicos, ruleta y encendido
-│  ├─ public/                      # favicon y archivos estáticos
 │  ├─ shared/
 │  │  ├─ css/ tokens.css · base.css · components.css · responsive.css
 │  │  └─ js/  config.js · data.js · store.js · ui.js · sound.js
@@ -68,14 +68,9 @@ CIYA-navidad-2026/
 │  │  ├─ 0003_receipts.sql         # cola de comprobantes y permisos
 │  │  ├─ 0004_legacy_import.sql    # importación del respaldo v1
 │  │  └─ 0005_role_discovery.sql   # RPC ciya_my_roles para acceso por rol
-│  ├─ functions/ciya-receipts/     # Edge Function → Brevo
-│  └─ seeds/                       # datos ficticios
+│  └─ functions/ciya-receipts/     # Edge Function → Brevo
 ├─ tests/
-│  ├─ unit/                        # reglas puras, incluido draw.test.cjs
-│  ├─ integration/                 # RPC SQL con hora simulada
-│  ├─ hardware/                    # mock de Web Serial
-│  ├─ e2e/                         # navegadores a 360 px
-│  └─ fixtures/                    # respaldos v1 y v2 ficticios
+│  └─ unit/                        # draw.test.cjs y ui.test.cjs
 ├─ tools/
 │  ├─ local-stage.py               # consola local con Basic auth
 │  └─ check-structure.py           # IDs y recursos locales
@@ -123,7 +118,7 @@ exportar antes, porque la curaduría puede realizarse apenas se reciben las fras
 | --- | --- | --- |
 | RF-01 Acceso inmediato sin instalación | Sí | Sitio estático servido por URL/QR desde GitHub Pages; HTML/CSS/JS puro, sin build, `manifest`, service worker ni tiendas de aplicaciones. |
 | RF-02 Selección de carrera | Sí | Las 5 carreras están en `apps/web/shared/js/data.js:9` con `color` e `icono`; `applyLantern()` aplica `--lantern-color` y muestra el icono en `#lantern-carrera`. |
-| RF-03 Mensajes personalizables | Sí | Frases predefinidas (“Feliz Navidad CIYA”, “Orgullo Industrial”, “Compilando el 2027”) y campo libre de 60 caracteres; tipografía `clamp(2rem, 9vw, 7rem)`, alto contraste y animación `lanternPulse` de 1,6 s con botón “Sincronizar destello”. |
+| RF-03 Mensajes personalizables | Sí | Frases predefinidas (“Feliz Navidad CIYA”, “Orgullo Industrial”, “Compilando el 2027”) y campo libre de 60 caracteres; tipografía `clamp(2rem, 9vw, 7rem)`, halo de brillo fuerte, alto contraste y animación `lanternPulse` de 1,6 s con botón “Sincronizar destello”. |
 | RF-04 Pantalla completa y ejecución local | Sí | El botón “Pantalla completa” usa `requestFullscreen()` con vista CSS de respaldo. En `portal.html?modo=linterna#linterna` (o `index.html?modo=linterna#linterna`), `init()` termina antes de `Store.init()`: color, carrera, mensaje y parpadeo se resuelven solo en JS/CSS del navegador. |
 | RF-05 Ruta de códigos QR | Sí | `qr.html` y `qr.js` sirven mensajes, trivias y memes; `ciya.gold` tiene 3 ranuras y admin genera las URLs `qr.html#dorado=<secret>` para los QR Dorados. |
 
@@ -134,40 +129,83 @@ está prevista en el ensayo del 3 de diciembre (`docs/operacion/runbook.md`).
 
 ## Cómo ejecutar el proyecto
 
-El frontend **no lee `.env`**: `.env.example` es solo la plantilla de secretos
-para Supabase/Edge Functions. Las dos URLs públicas que necesita el navegador se
-ponen en `apps/web/shared/js/config.js`.
+El frontend **no lee `.env`**: `.env.example` solo lista los secretos de la Edge
+Function. Los dos valores públicos que necesita el navegador **ya están llenos**
+en `apps/web/shared/js/config.js`: la URL del proyecto
+`jrrvsouvnuorzucyeuzf`, su anon key, `syncIntervalMs: 3000`,
+`relayCommand: 'RELAY_ON\n'` y `serialBaudRate: 9600`. No vuelvas a pegar la
+anon key: es pública por diseño y ya activa el modo remoto. **Nunca** pongas
+`service_role`, tokens de Brevo ni secretos en ese archivo ni en el frontend.
 
-### Caso A: todavía sin variables reales de Supabase
+### Antes de ejecutar: migraciones de la base de datos
 
-Dejar `supabaseUrl: ''` y `supabaseAnonKey: ''` como están en el repositorio y
-servir solo el frontend:
+Si la base de datos aún no tiene el esquema, la forma más simple es copiar y
+pegar cada archivo de `supabase/migrations/` en **Supabase → SQL Editor → New
+query** y ejecutarlo **uno por uno**, en este orden exacto:
+
+```text
+0001_schema_core.sql       esquema ciya, tablas, roles y horarios
+0002_rpc_read_write.sql    RPC de lectura, escritura, acceso y sorteo
+0003_receipts.sql          cola de comprobantes por correo
+0004_legacy_import.sql     importador del respaldo v1
+0005_role_discovery.sql    RPC ciya_my_roles() para acceso por rol
+```
+
+No pegar los cinco juntos. Si uno marca error, detenerse y corregir antes de
+seguir. Si alguno ya está aplicado, omitirlo y continuar desde el siguiente;
+nunca editar una migración ya aplicada. Con esto listo, seguir con el servidor
+estático de abajo.
+
+### Estado actual: Supabase configurado y con datos
+
+No se necesita Node, npm ni build. Con el repositorio ya clonado:
 
 ```bash
+cd /home/eser/Documentos/GitHub/CIYA-navidad-2026
+git pull --ff-only
 cd apps/web
 python3 -m http.server 8000
 ```
 
-Abrir `http://127.0.0.1:8000/index.html`. El sistema inicia en la pantalla de
-acceso por rol:
+Abrir `http://127.0.0.1:8000/index.html`. La barra superior pasa de
+`Verificando` a **Sincronización activa** cuando `ciya_read` responde. Si las
+claves están puestas pero el proyecto no responde, muestra **Sin sincronización**
+y las operaciones devuelven el error de conexión.
 
-- **Estudiantes y Docentes**: botón **Ingresar como Estudiante / Docente** para
-  entrar a `portal.html`, la linterna (`portal.html?modo=linterna#linterna`), las
-  bases (`bases.html`) y la ruta QR (`qr.html`).
-- **Modo demo local (solo mientras `supabaseUrl` y `supabaseAnonKey` estén vacíos)**:
-  permite probar cada rol visualmente con `recepcion@ciya.local`,
-  `escenario@ciya.local` o `admin@ciya.local` (clave `ciya2026`). En cuanto se
-  configura Supabase en `config.js`, el modo demo se desactiva automáticamente.
+En la pantalla de acceso hay dos entradas:
 
-Qué no ocurre en la nube mientras Supabase esté sin configurar:
+- **Estudiantes y Docentes**: botón **Ingresar como Estudiante / Docente**. Lleva
+  a `portal.html`, desde donde se usan la linterna
+  (`portal.html?modo=linterna#linterna`), la Ruta QR (`qr.html`) y las bases
+  (`bases.html`). No requiere contraseña.
+- **Organización**: correo y contraseña de una cuenta creada en Supabase Auth
+  con al menos un rol en `ciya.roles` (`recepcion`, `escenario` o `admin`). Si la
+  cuenta tiene un solo rol, entra directo a ese panel; si tiene varios, muestra
+  las tarjetas de los paneles permitidos.
 
-- Los datos de demostración viven únicamente en el `sessionStorage` del
-  navegador y no se guardan en Postgres ni envían correos.
-- Los QR Dorados devuelven una clave de prueba local sin validar en servidor.
+Las URL públicas también se pueden abrir directamente:
 
-Para revisar la consola de escenario sin red ni Supabase:
+```text
+http://127.0.0.1:8000/portal.html
+http://127.0.0.1:8000/qr.html
+http://127.0.0.1:8000/bases.html
+```
+
+Para copiar el frontend a un servidor estático:
 
 ```bash
+cd /home/eser/Documentos/GitHub/CIYA-navidad-2026
+bash scripts/deploy-static.sh /ruta/al/destino
+```
+
+Ese script copia `apps/web/` tal cual dentro de `/ruta/al/destino`; no ejecuta
+migraciones ni despliega la Edge Function. Publicar en GitHub Pages es un push a
+`main` con el workflow indicado más abajo.
+
+Para la consola de escenario sin red:
+
+```bash
+cd /home/eser/Documentos/GitHub/CIYA-navidad-2026
 python3 tools/local-stage.py
 ```
 
@@ -175,108 +213,107 @@ Pedir una contraseña local de al menos 8 caracteres ASCII y abrir
 `http://127.0.0.1:8080/escenario.html?modo=local` con usuario `escenario`. Ese
 servidor sirve únicamente los archivos de escenario y no almacena nada en la nube.
 
-### Caso B: con Supabase configurado
+### Si el backend aún no está listo
 
-1. Completar en `apps/web/shared/js/config.js` los valores públicos del proyecto:
+Estos pasos solo son necesarios la primera vez o si el proyecto Supabase no tiene
+el esquema, los roles o la función de comprobantes. Si ya están aplicados,
+**omitir `supabase db push`**: nunca editar una migración ya aplicada.
 
-```js
-window.CIYA_CONFIG = {
-  supabaseUrl: 'https://<ref>.supabase.co',
-  supabaseAnonKey: '<anon-public-key>',
-  syncIntervalMs: 3000,
-  relayCommand: 'RELAY_ON\n',
-  serialBaudRate: 9600
-};
-```
-
-   Usar solo la clave `anon` pública. **Nunca** poner `service_role`, tokens de
-   Brevo ni secretos en este archivo ni en el frontend.
-
-2. Instalar la CLI de Supabase (solo la primera vez).
-
-   **Opción A — sin npm, descarga directa del binario (recomendada en Linux):**
-
-   ```bash
-   curl -fsSL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz -o supabase.tar.gz
-   tar -xf supabase.tar.gz supabase
-   sudo mv supabase /usr/local/bin/supabase
-   rm supabase.tar.gz
-   supabase --version
-   ```
-
-   **Opción B — con npm (requiere Node.js instalado):**
-
-   Si el sistema dice `npm: instrucción no encontrada`, primero instalar Node.js.
-   En **Fedora / RHEL**:
-
-   ```bash
-   sudo dnf install nodejs-npm -y
-   ```
-
-   En **Ubuntu / Debian**:
-
-   ```bash
-   sudo apt install npm -y
-   ```
-
-   Luego instalar la CLI:
-
-   ```bash
-   npm install -g supabase
-   ```
-
-3. Vincular el proyecto local con el proyecto remoto de Supabase y aplicar las migraciones:
+Instalar la CLI de Supabase (solo la primera vez). Sin npm, en Linux:
 
 ```bash
-supabase link --project-ref <ref>
+curl -fsSL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz -o supabase.tar.gz
+tar -xf supabase.tar.gz supabase
+sudo mv supabase /usr/local/bin/supabase
+rm supabase.tar.gz
+supabase --version
+```
+
+Con npm, si ya hay Node.js instalado:
+
+```bash
+sudo dnf install nodejs-npm -y   # Fedora / RHEL
+sudo apt install npm -y          # Ubuntu / Debian
+npm install -g supabase
+```
+
+Iniciar sesión, vincular, aplicar migraciones y desplegar la Edge Function:
+
+```bash
+cd /home/eser/Documentos/GitHub/CIYA-navidad-2026
+supabase login
+supabase link --project-ref jrrvsouvnuorzucyeuzf
 supabase db push
-```
-
-   Reemplazar `<ref>` con el ID del proyecto (se ve en **Project Settings → General → Reference ID** en el dashboard de Supabase, por ejemplo `abcdefghijklmnopqrst`).
-
-   `supabase db push` aplica en orden los 5 archivos de `supabase/migrations/`:
-
-   | Archivo | Qué crea |
-   |---------|----------|
-   | `0001_schema_core.sql` | Schema `ciya`, tablas, roles y horarios |
-   | `0002_rpc_read_write.sql` | Funciones RPC de lectura, escritura y sorteo |
-   | `0003_receipts.sql` | Cola de comprobantes por correo |
-   | `0004_legacy_import.sql` | Importador de respaldo v1 |
-   | `0005_role_discovery.sql` | RPC `ciya_my_roles()` para acceso por rol |
-
-   **Alternativa sin CLI:** abrir el editor SQL de Supabase (**SQL Editor → New query**) y ejecutar cada archivo en el orden indicado, uno por uno.
-
-4. Desplegar la Edge Function de comprobantes:
-
-```bash
 supabase functions deploy ciya-receipts
 ```
 
-5. Crear las cuentas en Supabase Auth y asignar roles. Ejemplo para recepción:
+`supabase db push` aplica en orden los 5 archivos de `supabase/migrations/`:
+
+| Archivo | Qué crea |
+|---------|----------|
+| `0001_schema_core.sql` | Schema `ciya`, tablas, roles y horarios |
+| `0002_rpc_read_write.sql` | Funciones RPC de lectura, escritura, acceso y sorteo |
+| `0003_receipts.sql` | Cola de comprobantes por correo |
+| `0004_legacy_import.sql` | Importador de respaldo v1 |
+| `0005_role_discovery.sql` | RPC `ciya_my_roles()` para acceso por rol |
+
+Si las migraciones ya están aplicadas, omitir `supabase db push`. Si falta
+alguna, no editar los archivos anteriores: agregar una migración nueva.
+
+### Alternativas sin CLI
+
+Opción 1: abrir **SQL Editor → New query** en el dashboard de Supabase y ejecutar
+cada archivo de `supabase/migrations/` en el orden de la tabla anterior, uno por
+uno. Cada archivo es su propia transacción `begin; ... commit;`.
+
+Opción 2: usar `psql` contra la conexión directa de Postgres (esta máquina ya
+tiene `psql`; no usa la anon key). Copiar la URI completa de
+**Project Settings → Database → Connection string → URI**, reemplazar la
+contraseña y pegarla cuando el comando la pida; no compartirla ni guardarla en el
+repositorio:
+
+```bash
+cd /home/eser/Documentos/GitHub/CIYA-navidad-2026
+read -rsp 'URI directa de Postgres: ' DATABASE_URL; printf '\n'
+export DATABASE_URL
+for f in supabase/migrations/000*.sql; do
+  psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -f "$f"
+done
+unset DATABASE_URL
+```
+
+Usar la conexión directa al puerto `5432`, no el pooler transaccional, para DDL.
+Si algún archivo falla, detenerse antes de continuar. Verificación rápida:
+
+```bash
+psql "$DATABASE_URL" -X -c '\dt ciya.*'
+psql "$DATABASE_URL" -X -c "select proname from pg_proc where proname like 'ciya_%' order by proname"
+```
+
+Crear cuentas en **Authentication → Users** y asignar roles. Ejemplo para
+recepción:
 
 ```sql
 insert into ciya.roles (user_id, panel)
-select id, 'recepcion' from auth.users where email = 'correo@ejemplo.com';
+select id, 'recepcion' from auth.users where email = '<correo-del-organizador>';
 ```
 
-   Repetir con `escenario` y `admin` según corresponda.
-
-6. Configurar los secretos de `ciya-receipts`, Brevo, Vault y `pg_cron` según
-   `docs/operacion/runbook.md`; los nombres están en `.env.example`.
-
-7. Servir o publicar el frontend:
+Repetir con `escenario` y `admin` según corresponda; una misma cuenta puede
+tener varios roles. Configurar secretos de la Edge Function:
 
 ```bash
-cd apps/web
-python3 -m http.server 8000
+supabase secrets set CIYA_WORKER_SECRET='<secreto>' BREVO_API_KEY='<clave>' CIYA_SENDER_EMAIL='<correo-del-remitente>'
 ```
 
-   O desde la raíz: `bash scripts/deploy-static.sh <destino>`.
+La programación con `pg_cron`/`pg_net` y el resto de la operación están en
+`docs/operacion/runbook.md`; los nombres de variables están en `.env.example`.
 
-Con la configuración correcta, la barra indica **Sincronización activa** y se
-puede iniciar sesión en recepción, escenario y administración. Si las claves
-están puestas pero el proyecto no responde, la barra indica **Sin sincronización**
-y las operaciones muestran el error de conexión.
+### Sin modo demo
+
+La aplicación no tiene datos de prueba ni acceso simulado. Si faltan `supabaseUrl`
+o `supabaseAnonKey`, `index.html` muestra **Configuración requerida** y las demás
+vistas redirigen allí. El único modo sin red es la consola local de escenario con
+`tools/local-stage.py`, que es operativa y no usa datos de ejemplo.
 
 ### Publicación en GitHub Pages
 
@@ -305,13 +342,15 @@ documentos fuente prevalece el cronograma de las bases oficiales.
 ## Verificación
 
 ```bash
+cd /home/eser/Documentos/GitHub/CIYA-navidad-2026
 bash scripts/check.sh
 ```
 
 Ese comando revisa la sintaxis de todos los JS, valida IDs duplicados, recursos
-locales y migraciones. Si hay `node`, también ejecuta `tests/unit`; si no, usa
-`esprima` para verificar la sintaxis. Las pruebas de integración, hardware y e2e
-se documentan en `tests/` a medida que se implementan.
+locales, orden de carga y migraciones. Si hay `node`, ejecuta `node --test
+tests/unit`; si no, usa `esprima` para verificar la sintaxis. Las pruebas
+unitarias usan una configuración simulada en memoria y comprueban también que
+sin configuración no haya sesión ni operaciones disponibles.
 
 ## Límites y decisiones a vigilar
 
@@ -329,10 +368,11 @@ se documentan en `tests/` a medida que se implementan.
   `portal.js` se carga antes que `inscripciones.js` y `buzon.js` para que el
   portal cree sus raíces; en `escenario.html`, `encendido.js` se carga antes que
   `escenario.js` para exponer `CIYA_IGNITE` y permitir `CIYA_STAGE.mount()`.
-- **Migraciones**: nunca editar una migración ya aplicada; agregar `0005_...`.
-  Los secretos solo en entorno o Vault, nunca en el repositorio.
-- **Pruebas**: hoy hay cobertura real en `tests/unit`; `integration/`,
-  `hardware/` y `e2e/` están preparados pero requieren más casos.
+- **Migraciones**: nunca editar una migración ya aplicada; agregar una nueva,
+  por ejemplo `0006_...`. Los secretos solo en entorno o Vault, nunca en el
+  repositorio.
+- **Pruebas**: la cobertura actual vive en `tests/unit`. No hay carpetas
+  auxiliares vacías: los nuevos casos se agregan ahí cuando se necesiten.
 - **Offline**: no hay service worker porque el SRS excluyó la PWA. Desconectar
   la red después de cargar depende de la caché del navegador; está previsto
   documentar la comprobación en el ensayo del 3 de diciembre.
