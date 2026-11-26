@@ -11,8 +11,12 @@ function fixture() {
     localStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) },
     crypto: { getRandomValues: values => { values[0] = 0; return values; } }
   });
-  for (const filename of ['data.js', 'draw.js']) {
-    runInContext(readFileSync(join(__dirname, '..', 'assets', 'js', filename), 'utf8'), context);
+  const files = [
+    join(__dirname, '..', '..', 'apps', 'web', 'shared', 'js', 'data.js'),
+    join(__dirname, '..', '..', 'apps', 'web', 'modules', 'pantalla-gigante', 'js', 'draw.js')
+  ];
+  for (const filename of files) {
+    runInContext(readFileSync(filename, 'utf8'), context);
   }
   const careers = context.window.CIYA_DATA.carreras;
   const ticket = (number, person, nombre) => ({ number: 'CIYA-' + String(number).padStart(19, '0'), person, nombre });

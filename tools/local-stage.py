@@ -9,7 +9,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent / 'apps' / 'web'
 HOST = '127.0.0.1'
 PORT = 8080
 
@@ -26,10 +26,26 @@ class StageHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             return None
         path = urlsplit(self.path).path
-        static_files = ['/escenario.html', '/assets/css/app.css']
-        static_files.extend('/assets/js/' + name + '.js' for name in (
-            'config', 'data', 'store', 'ui', 'sound', 'draw', 'escenario'
-        ))
+        static_files = {
+            '/escenario.html',
+            '/shared/css/tokens.css',
+            '/shared/css/base.css',
+            '/shared/css/components.css',
+            '/shared/css/responsive.css',
+            '/modules/pantalla-gigante/css/ranking.css',
+            '/modules/pantalla-gigante/css/villancicos.css',
+            '/modules/pantalla-gigante/css/ruleta.css',
+            '/modules/pantalla-gigante/css/respaldo.css',
+            '/modules/hardware-encendido/css/encendido.css',
+            '/shared/js/config.js',
+            '/shared/js/data.js',
+            '/shared/js/store.js',
+            '/shared/js/ui.js',
+            '/shared/js/sound.js',
+            '/modules/pantalla-gigante/js/draw.js',
+            '/modules/hardware-encendido/js/encendido.js',
+            '/modules/pantalla-gigante/js/escenario.js',
+        }
         if path not in static_files:
             self.send_error(404)
             return None

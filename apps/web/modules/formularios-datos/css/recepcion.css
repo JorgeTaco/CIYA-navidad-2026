@@ -1,0 +1,13 @@
+.reception-page .container { max-width: 57rem; }
+.reception-heading h1 { margin: 0; }
+.reception-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .35rem; padding: .3rem; margin-bottom: .7rem; border: 1px solid var(--line); border-radius: 13px; background: var(--bg-soft); }
+.reception-tabs button { padding: .5rem .3rem; min-height: 44px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: var(--muted); font: inherit; font-weight: 750; cursor: pointer; }
+.reception-tabs button:hover { color: var(--text); border-color: var(--line); }
+.reception-tabs [aria-selected="true"] { color: #18211b; background: var(--gold); }
+.wall-confirmation, .receipt-card, .gold-availability { margin: .75rem 0 0; }
+.wall-confirmation form, .record-list summary + div { margin-top: 1rem; }
+.gold-availability { display: flex; flex-wrap: wrap; gap: .4rem; }
+.receipt-card { border-color: #72e1b166; overflow-wrap: anywhere; }
+.receipt-card h2 { font-size: 1.25rem; }
+.record-list { min-width: 0; margin-bottom: 0; }
+.table-label { display: none; }

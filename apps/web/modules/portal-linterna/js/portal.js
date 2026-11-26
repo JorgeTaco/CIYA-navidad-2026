@@ -136,30 +136,6 @@
     applyLantern();
   }
 
-  function setupForms() {
-    const value = function (id) { return document.getElementById(id).value.trim(); };
-    const group = document.getElementById('form-villancicos');
-    group.addEventListener('submit', function (event) {
-      return UI.submit(event, 'group', {
-        nombre: value('vil-grupo'), representante: value('vil-representante'),
-        integrantes: value('vil-integrantes').split('\n').map(function (name) { return name.trim(); }).filter(Boolean),
-        carrera: value('vil-carrera'), cancion: value('vil-cancion'), categoria: value('vil-categoria')
-      }, false, function () {
-        group.reset();
-        UI.toast('Grupo inscrito en el orden de presentación.');
-      });
-    });
-    const wish = document.getElementById('form-deseo');
-    wish.addEventListener('submit', function (event) {
-      return UI.submit(event, 'wish', {
-        nombre: value('des-nombre'), rol: value('des-rol'), carrera: value('des-carrera'), frase: value('des-frase')
-      }, false, function () {
-        wish.reset();
-        UI.toast('Frase enviada a curaduría.');
-      });
-    });
-  }
-
   function setupEstaticos() {
     document.getElementById('espacios-puertas').innerHTML = Data.carreras.map(function (c) {
       return '<p><span class="carrera-dot" style="--dot-color:' + c.color + '"></span><strong>' + esc(c.nombre) + '</strong><br><small>Aulas ' + esc(c.aula) + '</small></p>';
@@ -172,7 +148,7 @@
   function render(state) {
     const counters = { asistentes: 'attendees', boletos: 'tickets', grupos: 'groups', deseos: 'wishes' };
     Object.keys(counters).forEach(function (id) {
-      document.getElementById('stat-' + id).textContent = state.counts[counters[id]] ?? '—';
+      document.getElementById('stat-' + id).textContent = state.counts[counters[id]] == null ? '—' : state.counts[counters[id]];
     });
     if (!state.ranking.length) {
       document.getElementById('lista-grupos').textContent = 'Orden de presentación aún no disponible.';
@@ -204,7 +180,8 @@
       return;
     }
     fillSelects();
-    setupForms();
+    window.CIYA_INSCRIPCIONES.init();
+    window.CIYA_BUZON.init();
     setupEstaticos();
     UI.initNav();
     await Store.init();

@@ -42,10 +42,10 @@
         const emails = new Map();
         const checks = [];
         for (const person of backup.attendees) {
-          const cedula = String(person.cedula ?? '').trim();
+          const cedula = String(person.cedula == null ? '' : person.cedula).trim();
           if (!/^\d{10}$/.test(cedula) || ids.has(cedula)) throw new Error('Cédula inválida o duplicada: ' + cedula);
           ids.add(cedula);
-          const email = String(person.email ?? '').trim().toLowerCase();
+          const email = String(person.email == null ? '' : person.email).trim().toLowerCase();
           if (email) emails.set(email, (emails.get(email) || 0) + 1);
           const label = document.createElement('label');
           const checkbox = document.createElement('input');
@@ -58,7 +58,7 @@
         const donations = backup.donations;
         const claims = backup.qrClaims.filter(function (claim) { return claim.canjeado === true; });
         for (const item of [...donations, ...claims]) {
-          if (!ids.has(String(item.cedula ?? '').trim())) throw new Error('Hay aportes o canjes sin asistente asociado.');
+          if (!ids.has(String(item.cedula == null ? '' : item.cedula).trim())) throw new Error('Hay aportes o canjes sin asistente asociado.');
         }
         if (new Set(claims.map(function (claim) { return claim.codigo; })).size !== claims.length ||
           new Set(claims.map(function (claim) { return claim.cedula; })).size !== claims.length) {
@@ -73,7 +73,7 @@
           warning.textContent = 'Hay correos repetidos. Solo se puede confirmar un registro por correo.';
           report.append(warning);
         }
-        if (backup.groups.some(function (group) { return group.carreras?.length > 1; })) {
+        if (backup.groups.some(function (group) { return group.carreras && group.carreras.length > 1; })) {
           const warning = document.createElement('p');
           warning.textContent = 'Los grupos con varias carreras se importarán con la primera carrera registrada.';
           report.append(warning);
@@ -182,7 +182,7 @@
     document.getElementById('lista-scores').innerHTML = UI.table(['Grupo', 'Creatividad', 'Musical', 'Escena', 'Aplauso', 'Total'],
       state.scores.map(function (s) {
         const group = state.groups.find(function (g) { return g.id === s.grupoId; });
-        return [esc(group ? group.nombre : 'Grupo'), Number(s.criterios?.creatividad || 0), Number(s.criterios?.musical || 0), Number(s.criterios?.escena || 0), Number(s.aplauso || 0), Number(s.total) + '/100'];
+        return [esc(group ? group.nombre : 'Grupo'), Number((s.criterios && s.criterios.creatividad) || 0), Number((s.criterios && s.criterios.musical) || 0), Number((s.criterios && s.criterios.escena) || 0), Number(s.aplauso || 0), Number(s.total) + '/100'];
       })
     );
   }

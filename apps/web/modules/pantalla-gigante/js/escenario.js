@@ -3,9 +3,9 @@
   const Store = window.CIYA_STORE;
   const Data = window.CIYA_DATA;
   const Sound = window.CIYA_SOUND;
-  const CFG = window.CIYA_CONFIG;
   const esc = UI.escapeHtml;
   const Draw = window.CIYA_DRAW;
+  const Ignite = window.CIYA_IGNITE;
   const localMode = location.origin === 'http://127.0.0.1:8080' &&
     new URLSearchParams(location.search).get('modo') === 'local';
 
@@ -13,8 +13,6 @@
   const cron = { remaining: 180, running: false, timer: null };
   const aplauso = { value: 0, db: null, stream: null, context: null, analyser: null, frame: null, data: null };
   const rotacion = { timer: null, index: 0 };
-  const ignicion = { count: 10, running: false, timer: null, step: -1, sequenceTimer: null };
-  const serial = { port: null, reader: null, writer: null, armed: false, connecting: false };
   let draw = null;
   let lastDrawFrame = '';
   let lastTick = 0;
@@ -68,12 +66,13 @@
         '<h2 style="font-size:clamp(1.6rem,4.5vw,3rem);text-wrap:balance">' + (frase ? '“' + esc(frase.frase) + '”' : 'Esperando frases aprobadas') + '</h2>' +
         '<p class="muted">' + (frase ? esc(frase.nombre) + ' · ' + esc(frase.rol) + ' · ' + esc(frase.carrera) : 'La curaduría aprobará las frases enviadas') + '</p>';
     } else if (activeTab === 'encendido') {
+      const estado = Ignite.status();
       screen.innerHTML = '<span class="kicker">5 carreras, 1 energía</span>' +
         '<h2>Encendido del Árbol CIYA 2026</h2>' +
-        '<div class="big-number">' + (ignicion.running ? ignicion.count : ignicion.step >= 0 ? '0' : 'LISTO') + '</div>' +
+        '<div class="big-number">' + (estado.running ? estado.count : estado.step >= 0 ? '0' : 'LISTO') + '</div>' +
         '<div class="row" style="justify-content:center;margin-top:1rem">' + Data.secuenciaEncendido.map(function (id, index) {
           const c = Store.carrera(id);
-          const cls = index === ignicion.step ? 'active' : index < ignicion.step ? 'done' : '';
+          const cls = index === estado.step ? 'active' : index < estado.step ? 'done' : '';
           return '<span class="badge ' + cls + '" style="border-color:' + c.color + ';color:' + c.color + '">' + c.sigla + '</span>';
         }).join('') + '</div>';
     } else if (activeTab === 'ruleta') {
@@ -89,17 +88,6 @@
     } else {
       screen.innerHTML = '<span class="kicker">Respaldo local</span><h2>Modo contingencia</h2><p class="muted">Descarga el JSON después de que recepción selle los datos a las 17:45.</p>';
     }
-  }
-
-  function renderSequence() {
-    const container = document.getElementById('secuencia-encendido');
-    if (!container) return;
-    container.innerHTML = Data.secuenciaEncendido.map(function (id, index) {
-      const c = Store.carrera(id);
-      const cls = index === ignicion.step ? 'active' : index < ignicion.step ? 'done' : '';
-      return '<div class="timeline-step ' + cls + '" style="--step-color:' + c.color + '"><span class="step-index">' + (index + 1) + '</span>' +
-        '<span>' + esc(c.nombre) + (index === 4 ? ' · pulso al relé' : '') + '</span></div>';
-    }).join('');
   }
 
   function renderScoreFields() {
@@ -223,114 +211,6 @@
     rotacion.timer = null;
   }
 
-  function relayStatus(message, kind) {
-    const status = document.getElementById('estado-relay');
-    status.textContent = message;
-    status.className = 'badge ' + kind;
-  }
-
-  async function writeRelay() {
-    if (!serial.writer) {
-      relayStatus('Simulación local: placa desconectada.', 'warn');
-      return;
-    }
-    try {
-      await serial.writer.write(new TextEncoder().encode(CFG.relayCommand));
-      relayStatus('Comando enviado a la placa.', 'ok');
-    } catch {
-      relayStatus('Error al enviar el comando. Avisa a Electricidad.', 'bad');
-    }
-  }
-
-  function runSequence() {
-    ignicion.step = 0;
-    renderSequence();
-    renderStage();
-    ignicion.sequenceTimer = setInterval(function () {
-      ignicion.step += 1;
-      if (ignicion.step >= Data.secuenciaEncendido.length) {
-        clearInterval(ignicion.sequenceTimer);
-        ignicion.sequenceTimer = null;
-        Sound.ignite();
-      } else {
-        Sound.beep();
-      }
-      renderSequence();
-      renderStage();
-    }, 900);
-  }
-
-  function startIgnicion() {
-    if (ignicion.running || ignicion.sequenceTimer) return;
-    serial.armed = false;
-    document.getElementById('serial-arm').textContent = 'Armar disparo del sensor';
-    Sound.enable();
-    ignicion.running = true;
-    ignicion.count = 10;
-    ignicion.step = -1;
-    const deadline = performance.now() + 10000;
-    relayStatus('Cuenta en curso.', 'warn');
-    renderSequence();
-    renderStage();
-    ignicion.timer = setInterval(function () {
-      const seconds = Math.max(0, Math.ceil((deadline - performance.now()) / 1000));
-      if (seconds === ignicion.count) return;
-      ignicion.count = seconds;
-      if (seconds === 0) {
-        clearInterval(ignicion.timer);
-        ignicion.running = false;
-        Sound.go();
-        writeRelay();
-        runSequence();
-      } else {
-        Sound.countdown();
-        renderStage();
-      }
-    }, 50);
-  }
-
-  async function connectSerial() {
-    if (serial.connecting) return;
-    if (!navigator.serial) return UI.toast('Web Serial requiere Chrome o Edge de escritorio.', 'bad');
-    serial.connecting = true;
-    const connect = document.getElementById('serial-connect');
-    const arm = document.getElementById('serial-arm');
-    const status = document.getElementById('serial-status');
-    connect.disabled = true;
-    try {
-      serial.port = await navigator.serial.requestPort();
-      await serial.port.open({ baudRate: CFG.serialBaudRate });
-      serial.writer = serial.port.writable.getWriter();
-      serial.reader = serial.port.readable.getReader();
-      status.textContent = 'Sensor conectado';
-      arm.disabled = false;
-      let buffer = '';
-      const decoder = new TextDecoder();
-      while (true) {
-        const packet = await serial.reader.read();
-        if (packet.done) break;
-        buffer += decoder.decode(packet.value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop();
-        if (buffer.length > 256) buffer = '';
-        for (const line of lines) {
-          if (serial.armed && /^(SENSOR|TRIGGER|DISPARO|IGNITE|1)$/i.test(line.trim())) startIgnicion();
-        }
-      }
-    } catch (error) {
-      if (error.name !== 'NotFoundError') UI.toast('Puerto serial interrumpido: ' + error.message, 'bad');
-    } finally {
-      if (serial.reader) serial.reader.releaseLock();
-      if (serial.writer) serial.writer.releaseLock();
-      if (serial.port) await serial.port.close().catch(function () {});
-      Object.assign(serial, { port: null, reader: null, writer: null, armed: false, connecting: false });
-      status.textContent = 'Sin conectar';
-      arm.textContent = 'Armar disparo del sensor';
-      arm.disabled = true;
-      connect.disabled = false;
-    }
-  }
-
   function updateDraw() {
     if (!draw) return;
     const now = Date.now();
@@ -431,13 +311,13 @@
     document.getElementById('backup-download').disabled = !state.snapshot && !draw;
 
     renderRuleta();
-    renderSequence();
+    Ignite.renderSequence();
     renderStage();
   }
 
   function setup() {
     renderScoreFields();
-    renderSequence();
+    Ignite.renderSequence();
     UI.initNav('escenario');
 
     document.querySelectorAll('.stage-tabs .btn').forEach(function (button) {
@@ -482,12 +362,7 @@
 
     document.getElementById('deseos-play').addEventListener('click', startRotation);
     document.getElementById('deseos-stop').addEventListener('click', stopRotation);
-    document.getElementById('serial-connect').addEventListener('click', connectSerial);
-    document.getElementById('serial-arm').onclick = function (event) {
-      Sound.enable();
-      serial.armed = !serial.armed;
-      event.currentTarget.textContent = serial.armed ? 'Desarmar disparo' : 'Armar disparo del sensor';
-    };
+    Ignite.setup();
     document.getElementById('project-fullscreen').onclick = async function () {
       const screen = document.getElementById('stage-screen');
       try {
@@ -497,15 +372,7 @@
         UI.toast('Usa el modo de pantalla completa del navegador.', 'warn');
       }
     };
-    document.getElementById('ignicion-manual').addEventListener('click', startIgnicion);
     document.getElementById('ruleta-girar').addEventListener('click', spin);
-    document.addEventListener('keydown', function (event) {
-      const tag = document.activeElement ? document.activeElement.tagName : '';
-      if (!event.repeat && event.code === 'Space' && activeTab === 'encendido' && !['INPUT','TEXTAREA','SELECT','BUTTON','A'].includes(tag)) {
-        event.preventDefault();
-        startIgnicion();
-      }
-    });
 
     document.getElementById('backup-download').onclick = function () {
       const snapshot = (draw && draw.snapshot) || Store.get().snapshot;
@@ -567,5 +434,6 @@
     Store.subscribe(render);
   }
 
+  window.CIYA_STAGE_RENDER = renderStage;
   init();
 })();

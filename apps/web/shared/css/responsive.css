@@ -1,0 +1,62 @@
+@media (max-width: 920px) {
+  .grid.cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stage-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  body { font-size: 15px; }
+  .container { padding: 1rem 0.8rem 3rem; }
+  .grid.cols-2, .grid.cols-3, .grid.cols-4 { grid-template-columns: 1fr; }
+  .topbar-inner { padding: 0.55rem 0.8rem; }
+  .nav-links { order: 3; width: 100%; overflow-x: auto; flex-wrap: nowrap; }
+  .card { padding: 1rem; }
+  .row .btn { flex: 1 1 auto; }
+  th, td { padding: 0.5rem 0.55rem; }
+}
+
+@media print {
+  body { background: #fff; color: #000; }
+  .topbar, .footer, .btn, .pin-overlay, .toast-box { display: none !important; }
+  .card, .hero { border-color: #aaa; box-shadow: none; background: #fff; color: #000; }
+  .print-only { display: block; }
+}
+
+[hidden] { display: none !important; }
+
+@media (max-width: 760px) {
+  .event-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .event-art { right: 0; opacity: .6; }
+  .lantern-layout { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .portal-page input, .portal-page select, .portal-page textarea,
+  .reception-page input, .reception-page select, .reception-page textarea { font-size: 16px; }
+  .event-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .event-summary > div:nth-child(even) { border-inline-end: 0; }
+  .event-summary > div:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+  .event-action { font-size: .88rem; }
+  .route-page .bottom-actions .btn { flex: 1; padding-inline: .35rem; }
+  .form-row { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .table-stack { border: 0; overflow: visible; }
+  .table-stack table, .table-stack tbody { display: block; }
+  .table-stack thead { position: absolute; clip-path: inset(50%); width: 1px; height: 1px; overflow: hidden; }
+  .table-stack tbody tr { display: block; padding: .3rem .65rem; margin-bottom: .5rem; border: 1px solid var(--line); border-radius: .6rem; }
+  .table-stack td { display: grid; grid-template-columns: minmax(0, 5.5rem) minmax(0, 1fr); gap: .35rem; padding: .35rem 0; white-space: normal; overflow-wrap: anywhere; border: 0; }
+  .table-stack .table-label { display: inline; color: var(--muted); font-size: .8rem; }
+  .rules-page th, .rules-page td, .rules-page td.wrap { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .lantern-stage.blink .lantern-message { animation: none; }
+  .wheel.spinning { animation-duration: .01s; }
+}
+@media print {
+  .portal-page, .route-page, .reception-page, .rules-page { color-scheme: light; background: #fff; }
+  .route-page { padding-bottom: 0; }
+  .bottom-actions { display: none; }
+  .event-hero { background: #fff; color: #000; box-shadow: none; }
+  .route-page a, .route-page .muted, .route-page .route-hero p { color: #000; }
+  .route-page .card-link::after { content: attr(href); font-size: .8rem; }
+}

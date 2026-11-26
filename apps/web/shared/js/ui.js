@@ -168,7 +168,7 @@
   function csv(rows) {
     return '\ufeff' + rows.map(function (row) {
       return row.map(function (value) {
-        let cell = String(value ?? '');
+        let cell = String(value == null ? '' : value);
         if (/^\s*[=+@-]/.test(cell) || /^[\r\n\t]/.test(cell)) cell = "'" + cell;
         return '"' + cell.replace(/"/g, '""') + '"';
       }).join(',');

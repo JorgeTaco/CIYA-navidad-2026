@@ -89,8 +89,8 @@
   function render(state) {
     if (state.ranking.length) UI.renderRanking('ranking-recepcion', Store.ranking());
     else byId('ranking-recepcion').textContent = 'Marcador aún no disponible.';
-    byId('count-asistentes').textContent = state.counts.attendees ?? '—';
-    byId('count-donaciones').textContent = state.counts.donations ?? '—';
+    byId('count-asistentes').textContent = state.counts.attendees == null ? '—' : state.counts.attendees;
+    byId('count-donaciones').textContent = state.counts.donations == null ? '—' : state.counts.donations;
     byId('lista-asistentes').innerHTML = UI.table(['Estudiante', 'Cédula', 'Carrera', 'Acreditación'],
       state.attendees.filter(function (person) { return person.checked_in_at; }).map(function (person) {
         return [esc(person.nombre), esc(person.cedula), esc(Store.carrera(person.carrera).nombre), esc(UI.dateTime(person.checked_in_at))];

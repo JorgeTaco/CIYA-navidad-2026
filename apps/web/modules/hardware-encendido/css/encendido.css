@@ -1,0 +1,4 @@
+.timeline-step { display: flex; align-items: center; gap: 0.7rem; padding: 0.65rem 0.8rem; border: 1px solid var(--line); border-radius: 12px; margin-bottom: 0.5rem; font-weight: 700; }
+.timeline-step.active { border-color: var(--step-color, var(--gold)); box-shadow: 0 0 0 3px rgba(255, 209, 102, 0.12); background: rgba(255, 255, 255, 0.05); }
+.timeline-step.done { opacity: 0.62; }
+.step-index { width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; background: var(--step-color, var(--gold)); color: #081426; flex: none; }
