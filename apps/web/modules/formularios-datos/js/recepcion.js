@@ -98,7 +98,7 @@
           <details class="card record-list"><summary>Donaciones registradas <span class="badge" id="count-donaciones">—</span></summary><div id="lista-donaciones"></div></details>
         </section>
         <section class="section card">
-          <div class="row between"><div><h3>Cierre de recepción</h3><p class="muted">El cierre formal es a las 17:45. Al cerrar, la consola de escenario puede descargar el respaldo local JSON de la ruleta y el ranking.</p></div><button class="btn danger" id="btn-cerrar">Marcar cierre de recepción</button></div>
+          <div class="row between"><div><h3>Cierre de recepción</h3><p class="muted">El cierre formal es a las 17:45. Al cerrar, la consola de escenario puede descargar el respaldo local JSON de la ruleta y el ranking.</p></div><button class="btn danger" id="btn-cerrar" disabled>Marcar cierre de recepción</button></div>
           <p id="estado-cierre"></p>
         </section>
       </div>`;

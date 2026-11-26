@@ -127,6 +127,7 @@
       statusNode.textContent = 'Sensor conectado';
       arm.disabled = false;
       let buffer = '';
+      let discardLine = false;
       const decoder = new TextDecoder();
       while (true) {
         const packet = await serial.reader.read();
@@ -134,9 +135,14 @@
         buffer += decoder.decode(packet.value, { stream: true });
         const lines = buffer.split('\n');
         buffer = lines.pop();
-        if (buffer.length > 256) buffer = '';
         for (const line of lines) {
-          if (serial.armed && /^(SENSOR|TRIGGER|DISPARO|IGNITE|1)$/i.test(line.trim())) startIgnicion();
+          if (!discardLine && line.length <= 256 && serial.armed &&
+              /^(SENSOR|TRIGGER|DISPARO|IGNITE|1)$/i.test(line.trim())) startIgnicion();
+          discardLine = false;
+        }
+        if (buffer.length > 256) {
+          buffer = '';
+          discardLine = true;
         }
       }
     } catch (error) {

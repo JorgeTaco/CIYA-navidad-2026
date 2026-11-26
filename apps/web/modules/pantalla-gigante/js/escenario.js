@@ -90,7 +90,7 @@
             <section class="card tab-panel" data-panel="respaldo" hidden>
               <h2>Respaldo local</h2>
               <p class="muted">A las 17:45, descarga el JSON con la lista completa de boletos y el marcador final de donaciones. La ruleta, el ranking y el encendido siguen funcionando sin internet.</p>
-              <button class="btn primary wide" id="backup-download">Descargar Respaldo Local (JSON)</button>
+              <button class="btn primary wide" id="backup-download" disabled>Descargar Respaldo Local (JSON)</button>
               <div class="field" style="margin-top:1rem"><label for="backup-file">Restaurar desde archivo</label><input id="backup-file" type="file" accept="application/json,.json"></div>
               <button class="btn wide" id="backup-load">Cargar respaldo</button>
               <p class="hint" style="margin-top:1rem">Importa el respaldo en la consola local. Usa una sola pestaña para operar el sorteo.</p>

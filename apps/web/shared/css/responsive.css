@@ -44,7 +44,6 @@
   .table-stack tbody tr { display: block; padding: .3rem .65rem; margin-bottom: .5rem; border: 1px solid var(--line); border-radius: .6rem; }
   .table-stack td { display: grid; grid-template-columns: minmax(0, 5.5rem) minmax(0, 1fr); gap: .35rem; padding: .35rem 0; white-space: normal; overflow-wrap: anywhere; border: 0; }
   .table-stack .table-label { display: inline; color: var(--muted); font-size: .8rem; }
-  .rules-page th, .rules-page td, .rules-page td.wrap { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -52,7 +51,7 @@
   .wheel.spinning { animation-duration: .01s; }
 }
 @media print {
-  .portal-page, .route-page, .reception-page, .rules-page { color-scheme: light; background: #fff; }
+  .portal-page, .route-page, .reception-page, .schedule-page { color-scheme: light; background: #fff; }
   .route-page { padding-bottom: 0; }
   .bottom-actions { display: none; }
   .event-hero { background: #fff; color: #000; box-shadow: none; }

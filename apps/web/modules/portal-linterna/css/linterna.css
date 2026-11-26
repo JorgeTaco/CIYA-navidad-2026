@@ -20,12 +20,8 @@
   background: #05090b;
 }
 
-.lantern-stage[data-format="vertical"] .lantern-board {
-  block-size: clamp(12rem, 35vw, 17rem);
-}
-
 @media (orientation: portrait) {
-  .lantern-stage[data-format="auto"] .lantern-board {
+  .lantern-stage .lantern-board {
     block-size: clamp(12rem, 35vw, 17rem);
   }
 }
@@ -95,7 +91,7 @@
 
 .lantern-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.18fr); gap: 1rem; align-items: start; }
 .lantern-setup fieldset, #chk-donation-fields { margin: 0; padding: 0; border: 0; min-inline-size: 0; }
-.lantern-setup fieldset + fieldset, .lantern-format { margin-top: 1.2rem; }
+.lantern-setup fieldset + fieldset { margin-top: 1.2rem; }
 .lantern-setup legend { margin-bottom: .6rem; padding: 0; font-weight: 750; }
 .lantern-setup .chip { min-height: 44px; }
 .custom-message { margin-top: .8rem; }

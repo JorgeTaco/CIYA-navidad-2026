@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#07151c">
+  <title>Cronograma | CIYA Navidad 2026</title>
+  <link rel="stylesheet" href="shared/css/tokens.css">
+  <link rel="stylesheet" href="shared/css/base.css">
+  <link rel="stylesheet" href="shared/css/components.css">
+  <link rel="stylesheet" href="modules/cronograma/css/cronograma.css">
+  <link rel="stylesheet" href="shared/css/responsive.css">
+</head>
+<body class="schedule-page">
+  <header class="topbar event-topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html"><span class="brand-mark">CIYA</span><span>Navidad 2026</span></a>
+      <nav class="nav-links" data-role-links aria-label="Navegación principal">
+        <a href="portal.html" data-nav="portal">Portal</a>
+        <a href="qr.html" data-nav="qr">Ruta QR</a>
+        <a href="cronograma.html" data-nav="cronograma" aria-current="page">Cronograma</a>
+        <a href="index.html" data-nav="acceso">Acceso</a>
+      </nav>
+      <button class="btn ghost small" type="button" data-logout-btn hidden>Cerrar sesión</button>
+    </div>
+  </header>
+
+  <main class="container narrow" id="cronograma">
+    <header class="event-hero schedule-header">
+      <p class="kicker">Viernes 4 de diciembre de 2026</p>
+      <h1>Cronograma</h1>
+      <p>Hall principal CIYA · Hora de Ecuador continental</p>
+    </header>
+
+    <div class="schedule-filters" role="group" aria-label="Filtrar actividades" id="schedule-filters">
+      <button type="button" class="btn" data-phase="all" aria-pressed="true" aria-controls="schedule-list">Todas</button>
+      <button type="button" class="btn" data-phase="previo" aria-pressed="false" aria-controls="schedule-list">Antes del escenario</button>
+      <button type="button" class="btn" data-phase="escenario" aria-pressed="false" aria-controls="schedule-list">Escenario</button>
+      <button type="button" class="btn" data-phase="cierre" aria-pressed="false" aria-controls="schedule-list">Cierre</button>
+    </div>
+    <p class="muted schedule-count" id="schedule-count" role="status"></p>
+    <ol id="schedule-list" class="schedule-list" aria-label="Actividades por horario" role="list"></ol>
+  </main>
+
+  <footer class="footer">Facultad CIYA · Carrera de Sistemas y Software</footer>
+
+  <script src="shared/js/config.js"></script>
+  <script src="shared/js/data.js"></script>
+  <script src="shared/js/store.js"></script>
+  <script src="shared/js/ui.js"></script>
+  <script src="modules/cronograma/js/cronograma.js"></script>
+</body>
+</html>

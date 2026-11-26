@@ -23,6 +23,7 @@ function loadShared({ configured = true, storedSession = null, storedRoles = nul
   const logoutBtn = { hidden: true, dataset: {}, addEventListener() {} };
   const timers = [];
   const docListeners = [];
+  const network = [];
   const context = createContext({
     window: {},
     sessionStorage: {
@@ -41,6 +42,7 @@ function loadShared({ configured = true, storedSession = null, storedRoles = nul
       getElementById: id => (id === 'sync-status' ? statusEl : null),
       addEventListener: (type, fn) => docListeners.push({ type, fn })
     },
+    fetch: async (...args) => { network.push(args); throw new Error('Red desconectada'); },
     setInterval: fn => { timers.push(fn); return timers.length; },
     clearInterval: () => {}
   });
@@ -64,7 +66,8 @@ function loadShared({ configured = true, storedSession = null, storedRoles = nul
     roleLinksEl,
     logoutBtn,
     timers,
-    docListeners
+    docListeners,
+    network
   };
 }
 
@@ -125,7 +128,7 @@ test('store resuelve carreras conocidas, desconocidas y ranking inicial', () => 
 test('initNav oculta pestañas de otros roles en asistente, recepción y modo local', () => {
   const guest = loadShared();
   guest.ui.initNav('acceso');
-  assert.equal(guest.roleLinksEl.innerHTML, '<a href="bases.html" data-nav="bases">Bases oficiales</a>');
+  assert.equal(guest.roleLinksEl.innerHTML, '<a href="cronograma.html" data-nav="cronograma">Cronograma</a>');
   assert.equal(guest.logoutBtn.hidden, true);
 
   guest.store.enterAsistente();
@@ -164,12 +167,23 @@ test('sin configuración no hay sesión, Roles ni operaciones', async () => {
 
 test('la navegación pública funciona sin sesión ni configuración de Supabase', () => {
   const { ui, roleLinksEl, logoutBtn } = loadShared({ configured: false });
-  for (const page of ['portal', 'qr', 'bases']) {
+  for (const page of ['portal', 'qr', 'cronograma']) {
     ui.initNav(page);
     assert.match(roleLinksEl.innerHTML, /portal\.html/);
     assert.match(roleLinksEl.innerHTML, /qr\.html/);
-    assert.match(roleLinksEl.innerHTML, /bases\.html/);
+    assert.match(roleLinksEl.innerHTML, /cronograma\.html/);
     assert.doesNotMatch(roleLinksEl.innerHTML, /recepcion\.html|escenario\.html|admin\.html/);
     assert.equal(logoutBtn.hidden, true);
+  }
+});
+
+test('el acceso de escenario offline no consulta Supabase ni crea tareas de sincronización', async () => {
+  for (const configured of [true, false]) {
+    const { store, network, timers, docListeners } = loadShared({ configured });
+    await store.init('offline');
+    assert.equal(store.isRemote(), false);
+    assert.deepEqual(network, []);
+    assert.deepEqual(timers, []);
+    assert.deepEqual(docListeners, []);
   }
 });

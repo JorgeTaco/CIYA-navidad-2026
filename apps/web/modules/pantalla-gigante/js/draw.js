@@ -25,7 +25,7 @@
     const numbers = new Set();
     snapshot.tickets.forEach(function (ticket) {
       if (!ticket || !/^CIYA-\d{19}$/.test(ticket.number) || numbers.has(ticket.number) ||
-          typeof ticket.person !== 'string' || !/^[0-9a-f-]{36}$/i.test(ticket.person) ||
+          typeof ticket.person !== 'string' || !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(ticket.person) ||
           typeof ticket.nombre !== 'string' || !ticket.nombre.trim() || ticket.nombre.length > 120) {
         throw new Error('El respaldo contiene un boleto inválido o duplicado.');
       }

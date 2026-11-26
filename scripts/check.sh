@@ -17,4 +17,5 @@ for path in sorted(Path('apps/web').rglob('*.js')):
 print('JavaScript parseado con esprima (node no disponible).')
 PY
 fi
+python3 -B -m unittest discover -s tests/unit -p 'test_*.py'
 python3 tools/check-structure.py

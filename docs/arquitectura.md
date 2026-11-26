@@ -27,9 +27,9 @@ Las RPC están definidas en `supabase/migrations/0002_rpc_read_write.sql` y
 
 - Cada HTML funcional en `apps/web/` es un shell delgado con un punto de montaje:
   `#acceso-root` (`index.html`), `#portal-root` (`portal.html`), `#qr-root`,
-  `#recepcion-root`, `#admin-root` y `#escenario-root`. El JS dueño renderiza allí
-  todo el markup dinámico. `bases.html` es contenido oficial estático y no tiene
-  JS propio.
+  `#recepcion-root`, `#admin-root`, `#escenario-root` y `#schedule-list`
+  (`cronograma.html`). Cada módulo renderiza su vista dinámica. El cronograma
+  toma los horarios de `CIYA_DATA.cronograma` y los agrupa por fase.
 - `index.html` autentica las cuentas de organización mediante
   `CIYA_STORE.loginAccount()` y muestra los paneles asignados al rol. El portal y
   la ruta QR admiten acceso directo. `CIYA_UI.initNav()` adapta el menú al rol y
@@ -52,7 +52,8 @@ disponibilidad de los objetos globales: `shared/` primero, después los módulos
 al final `shared/css/responsive.css`. Dos órdenes son obligatorios por los puntos
 de montaje:
 
-- `portal.html`: `portal.js` antes que `inscripciones.js` y `buzon.js`, para que
+- `portal.html`: `lantern-matrix.js` antes de `portal.js` para dibujar el letrero.
+  `portal.js` se carga antes que `inscripciones.js` y `buzon.js`, para que
   `CIYA_PORTAL.mount()` cree `#inscripciones-root` y `#buzon-root` antes de que
   los formularios busquen esos contenedores.
 - `escenario.html`: `encendido.js` antes que `escenario.js`, para que exista

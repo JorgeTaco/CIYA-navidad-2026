@@ -229,12 +229,12 @@
       return '<a href="escenario.html" data-nav="escenario">Escenario</a>';
     }
     if (!roles.length) {
-      if (active === 'acceso') return '<a href="bases.html" data-nav="bases">Bases oficiales</a>';
-      if (active === 'portal' || active === 'qr' || active === 'bases') {
+      if (active === 'acceso') return '<a href="cronograma.html" data-nav="cronograma">Cronograma</a>';
+      if (active === 'portal' || active === 'qr' || active === 'cronograma') {
         return '<a href="portal.html" data-nav="portal">Portal</a><a href="qr.html" data-nav="qr">Ruta QR</a>' +
-          '<a href="bases.html" data-nav="bases">Bases oficiales</a><a href="index.html" data-nav="acceso">Acceso</a>';
+          '<a href="cronograma.html" data-nav="cronograma">Cronograma</a><a href="index.html" data-nav="acceso">Acceso</a>';
       }
-      return '<a href="index.html" data-nav="acceso">Iniciar sesión</a><a href="bases.html" data-nav="bases">Bases oficiales</a>';
+      return '<a href="index.html" data-nav="acceso">Iniciar sesión</a><a href="cronograma.html" data-nav="cronograma">Cronograma</a>';
     }
     const items = [];
     if (roles.includes('asistente')) {
@@ -247,7 +247,7 @@
         items.push('<a href="' + panel.href + '" data-nav="' + panel.id + '">' + escapeHtml(panel.shortLabel) + '</a>');
       }
     });
-    items.push('<a href="bases.html" data-nav="bases">Bases oficiales</a>');
+    items.push('<a href="cronograma.html" data-nav="cronograma">Cronograma</a>');
     return items.join('');
   }
 

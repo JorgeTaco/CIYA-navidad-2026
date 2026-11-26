@@ -153,12 +153,12 @@ window.CIYA_DATA = {
     }
   ],
   cronograma: [
-    { hora: '08:00 – 17:45', bloque: 'Recepción Solidaria, Donaciones y Canje de QR', detalle: 'Recepción de bienes y canje de QR. Acreditación del sorteo de 17:00 a 17:45.' },
-    { hora: '15:00', bloque: 'Cierre de montaje de Puertas Decoradas', detalle: 'Término del plazo formal para las cinco carreras.' },
-    { hora: '15:30 – 16:45', bloque: 'Evaluación de Puertas Decoradas', detalle: 'Recorrido formal de inspección del jurado calificador.' },
-    { hora: '17:45 – 18:25', bloque: 'Concurso de Villancicos "CIYA tiene Talento"', detalle: 'Presentaciones sobre escenario, límite de 3 minutos por intervención.' },
-    { hora: '18:25 – 18:55', bloque: 'Mensaje Institucional, Mar de Linternas y Encendido', detalle: 'Acto central y encendido sincronizado del Árbol Navideño CIYA 2026.' },
-    { hora: '18:55 – 19:25', bloque: 'Premiación y Gran Sorteo Digital', detalle: 'Adjudicación de reconocimientos y ejecución de la Ruleta Digital.' },
-    { hora: '19:25 – 20:15', bloque: 'Estación de Recarga Térmica y Cierre', detalle: 'Distribución de alimentos tradicionales, registro fotográfico y conclusión.' }
+    { fase: 'previo', hora: '08:00 – 17:45', bloque: 'Recepción Solidaria, Donaciones y Canje de QR', detalle: 'Recepción de bienes y canje de QR. Acreditación del sorteo de 17:00 a 17:45.' },
+    { fase: 'previo', hora: '15:00', bloque: 'Cierre de montaje de Puertas Decoradas', detalle: 'Término del plazo formal para las cinco carreras.' },
+    { fase: 'previo', hora: '15:30 – 16:45', bloque: 'Evaluación de Puertas Decoradas', detalle: 'Recorrido formal de inspección del jurado calificador.' },
+    { fase: 'escenario', hora: '17:45 – 18:25', bloque: 'Concurso de Villancicos "CIYA tiene Talento"', detalle: 'Presentaciones sobre escenario, límite de 3 minutos por intervención.' },
+    { fase: 'escenario', hora: '18:25 – 18:55', bloque: 'Mensaje Institucional, Mar de Linternas y Encendido', detalle: 'Acto central y encendido sincronizado del Árbol Navideño CIYA 2026. El QR del Mar de Linternas se proyecta a las 18:20.' },
+    { fase: 'escenario', hora: '18:55 – 19:25', bloque: 'Premiación y Gran Sorteo Digital', detalle: 'Adjudicación de reconocimientos y ejecución de la Ruleta Digital.' },
+    { fase: 'cierre', hora: '19:25 – 20:15', bloque: 'Estación de Recarga Térmica y Cierre', detalle: 'Distribución de alimentos tradicionales, registro fotográfico y conclusión.' }
   ]
 };

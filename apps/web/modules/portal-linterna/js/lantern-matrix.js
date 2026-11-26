@@ -149,7 +149,6 @@
 
     const deviceOrientation = window.matchMedia('(orientation: portrait)');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let format = 'auto';
     let color = '#ffd166';
     let text = '';
     let compiled = compileText(text);
@@ -164,13 +163,8 @@
     let paused = false;
     let visible = true;
 
-    function orientation() {
-      if (format !== 'auto') return format;
-      return deviceOrientation.matches ? 'vertical' : 'horizontal';
-    }
-
     function notify() {
-      onStateChange({ orientation: orientation(), mode: layout.mode, paused,
+      onStateChange({ mode: layout.mode, paused,
         part: part + 1, count: layout.lines.length, missing: compiled.missing });
     }
 
@@ -263,7 +257,8 @@
         canvas.height = pixelHeight;
       }
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
-      layout = layoutFor(compiled, width, height, orientation(), reduceMotion.matches);
+      const orientation = deviceOrientation.matches ? 'vertical' : 'horizontal';
+      layout = layoutFor(compiled, width, height, orientation, reduceMotion.matches);
       part = Math.min(part, layout.lines.length - 1);
       notify();
       paint();
@@ -282,7 +277,7 @@
     }
 
     return {
-      show(message, nextColor, nextFormat) {
+      show(message, nextColor) {
         if (message !== text) {
           text = message;
           compiled = compileText(message);
@@ -292,7 +287,6 @@
           paused = false;
         }
         color = nextColor;
-        format = nextFormat;
         redraw();
       },
       togglePlaying() {

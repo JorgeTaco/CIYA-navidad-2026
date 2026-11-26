@@ -3,7 +3,7 @@
   const Store = window.CIYA_STORE;
   const Data = window.CIYA_DATA;
   const esc = UI.escapeHtml;
-  const linterna = { carrera: 'sistemas', frase: 'Feliz Navidad CIYA', orientacion: 'auto' };
+  const linterna = { carrera: 'sistemas', frase: 'Feliz Navidad CIYA' };
   let lanternMatrix;
 
   function template() {
@@ -52,14 +52,6 @@
               <input id="linterna-custom" maxlength="60" placeholder="Tu mensaje navideño" aria-describedby="linterna-feedback">
               <p class="hint" id="linterna-feedback" role="status" hidden></p>
             </fieldset>
-            <div class="lantern-format">
-              <label for="linterna-format">Formato del letrero</label>
-              <select id="linterna-format">
-                <option value="auto">Automático (según el giro)</option>
-                <option value="horizontal">Horizontal (una línea)</option>
-                <option value="vertical">Vertical (varias líneas)</option>
-              </select>
-            </div>
           </div>
           <div>
             <p class="label">Vista previa</p>
@@ -151,10 +143,9 @@
     const meta = document.getElementById('lantern-carrera');
     const carrera = Store.carrera(linterna.carrera);
     stage.style.setProperty('--lantern-color', carrera.color);
-    stage.dataset.format = linterna.orientacion;
     message.textContent = linterna.frase;
     meta.textContent = carrera.icono + ' ' + carrera.nombre;
-    if (lanternMatrix) lanternMatrix.show(linterna.frase, carrera.color, linterna.orientacion);
+    if (lanternMatrix) lanternMatrix.show(linterna.frase, carrera.color);
     document.querySelectorAll('#linterna-carreras .chip, #linterna-frases .chip').forEach(function (button) {
       const selected = button.dataset.id === (button.parentElement.id === 'linterna-carreras' ? linterna.carrera : linterna.frase);
       button.classList.toggle('active', selected);
@@ -180,7 +171,6 @@
       if (saved && typeof saved.frase === 'string' && Data.carreras.some(function (career) { return career.id === saved.carrera; })) {
         linterna.carrera = saved.carrera;
         linterna.frase = saved.frase.trim().slice(0, 60) || Data.frasesLinterna[0];
-        if (['auto', 'horizontal', 'vertical'].includes(saved.orientacion)) linterna.orientacion = saved.orientacion;
       }
     } catch (error) { console.warn(error); }
 
@@ -196,13 +186,6 @@
       applyLantern();
     });
 
-    const format = document.getElementById('linterna-format');
-    format.value = linterna.orientacion;
-    format.addEventListener('change', function () {
-      linterna.orientacion = format.value;
-      applyLantern();
-    });
-
     const stage = document.getElementById('lantern-stage');
     const exit = document.getElementById('lantern-exit');
     const canvas = document.getElementById('lantern-canvas');
@@ -211,7 +194,6 @@
     const progress = document.getElementById('lantern-part');
     const feedback = document.getElementById('linterna-feedback');
     lanternMatrix = window.CIYA_LANTERN_MATRIX.create(canvas, function (state) {
-      stage.dataset.orientation = state.orientation;
       pause.hidden = state.mode !== 'scroll';
       pause.textContent = state.paused ? 'Reanudar' : 'Pausar';
       next.hidden = progress.hidden = state.mode !== 'parts';
@@ -224,8 +206,6 @@
       document.getElementById('lantern-message').classList.add('is-drawn');
       pause.addEventListener('click', lanternMatrix.togglePlaying);
       next.addEventListener('click', lanternMatrix.nextPart);
-    } else {
-      format.disabled = true;
     }
     const fullscreen = document.getElementById('lantern-fullscreen');
     fullscreen.addEventListener('click', async function () {

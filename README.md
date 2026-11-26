@@ -9,10 +9,9 @@ el backend es el proyecto Supabase de `supabase/`.
 El comportamiento funcional se conservó. Cambió la ubicación y la propiedad de
 cada archivo:
 
-- Las cinco páginas funcionales pasaron a `apps/web/` y son *shells* delgados:
-  header, footer y un punto de montaje (`#portal-root`, `#qr-root`,
-  `#recepcion-root`, `#admin-root`, `#escenario-root`); el contenido lo renderiza
-  el JS del módulo. `bases.html` sigue siendo un documento estático de consulta.
+- Las páginas funcionales viven en `apps/web/` y cada módulo renderiza su contenido
+  en un punto de montaje. `cronograma.html` muestra las actividades del evento
+  con filtros por momento del día y detalles desplegables.
 - `assets/css/app.css` se dividió en `shared/css/` (tokens, base, componentes y
   responsive) y en los CSS de cada módulo. Se respetó el orden original de la
   cascada cargando `responsive.css` al final.
@@ -48,7 +47,7 @@ CIYA-navidad-2026/
 │  ├─ index.html                   # puerta de entrada: login por rol y acceso asistentes
 │  ├─ portal.html                  # portal estudiantil + linterna + puntos de montaje
 │  ├─ qr.html                      # ruta QR y QR Dorados
-│  ├─ bases.html                   # bases oficiales
+│  ├─ cronograma.html              # programa interactivo de actividades
 │  ├─ recepcion.html               # acreditación, donaciones, canjes y cierre
 │  ├─ admin.html                   # curaduría, puertas, impresión e importación
 │  ├─ escenario.html               # proyección, ranking, villancicos, ruleta y encendido
@@ -56,7 +55,8 @@ CIYA-navidad-2026/
 │  │  ├─ css/ tokens.css · base.css · components.css · responsive.css
 │  │  └─ js/  config.js · data.js · store.js · ui.js · sound.js
 │  └─ modules/
-│     ├─ portal-linterna/          # portal.css, linterna.css, qr.css / portal.js, qr.js
+│     ├─ portal-linterna/          # portal, ruta QR y letrero de focos
+│     ├─ cronograma/               # cronograma.css y cronograma.js
 │     ├─ formularios-datos/        # forms.css, recepcion.css, admin.css / acceso.js, inscripciones.js, buzon.js, recepcion.js, admin.js
 │     ├─ pantalla-gigante/         # ranking.css, villancicos.css, ruleta.css, respaldo.css / escenario.js, draw.js
 │     └─ hardware-encendido/       # encendido.css / encendido.js
@@ -118,7 +118,7 @@ exportar antes, porque la curaduría puede realizarse apenas se reciben las fras
 | --- | --- | --- |
 | RF-01 Acceso inmediato sin instalación | Sí | Sitio estático servido por URL/QR desde GitHub Pages; HTML/CSS/JS puro, sin build, `manifest`, service worker ni tiendas de aplicaciones. |
 | RF-02 Selección de carrera | Sí | Los focos del letrero y su rótulo usan el color de la carrera seleccionada. |
-| RF-03 Mensajes personalizables | Sí | Frases predefinidas o texto libre de hasta 60 caracteres en una matriz de focos. El formato automático sigue el giro del dispositivo. El formato horizontal usa una línea y el vertical aprovecha hasta tres. Los mensajes que exceden el espacio se desplazan con pausa o se muestran por partes si el dispositivo solicita movimiento reducido. |
+| RF-03 Mensajes personalizables | Sí | Frases predefinidas o texto libre de hasta 60 caracteres en una matriz de focos. El letrero se adapta automáticamente al giro del dispositivo. En horizontal usa una línea y en vertical aprovecha hasta tres. Los mensajes que exceden el espacio se desplazan con pausa o se muestran por partes si el dispositivo solicita movimiento reducido. |
 | RF-04 Pantalla completa y ejecución local | Sí | El botón “Pantalla completa” usa `requestFullscreen()` con vista CSS de respaldo. El QR `portal.html?modo=linterna#linterna` abre el letrero y el navegador dibuja los focos con recursos locales. |
 | RF-05 Ruta de códigos QR | Sí | `qr.html` y `qr.js` sirven mensajes, trivias y memes; `ciya.gold` tiene 3 ranuras y admin genera las URLs `qr.html#dorado=<secret>` para los QR Dorados. |
 
@@ -175,8 +175,8 @@ En la pantalla de acceso hay dos entradas:
 
 - **Estudiantes y Docentes**: botón **Ingresar como Estudiante / Docente**. Lleva
   a `portal.html`, desde donde se usan la linterna
-  (`portal.html?modo=linterna#linterna`), la Ruta QR (`qr.html`) y las bases
-  (`bases.html`). No requiere contraseña.
+  (`portal.html?modo=linterna#linterna`), la Ruta QR (`qr.html`) y el cronograma
+  (`cronograma.html`). El acceso es libre.
 - **Organización**: correo y contraseña de una cuenta creada en Supabase Auth
   con al menos un rol en `ciya.roles` (`recepcion`, `escenario` o `admin`). Si la
   cuenta tiene un solo rol, entra directo a ese panel; si tiene varios, muestra
@@ -187,7 +187,7 @@ Las URL públicas también se pueden abrir directamente:
 ```text
 http://127.0.0.1:8000/portal.html
 http://127.0.0.1:8000/qr.html
-http://127.0.0.1:8000/bases.html
+http://127.0.0.1:8000/cronograma.html
 ```
 
 Para copiar el frontend a un servidor estático:
@@ -309,7 +309,7 @@ La programación con `pg_cron`/`pg_net` y el resto de la operación están en
 
 ### Sin modo demo
 
-El portal, la linterna, las bases y los QR informativos pueden abrirse sin
+El portal, la linterna, el cronograma y los QR informativos pueden abrirse sin
 cuenta ni configuración de Supabase. El ranking en vivo, los formularios, el
 canje y los paneles de organización requieren conexión al proyecto configurado.
 La consola de escenario puede importar un respaldo sellado y operar sin red
@@ -348,10 +348,11 @@ bash scripts/check.sh
 ```
 
 Ese comando revisa la sintaxis de todos los JS, valida IDs duplicados, recursos
-locales, orden de carga y migraciones. Si hay `node`, ejecuta
-`node --test tests/unit/*.test.cjs`. La alternativa usa `esprima` para verificar la sintaxis. Las pruebas
-unitarias usan una configuración simulada en memoria y comprueban también que
-sin configuración no haya sesión ni operaciones disponibles.
+locales, orden de carga y migraciones. Ejecuta `node --test tests/unit/*.test.cjs`
+y `unittest` de Python. El conjunto offline cubre la linterna, el respaldo
+sellado, la recuperación del sorteo, el audio local y el puerto serial simulado.
+Las pruebas Python comprueban la autenticación del servidor de escenario y la
+carga de todos sus archivos mediante una conexión de bucle local.
 
 ## Límites y decisiones a vigilar
 
@@ -362,13 +363,11 @@ sin configuración no haya sesión ni operaciones disponibles.
   módulos. Lo que usa un solo módulo se queda dentro de ese módulo. Los helpers
   `format.js` y `dom.js` siguen dentro de `ui.js` porque todavía no hay código
   suficiente para extraerlos.
-- **Shells delgados**: los cinco HTML funcionales de `apps/web/` solo cargan
-  CSS/JS y definen un contenedor; la lógica y el markup dinámico viven en
-  `modules/` mediante puntos de montaje. `bases.html` es la excepción: contenido
-  oficial estático sin JS. El orden de scripts es parte del contrato: en `portal.html`,
-  `portal.js` se carga antes que `inscripciones.js` y `buzon.js` para que el
-  portal cree sus raíces; en `escenario.html`, `encendido.js` se carga antes que
-  `escenario.js` para exponer `CIYA_IGNITE` y permitir `CIYA_STAGE.mount()`.
+- Las páginas de `apps/web/` cargan CSS y JS y definen contenedores. La lógica
+  y el contenido dinámico viven en `modules/`. En `portal.html` se carga
+  `lantern-matrix.js` antes de `portal.js`, seguido de `inscripciones.js` y
+  `buzon.js`. En `escenario.html`, `encendido.js` se carga antes de `escenario.js`
+  para exponer `CIYA_IGNITE` y permitir `CIYA_STAGE.mount()`.
 - **Migraciones**: nunca editar una migración ya aplicada; agregar una nueva,
   por ejemplo `0006_...`. Los secretos solo en entorno o Vault, nunca en el
   repositorio.
