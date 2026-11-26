@@ -171,11 +171,15 @@
       const columns = layout.mode === 'scroll' ? layout.capacity : Math.max(5, ...lines.map(line => line.length));
       const rowStep = glyphHeight + 1;
       const rows = rowStep * lines.length + 1;
-      const pitch = Math.min(width / (columns + 2), height / (rows + 2));
-      const left = (width - (columns - 1) * pitch) / 2;
-      const top = (height - (rows - 1) * pitch) / 2;
+      const columnSpace = width / (columns + 0.5);
+      const rowSpace = height / (rows + 0.5);
+      const stepX = Math.min(columnSpace, rowSpace * 1.15);
+      const stepY = Math.min(rowSpace, columnSpace * 1.22);
+      const left = (width - (columns - 1) * stepX) / 2;
+      const top = (height - (rows - 1) * stepY) / 2;
       const lit = [];
-      const radius = pitch * 0.29;
+      const dotSpace = Math.min(stepX, stepY);
+      const unlitRadius = dotSpace * 0.25;
 
       context.clearRect(0, 0, width, height);
       context.beginPath();
@@ -184,15 +188,15 @@
         const bit = (row - 1) % rowStep;
         const margin = line ? Math.floor((columns - line.length) / 2) : 0;
         for (let column = 0; column < columns; column++) {
-          const x = left + column * pitch;
-          const y = top + row * pitch;
+          const x = left + column * stepX;
+          const y = top + row * stepY;
           const index = layout.mode === 'scroll' ?
             (column + columnOffset) % (compiled.columns.length + loopGap) : column - margin;
           if (line && bit < glyphHeight && (line[index] & (1 << bit))) {
             lit.push([x, y]);
           } else {
-            context.moveTo(x + radius, y);
-            context.arc(x, y, radius, 0, Math.PI * 2);
+            context.moveTo(x + unlitRadius, y);
+            context.arc(x, y, unlitRadius, 0, Math.PI * 2);
           }
         }
       }
@@ -210,9 +214,9 @@
         context.fill();
       }
 
-      fillLights(pitch * 0.49, color, 0.22);
-      fillLights(radius, color, 1);
-      fillLights(pitch * 0.10, '#fffdf2', 0.86);
+      fillLights(dotSpace * 0.55, color, 0.37);
+      fillLights(dotSpace * 0.37, color, 1);
+      fillLights(dotSpace * 0.18, '#fffdf2', 0.92);
       context.globalAlpha = 1;
     }
 

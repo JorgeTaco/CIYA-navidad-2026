@@ -77,8 +77,9 @@
   block-size: 100vh;
   block-size: 100dvh;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  padding: max(.55rem, env(safe-area-inset-top)) max(.55rem, env(safe-area-inset-right))
-    max(.55rem, env(safe-area-inset-bottom)) max(.55rem, env(safe-area-inset-left));
+  gap: .35rem;
+  padding: max(.3rem, env(safe-area-inset-top)) max(.3rem, env(safe-area-inset-right))
+    max(.3rem, env(safe-area-inset-bottom)) max(.3rem, env(safe-area-inset-left));
   border: 0;
   border-radius: 0;
   background: #030607;
@@ -87,7 +88,9 @@
 .lantern-stage.live .lantern-board {
   block-size: auto;
   min-block-size: 0;
-  border-color: #151b1e;
+  border: 0;
+  background-image: radial-gradient(ellipse at center,
+    color-mix(in srgb, var(--lantern-color, #ffd166) 14%, #05090b), transparent 76%);
 }
 
 .lantern-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.18fr); gap: 1rem; align-items: start; }
