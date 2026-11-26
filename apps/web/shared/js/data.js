@@ -18,7 +18,7 @@ window.CIYA_DATA = {
     'Villancico Parodia CIYA',
     'Coro de Carrera'
   ],
-  cristalVillancicos: [
+  criteriosVillancicos: [
     { id: 'creatividad', nombre: 'Creatividad e identidad CIYA', detalle: 'Originalidad en arreglos, adaptación de textos y vinculación temática con la ingeniería.', peso: 30 },
     { id: 'musical', nombre: 'Afinación, ritmo y desempeño musical', detalle: 'Calidad vocal, precisión rítmica, acople instrumental y dominio técnico escénico.', peso: 30 },
     { id: 'escena', nombre: 'Puesta en escena y vestuario', detalle: 'Coordinación dinámica, indumentaria festiva y proyección estética del conjunto.', peso: 20 },

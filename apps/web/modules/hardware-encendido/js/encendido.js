@@ -18,7 +18,7 @@
       <button class="btn primary wide" id="ignicion-manual" style="margin-top:0.6rem">Disparar cuenta regresiva manualmente</button>
       <p class="hint" style="margin-top:0.6rem"><strong>Tecla de emergencia:</strong> barra espaciadora inicia la cuenta local. Electricidad dispone de un interruptor físico independiente.</p>
       <div id="secuencia-encendido" style="margin-top:1rem"></div>
-      <div id="estado-relay" style="margin-top:0.8rem">Simulación local: placa desconectada.</div>
+      <div class="badge warn" id="estado-relay" style="margin-top:0.8rem">Simulación local: placa desconectada.</div>
       <p class="muted">${esc(String(CFG.serialBaudRate))} baudios · comando de relé: ${esc(JSON.stringify(CFG.relayCommand))}</p>`;
   }
 
@@ -99,6 +99,7 @@
       ignicion.count = seconds;
       if (seconds === 0) {
         clearInterval(ignicion.timer);
+        ignicion.timer = null;
         ignicion.running = false;
         Sound.go();
         writeRelay();
@@ -141,8 +142,13 @@
     } catch (error) {
       if (error.name !== 'NotFoundError') UI.toast('Puerto serial interrumpido: ' + error.message, 'bad');
     } finally {
-      if (serial.reader) serial.reader.releaseLock();
-      if (serial.writer) serial.writer.releaseLock();
+      if (serial.reader) {
+        try { await serial.reader.cancel(); } catch {}
+        try { serial.reader.releaseLock(); } catch {}
+      }
+      if (serial.writer) {
+        try { serial.writer.releaseLock(); } catch {}
+      }
       if (serial.port) await serial.port.close().catch(function () {});
       Object.assign(serial, { port: null, reader: null, writer: null, armed: false, connecting: false });
       statusNode.textContent = 'Sin conectar';

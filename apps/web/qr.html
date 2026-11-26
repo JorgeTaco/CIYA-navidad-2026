@@ -14,20 +14,16 @@
 <body class="route-page">
   <header class="topbar event-topbar">
     <div class="topbar-inner">
-      <a class="brand" href="index.html"><span class="brand-mark">CIYA</span><span>Navidad 2026</span></a>
-      <details class="site-menu">
-        <summary>Menú</summary>
-        <nav aria-label="Información y organización">
-          <a href="index.html">Portal</a>
-          <a href="qr.html" data-nav="qr">Ruta QR</a>
-          <a href="bases.html#cronograma">Cronograma</a>
-          <a href="bases.html">Bases oficiales</a>
-          <div class="menu-divider">Organización</div>
-          <a href="recepcion.html">Recepción</a>
-          <a href="escenario.html">Escenario</a>
-          <a href="admin.html">Administración</a>
-        </nav>
-      </details>
+      <a class="brand" href="portal.html"><span class="brand-mark">CIYA</span><span>Navidad 2026</span></a>
+      <nav class="nav-links" data-role-links aria-label="Navegación del asistente">
+        <a href="portal.html" data-nav="portal">Portal</a>
+        <a href="qr.html" data-nav="qr">Ruta QR</a>
+        <a href="bases.html" data-nav="bases">Bases oficiales</a>
+      </nav>
+      <div class="row">
+        <span class="sync-pill" id="sync-status">Ruta QR</span>
+        <button class="btn ghost small" type="button" data-logout-btn hidden>Cerrar sesión</button>
+      </div>
     </div>
   </header>
 

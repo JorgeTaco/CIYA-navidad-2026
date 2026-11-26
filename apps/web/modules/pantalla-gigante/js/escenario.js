@@ -21,7 +21,7 @@
     return `
       <div class="section-head">
         <div><span class="kicker">Laptop + proyector · 16:9</span><h1>Consola de Pantalla Gigante</h1></div>
-        <div class="row"><button class="btn small ghost" id="audio-toggle">Activar audio</button><button class="btn small" id="project-fullscreen">Proyección a pantalla completa</button><button class="btn small ghost" id="logout">Cerrar sesión</button></div>
+        <div class="row"><button class="btn small ghost" id="audio-toggle">Activar audio</button><button class="btn small" id="project-fullscreen">Proyección a pantalla completa</button></div>
       </div>
       <div id="locked" hidden><p class="empty">Esta consola requiere una cuenta de escenario.</p></div>
 
@@ -134,7 +134,7 @@
       screen.innerHTML =
         '<span class="kicker">CIYA tiene Talento</span>' +
         '<h2>' + esc(group ? group.nombre : 'Concurso de Villancicos') + '</h2>' +
-        '<p class="muted">' + esc(group ? group.categoria + ' · ' + group.integrantes.length + ' integrantes' : 'Esperando grupos inscritos') + '</p>' +
+        '<p class="muted">' + esc(group ? group.categoria + ' · ' + (group.integrantes || []).length + ' integrantes' : 'Esperando grupos inscritos') + '</p>' +
         '<div class="big-number">' + formatTime(cron.remaining) + '</div>' +
         '<div style="width:min(520px,90%);margin-top:1rem"><div class="bar"><span style="width:' + aplauso.value + '%;--bar-color:var(--green)"></span></div>' +
         '<small>Aplausómetro: ' + (aplauso.db === null ? 'nivel manual ' + Math.round(aplauso.value) + ' / 100' :
@@ -180,7 +180,7 @@
 
   function renderScoreFields() {
     const container = document.getElementById('score-fields');
-    container.innerHTML = Data.cristalVillancicos.map(function (c) {
+    container.innerHTML = Data.criteriosVillancicos.map(function (c) {
       return '<div class="field"><label for="score-' + c.id + '">' + esc(c.nombre) + ' (0–' + c.peso + ')</label>' +
         '<input id="score-' + c.id + '" type="number" min="0" max="' + c.peso + '" value="0" data-peso="' + c.peso + '" required></div>';
     }).join('') + '<p><strong>Total: <span id="score-total">0</span> / 100</strong></p>';
@@ -190,7 +190,7 @@
   }
 
   function updateScoreTotal() {
-    const total = Data.cristalVillancicos.reduce(function (sum, c) {
+    const total = Data.criteriosVillancicos.reduce(function (sum, c) {
       return sum + Number(document.getElementById('score-' + c.id).value || 0);
     }, 0);
     document.getElementById('score-total').textContent = total;
@@ -229,7 +229,7 @@
   function stopMic() {
     if (aplauso.frame) cancelAnimationFrame(aplauso.frame);
     if (aplauso.stream) aplauso.stream.getTracks().forEach(function (track) { track.stop(); });
-    if (aplauso.context) aplauso.context.close();
+    if (aplauso.context) aplauso.context.close().catch(function () {});
     aplauso.frame = null;
     aplauso.stream = null;
     aplauso.context = null;
@@ -265,7 +265,7 @@
           sum += value * value;
         }
         const rms = Math.sqrt(sum / aplauso.data.length);
-        aplauso.db = Math.max(-60, Math.round(20 * Math.log10(rms)));
+        aplauso.db = rms > 0 ? Math.max(-60, Math.round(20 * Math.log10(rms))) : -60;
         aplauso.value = (aplauso.db + 60) / 60 * 100;
         document.getElementById('aplauso-manual').value = aplauso.value;
         document.getElementById('aplauso-bar').style.width = aplauso.value + '%';
@@ -406,7 +406,6 @@
   function setup() {
     renderScoreFields();
     Ignite.renderSequence();
-    UI.initNav('escenario');
 
     document.querySelectorAll('.stage-tabs .btn').forEach(function (button) {
       button.addEventListener('click', function () {
@@ -441,7 +440,7 @@
       const group = activeGroup();
       if (!group || localMode) return UI.toast('Selecciona un grupo en la consola conectada.', 'warn');
       const criterios = {};
-      Data.cristalVillancicos.forEach(function (criterion) {
+      Data.criteriosVillancicos.forEach(function (criterion) {
         criterios[criterion.id] = Number(document.getElementById('score-' + criterion.id).value);
       });
       UI.submit(event, 'score', { subject: group.id, criterios }, true,
@@ -503,11 +502,10 @@
       return;
     }
     document.getElementById('panel').hidden = false;
-    document.getElementById('logout').hidden = localMode;
-    document.getElementById('logout').onclick = UI.logout;
     document.getElementById('backup-load').disabled = !localMode;
     document.getElementById('backup-file').disabled = !localMode;
     document.getElementById('sync-status').textContent = localMode ? 'Escenario local' : 'Conectando';
+    UI.initNav('escenario', { local: localMode });
     if (localMode) {
       const form = document.getElementById('form-score');
       form.querySelector('[type=submit]').disabled = true;
@@ -516,7 +514,6 @@
         if (!drawSafely(updateDraw)) clearInterval(timer);
       }, 250);
     } else {
-      UI.initNav('escenario');
       await Store.init('escenario');
     }
     setup();

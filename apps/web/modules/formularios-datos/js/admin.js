@@ -8,7 +8,6 @@
     return `
       <div class="section-head">
         <div><span class="kicker">Docentes organizadores y Asociación Estudiantil</span><h1>Curaduría y Evaluación</h1></div>
-        <button class="btn ghost small" id="logout">Cerrar sesión</button>
       </div>
       <div id="locked" hidden><p class="empty">Esta vista privada requiere una cuenta de administración.</p></div>
       <div id="panel" hidden>
@@ -19,14 +18,14 @@
           <div class="card"><div id="lista-deseos"></div></div>
         </section>
         <section class="section grid cols-2">
-          <div class="card">
+          <form class="card" id="form-puerta">
             <h2>Evaluación de Puertas Decoradas</h2>
             <p class="muted">Jurado: viernes 4 de diciembre, 15:30 – 16:45. Matriz de 100 puntos.</p>
             <div class="field"><label for="puerta-carrera">Carrera evaluada</label><select id="puerta-carrera"></select></div>
             <div id="puerta-criterios"></div>
             <div class="field"><label for="puerta-notas">Observaciones</label><textarea id="puerta-notas" maxlength="400"></textarea></div>
-            <button class="btn primary wide" id="guardar-puerta">Guardar evaluación</button>
-          </div>
+            <button class="btn primary wide" id="guardar-puerta" type="submit">Guardar evaluación</button>
+          </form>
           <div class="card"><h3>Resultado de puertas</h3><div id="ranking-puertas"></div></div>
         </section>
         <section class="section card">
@@ -163,7 +162,7 @@
     }).join('');
     document.getElementById('puerta-criterios').innerHTML = Data.criteriosPuertas.map(function (c) {
       return '<div class="field"><label for="puerta-' + c.id + '">' + esc(c.nombre) + ' (0–' + c.peso + ')</label>' +
-        '<input id="puerta-' + c.id + '" type="number" min="0" max="' + c.peso + '" value="0"></div>';
+        '<input id="puerta-' + c.id + '" type="number" min="0" max="' + c.peso + '" value="0" required></div>';
     }).join('') + '<p><strong>Total: <span id="puerta-total">0</span> / 100</strong></p>';
     document.querySelectorAll('#puerta-criterios input').forEach(function (input) {
       input.addEventListener('input', function () {
@@ -174,7 +173,7 @@
       });
     });
 
-    document.getElementById('guardar-puerta').addEventListener('click', function (event) {
+    document.getElementById('form-puerta').addEventListener('submit', function (event) {
       const criterios = {};
       Data.criteriosPuertas.forEach(function (criterion) {
         criterios[criterion.id] = Number(document.getElementById('puerta-' + criterion.id).value);
@@ -192,7 +191,6 @@
 
     document.getElementById('export-aprobados').addEventListener('click', function () { exportDeseos(true); });
     document.getElementById('export-todos').addEventListener('click', function () { exportDeseos(false); });
-    UI.initNav('admin');
     Store.subscribe(render);
   }
 
@@ -239,13 +237,13 @@
 
   async function init() {
     mount();
+    UI.initNav('admin');
     const ok = await UI.requireAccount('admin', 'Panel administrativo');
     if (!ok) {
       document.getElementById('locked').hidden = false;
       return;
     }
     document.getElementById('panel').hidden = false;
-    document.getElementById('logout').addEventListener('click', function () { UI.logout('admin'); });
     await Store.init('admin');
     setup();
   }

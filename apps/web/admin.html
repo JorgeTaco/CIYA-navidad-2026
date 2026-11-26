@@ -15,15 +15,15 @@
 <body>
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="brand" href="index.html"><span class="brand-mark">CIYA</span><span>Navidad 2026</span></a>
-      <nav class="nav-links" aria-label="Navegación principal">
-        <a href="index.html">Portal</a>
-        <a href="bases.html">Bases</a>
-        <a href="recepcion.html">Recepción</a>
-        <a href="escenario.html">Escenario</a>
-        <a href="admin.html" data-nav="admin">Admin</a>
+      <a class="brand" href="admin.html"><span class="brand-mark">CIYA</span><span>Navidad 2026</span></a>
+      <nav class="nav-links" data-role-links aria-label="Navegación principal">
+        <a href="admin.html" data-nav="admin">Administración</a>
+        <a href="bases.html" data-nav="bases">Bases oficiales</a>
       </nav>
-      <span class="sync-pill" id="sync-status">Modo local</span>
+      <div class="row">
+        <span class="sync-pill" id="sync-status">Conectando</span>
+        <button class="btn ghost small" type="button" data-logout-btn hidden>Cerrar sesión</button>
+      </div>
     </div>
   </header>
 

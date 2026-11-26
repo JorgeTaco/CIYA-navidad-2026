@@ -18,10 +18,6 @@
     return `
       <div class="section-head reception-heading">
         <h1>Recepción solidaria</h1>
-        <div class="row" id="reception-session" hidden>
-          <span class="sync-pill" id="sync-status">Conectando</span>
-          <button class="btn ghost small" id="logout">Cerrar sesión</button>
-        </div>
       </div>
       <div id="locked" hidden><p class="empty">Inicia sesión con una cuenta de recepción.</p></div>
       <div id="panel" hidden>
@@ -256,8 +252,6 @@
       return;
     }
     byId('panel').hidden = false;
-    byId('reception-session').hidden = false;
-    byId('logout').onclick = UI.logout;
     await Store.init('recepcion');
     setup();
     Store.subscribe(render);

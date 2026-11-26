@@ -12,11 +12,11 @@
     }).join('');
     return `
       <form class="card" id="form-villancicos">
-        <div class="field"><label for="vil-grupo">Nombre artístico del grupo</label><input id="vil-grupo" required></div>
+        <div class="field"><label for="vil-grupo">Nombre artístico del grupo</label><input id="vil-grupo" maxlength="120" required></div>
         <div class="field"><label for="vil-integrantes">Nómina de integrantes (uno por línea)</label><textarea id="vil-integrantes" required placeholder="Nombre 1&#10;Nombre 2"></textarea></div>
         <div class="field"><label for="vil-representante">Representante del grupo</label><input id="vil-representante" maxlength="120" required></div>
         <div class="field"><label for="vil-carrera">Carrera representada</label><select id="vil-carrera" required>${carreras}</select></div>
-        <div class="field"><label for="vil-cancion">Obra musical seleccionada</label><input id="vil-cancion" required></div>
+        <div class="field"><label for="vil-cancion">Obra musical seleccionada</label><input id="vil-cancion" maxlength="160" required></div>
         <div class="field"><label for="vil-categoria">Modalidad</label><select id="vil-categoria" required>${categorias}</select></div>
         <button class="btn primary wide" type="submit">Inscribir grupo</button>
         <p class="hint">Inscripción oficial abierta hasta el jueves 3 de diciembre de 2026, 17:30. Evaluación: 30% creatividad, 30% musicalidad, 20% puesta en escena y 20% aplausómetro.</p>
@@ -31,9 +31,14 @@
     const value = function (id) { return document.getElementById(id).value.trim(); };
     const group = document.getElementById('form-villancicos');
     group.addEventListener('submit', function (event) {
+      const integrantes = value('vil-integrantes').split('\n').map(function (name) { return name.trim(); }).filter(Boolean);
+      if (!integrantes.length) {
+        event.preventDefault();
+        return UI.toast('Ingresa al menos un integrante.', 'bad');
+      }
       return UI.submit(event, 'group', {
         nombre: value('vil-grupo'), representante: value('vil-representante'),
-        integrantes: value('vil-integrantes').split('\n').map(function (name) { return name.trim(); }).filter(Boolean),
+        integrantes: integrantes,
         carrera: value('vil-carrera'), cancion: value('vil-cancion'), categoria: value('vil-categoria')
       }, false, function () {
         group.reset();

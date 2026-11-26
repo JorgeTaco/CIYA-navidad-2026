@@ -44,7 +44,8 @@ CIYA-navidad-2026/
 │  ├─ operacion/                   # runbook del 4 de diciembre
 │  └─ fuentes/                     # SRS v2, bases oficiales y ruta QR
 ├─ apps/web/                       # FRONTEND: publicar esta carpeta tal cual
-│  ├─ index.html                   # portal + linterna + puntos de montaje
+│  ├─ index.html                   # puerta de entrada: login por rol y acceso asistentes
+│  ├─ portal.html                  # portal estudiantil + linterna + puntos de montaje
 │  ├─ qr.html                      # ruta QR y QR Dorados
 │  ├─ bases.html                   # bases oficiales
 │  ├─ recepcion.html               # acreditación, donaciones, canjes y cierre
@@ -56,7 +57,7 @@ CIYA-navidad-2026/
 │  │  └─ js/  config.js · data.js · store.js · ui.js · sound.js
 │  └─ modules/
 │     ├─ portal-linterna/          # portal.css, linterna.css, qr.css / portal.js, qr.js
-│     ├─ formularios-datos/        # forms.css, recepcion.css, admin.css / inscripciones.js, buzon.js, recepcion.js, admin.js
+│     ├─ formularios-datos/        # forms.css, recepcion.css, admin.css / acceso.js, inscripciones.js, buzon.js, recepcion.js, admin.js
 │     ├─ pantalla-gigante/         # ranking.css, villancicos.css, ruleta.css, respaldo.css / escenario.js, draw.js
 │     └─ hardware-encendido/       # encendido.css / encendido.js
 ├─ supabase/                       # BACKEND: proyecto Supabase
@@ -65,7 +66,8 @@ CIYA-navidad-2026/
 │  │  ├─ 0001_schema_core.sql      # esquema, tablas, roles y horarios
 │  │  ├─ 0002_rpc_read_write.sql   # RPC de lectura, escritura, acceso y sorteo
 │  │  ├─ 0003_receipts.sql         # cola de comprobantes y permisos
-│  │  └─ 0004_legacy_import.sql    # importación del respaldo v1
+│  │  ├─ 0004_legacy_import.sql    # importación del respaldo v1
+│  │  └─ 0005_role_discovery.sql   # RPC ciya_my_roles para acceso por rol
 │  ├─ functions/ciya-receipts/     # Edge Function → Brevo
 │  └─ seeds/                       # datos ficticios
 ├─ tests/
@@ -85,10 +87,14 @@ CIYA-navidad-2026/
 ## Contratos entre módulos
 
 - `CIYA_STORE` en `shared/js/store.js` es el único acceso a Supabase.
-- Cada shell expone un punto de montaje y su JS dueño: `CIYA_PORTAL.mount()` en
-  `#portal-root`, `CIYA_RECEPCION.mount()` en `#recepcion-root`,
+- Cada shell expone un punto de montaje y su JS dueño: `CIYA_ACCESO.mount()` en
+  `#acceso-root` (`index.html`), `CIYA_PORTAL.mount()` en `#portal-root`
+  (`portal.html`), `CIYA_RECEPCION.mount()` en `#recepcion-root`,
   `CIYA_ADMIN.mount()` en `#admin-root` y `CIYA_STAGE.mount()` en
   `#escenario-root`. La ruta QR usa `qr.js` sobre `#qr-root`.
+- `CIYA_UI.initNav()` filtra las pestañas de navegación según el rol de la
+  sesión (`asistente`, `recepcion`, `escenario`, `admin`), de modo que cada
+  usuario vea únicamente las vistas correspondientes a su rol.
 - `CIYA_INSCRIPCIONES.init()` y `CIYA_BUZON.init()` montan sus formularios dentro
   del portal en `#inscripciones-root` y `#buzon-root`; `portal.js` no contiene esa
   lógica.
@@ -101,7 +107,7 @@ CIYA-navidad-2026/
 
 | Actor | Acceso y responsabilidad | Implementación |
 | --- | --- | --- |
-| Estudiantes y Docentes (Asistentes) | Portal móvil responsive: Mar de Linternas, inscripción de villancicos, buzón “Compilando Deseos 2027” y Ruta de Códigos QR. | `apps/web/index.html`, `modules/portal-linterna/`, `modules/formularios-datos/js/inscripciones.js`, `modules/formularios-datos/js/buzon.js` y `qr.html`; acciones públicas `group` y `wish`. |
+| Estudiantes y Docentes (Asistentes) | Portal móvil responsive: Mar de Linternas, inscripción de villancicos, buzón “Compilando Deseos 2027” y Ruta de Códigos QR. | `apps/web/portal.html`, `modules/portal-linterna/`, `modules/formularios-datos/js/inscripciones.js`, `modules/formularios-datos/js/buzon.js` y `qr.html`; acciones públicas `group` y `wish`. |
 | Equipo de Recepción (Delegados Estudiantiles de Industrial) | Panel desde celular o laptop, 17:00–17:45: registrar asistentes, contabilizar donaciones por carrera y validar QR Dorados. | `recepcion.html` y `recepcion.js`; rol `recepcion`; acciones `checkin`, `donate`, `redeem` y `seal`; franjas en `ciya.event`. |
 | Equipo de Producción / Escenario (Sistemas y Software) | Consola conectada a proyector y Arduino/ESP32: ranking en vivo, villancicos, Encendido 5 en 1 y Gran Ruleta Digital. | `escenario.html`, `modules/pantalla-gigante/` y `modules/hardware-encendido/`; rol `escenario`; modo local sin red. |
 | Docentes Organizadores y Asociación Estudiantil (Curadores) | Vista privada del buzón para moderar, aprobar y exportar las frases en enero. | `admin.html` y `admin.js`; rol `admin`; acción `moderate`; CSV de deseos aprobados o todos. |
@@ -118,7 +124,7 @@ exportar antes, porque la curaduría puede realizarse apenas se reciben las fras
 | RF-01 Acceso inmediato sin instalación | Sí | Sitio estático servido por URL/QR desde GitHub Pages; HTML/CSS/JS puro, sin build, `manifest`, service worker ni tiendas de aplicaciones. |
 | RF-02 Selección de carrera | Sí | Las 5 carreras están en `apps/web/shared/js/data.js:9` con `color` e `icono`; `applyLantern()` aplica `--lantern-color` y muestra el icono en `#lantern-carrera`. |
 | RF-03 Mensajes personalizables | Sí | Frases predefinidas (“Feliz Navidad CIYA”, “Orgullo Industrial”, “Compilando el 2027”) y campo libre de 60 caracteres; tipografía `clamp(2rem, 9vw, 7rem)`, alto contraste y animación `lanternPulse` de 1,6 s con botón “Sincronizar destello”. |
-| RF-04 Pantalla completa y ejecución local | Sí | El botón “Pantalla completa” usa `requestFullscreen()` con vista CSS de respaldo. En `index.html?modo=linterna#linterna`, `init()` termina antes de `Store.init()`: color, carrera, mensaje y parpadeo se resuelven solo en JS/CSS del navegador. |
+| RF-04 Pantalla completa y ejecución local | Sí | El botón “Pantalla completa” usa `requestFullscreen()` con vista CSS de respaldo. En `portal.html?modo=linterna#linterna` (o `index.html?modo=linterna#linterna`), `init()` termina antes de `Store.init()`: color, carrera, mensaje y parpadeo se resuelven solo en JS/CSS del navegador. |
 | RF-05 Ruta de códigos QR | Sí | `qr.html` y `qr.js` sirven mensajes, trivias y memes; `ciya.gold` tiene 3 ranuras y admin genera las URLs `qr.html#dorado=<secret>` para los QR Dorados. |
 
 Matiz de RF-04: al no existir service worker —la PWA fue excluida del SRS—, la
@@ -142,18 +148,22 @@ cd apps/web
 python3 -m http.server 8000
 ```
 
-Abrir `http://127.0.0.1:8000/index.html`. En este modo funcionan la maquetación,
-el portal, la linterna (`index.html?modo=linterna#linterna`), las bases
-(`bases.html`) y la ruta QR estática (`qr.html`, mensajes, trivias y memes).
-`Store.init()` sale sin conectarse y la barra indica **Sin configurar**.
+Abrir `http://127.0.0.1:8000/index.html`. El sistema inicia en la pantalla de
+acceso por rol:
 
-Qué no funciona todavía:
+- **Estudiantes y Docentes**: botón **Ingresar como Estudiante / Docente** para
+  entrar a `portal.html`, la linterna (`portal.html?modo=linterna#linterna`), las
+  bases (`bases.html`) y la ruta QR (`qr.html`).
+- **Modo demo local (solo mientras `supabaseUrl` y `supabaseAnonKey` estén vacíos)**:
+  permite probar cada rol visualmente con `recepcion@ciya.local`,
+  `escenario@ciya.local` o `admin@ciya.local` (clave `ciya2026`). En cuanto se
+  configura Supabase en `config.js`, el modo demo se desactiva automáticamente.
 
-- `recepcion.html`, `admin.html` y `escenario.html` muestran la pantalla de
-  acceso porque requieren una cuenta, aunque se pueda revisar su diseño.
-- Los formularios no guardan nada: al enviar aparece
-  `Configura Supabase para usar esta función.`
-- Los QR Dorados no pueden validarse: `Store.gold()` necesita la RPC.
+Qué no ocurre en la nube mientras Supabase esté sin configurar:
+
+- Los datos de demostración viven únicamente en el `sessionStorage` del
+  navegador y no se guardan en Postgres ni envían correos.
+- Los QR Dorados devuelven una clave de prueba local sin validar en servidor.
 
 Para revisar la consola de escenario sin red ni Supabase:
 
@@ -182,18 +192,67 @@ window.CIYA_CONFIG = {
    Usar solo la clave `anon` pública. **Nunca** poner `service_role`, tokens de
    Brevo ni secretos en este archivo ni en el frontend.
 
-2. Aplicar el backend en orden:
+2. Instalar la CLI de Supabase (solo la primera vez).
+
+   **Opción A — sin npm, descarga directa del binario (recomendada en Linux):**
+
+   ```bash
+   curl -fsSL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz -o supabase.tar.gz
+   tar -xf supabase.tar.gz supabase
+   sudo mv supabase /usr/local/bin/supabase
+   rm supabase.tar.gz
+   supabase --version
+   ```
+
+   **Opción B — con npm (requiere Node.js instalado):**
+
+   Si el sistema dice `npm: instrucción no encontrada`, primero instalar Node.js.
+   En **Fedora / RHEL**:
+
+   ```bash
+   sudo dnf install nodejs-npm -y
+   ```
+
+   En **Ubuntu / Debian**:
+
+   ```bash
+   sudo apt install npm -y
+   ```
+
+   Luego instalar la CLI:
+
+   ```bash
+   npm install -g supabase
+   ```
+
+3. Vincular el proyecto local con el proyecto remoto de Supabase y aplicar las migraciones:
 
 ```bash
 supabase link --project-ref <ref>
 supabase db push
+```
+
+   Reemplazar `<ref>` con el ID del proyecto (se ve en **Project Settings → General → Reference ID** en el dashboard de Supabase, por ejemplo `abcdefghijklmnopqrst`).
+
+   `supabase db push` aplica en orden los 5 archivos de `supabase/migrations/`:
+
+   | Archivo | Qué crea |
+   |---------|----------|
+   | `0001_schema_core.sql` | Schema `ciya`, tablas, roles y horarios |
+   | `0002_rpc_read_write.sql` | Funciones RPC de lectura, escritura y sorteo |
+   | `0003_receipts.sql` | Cola de comprobantes por correo |
+   | `0004_legacy_import.sql` | Importador de respaldo v1 |
+   | `0005_role_discovery.sql` | RPC `ciya_my_roles()` para acceso por rol |
+
+   **Alternativa sin CLI:** abrir el editor SQL de Supabase (**SQL Editor → New query**) y ejecutar cada archivo en el orden indicado, uno por uno.
+
+4. Desplegar la Edge Function de comprobantes:
+
+```bash
 supabase functions deploy ciya-receipts
 ```
 
-   Si no se usa la CLI, ejecutar manualmente los cuatro archivos de
-   `supabase/migrations/` en orden en el editor SQL de Supabase.
-
-3. Crear las cuentas en Supabase Auth y asignar roles. Ejemplo para recepción:
+5. Crear las cuentas en Supabase Auth y asignar roles. Ejemplo para recepción:
 
 ```sql
 insert into ciya.roles (user_id, panel)
@@ -202,10 +261,10 @@ select id, 'recepcion' from auth.users where email = 'correo@ejemplo.com';
 
    Repetir con `escenario` y `admin` según corresponda.
 
-4. Configurar los secretos de `ciya-receipts`, Brevo, Vault y `pg_cron` según
+6. Configurar los secretos de `ciya-receipts`, Brevo, Vault y `pg_cron` según
    `docs/operacion/runbook.md`; los nombres están en `.env.example`.
 
-5. Servir o publicar el frontend:
+7. Servir o publicar el frontend:
 
 ```bash
 cd apps/web
@@ -266,7 +325,7 @@ se documentan en `tests/` a medida que se implementan.
 - **Shells delgados**: los cinco HTML funcionales de `apps/web/` solo cargan
   CSS/JS y definen un contenedor; la lógica y el markup dinámico viven en
   `modules/` mediante puntos de montaje. `bases.html` es la excepción: contenido
-  oficial estático sin JS. El orden de scripts es parte del contrato: en `index.html`,
+  oficial estático sin JS. El orden de scripts es parte del contrato: en `portal.html`,
   `portal.js` se carga antes que `inscripciones.js` y `buzon.js` para que el
   portal cree sus raíces; en `escenario.html`, `encendido.js` se carga antes que
   `escenario.js` para exponer `CIYA_IGNITE` y permitir `CIYA_STAGE.mount()`.

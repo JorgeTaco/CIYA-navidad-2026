@@ -1,4 +1,1 @@
-.break-url, .gold-code { overflow-wrap: anywhere; }
-.ticket-list { max-height: 12rem; overflow: auto; font-variant-numeric: tabular-nums; }
-#form-checkin details { margin: 1rem 0; }
 .stage-screen:fullscreen { width: 100%; height: 100%; border-radius: 0; }

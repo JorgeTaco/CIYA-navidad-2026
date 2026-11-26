@@ -9,5 +9,6 @@
 .gold-availability { display: flex; flex-wrap: wrap; gap: .4rem; }
 .receipt-card { border-color: #72e1b166; overflow-wrap: anywhere; }
 .receipt-card h2 { font-size: 1.25rem; }
+.ticket-list { max-height: 12rem; overflow: auto; font-variant-numeric: tabular-nums; }
+#form-checkin details { margin: 1rem 0; }
 .record-list { min-width: 0; margin-bottom: 0; }
-.table-label { display: none; }

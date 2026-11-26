@@ -5,9 +5,9 @@
   function template() {
     return `
       <form class="card" id="form-deseo">
-        <div class="field"><label for="des-nombre">Nombre del autor</label><input id="des-nombre" required></div>
+        <div class="field"><label for="des-nombre">Nombre del autor</label><input id="des-nombre" maxlength="120" required></div>
         <div class="field"><label for="des-rol">Rol</label><select id="des-rol" required><option value="estudiante">Estudiante</option><option value="docente">Docente</option><option value="personal">Personal</option></select></div>
-        <div class="field"><label for="des-carrera">Carrera / Área</label><input id="des-carrera" required></div>
+        <div class="field"><label for="des-carrera">Carrera / Área</label><input id="des-carrera" maxlength="120" required></div>
         <div class="field"><label for="des-frase">Frase inspiradora o meta para 2027</label><textarea id="des-frase" maxlength="280" required></textarea></div>
         <button class="btn primary wide" type="submit">Enviar al buzón</button>
         <p class="hint">Las frases quedan pendientes de aprobación y podrán proyectarse durante la chocolatada final.</p>

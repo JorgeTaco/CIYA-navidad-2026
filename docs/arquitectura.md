@@ -12,15 +12,21 @@ Supabase en `supabase/`. No hay servidor propio ni build.
   `donate`, `redeem`, `seal`, `score`, `door` y `moderate`.
 - `CIYA_STORE.gold(secret)`, `CIYA_STORE.ranking()` y `CIYA_STORE.subscribe()`.
 
-Las RPC están definidas en `supabase/migrations/0002_rpc_read_write.sql`. El
-acceso se controla con `ciya.roles` y `ciya_access(panel)`.
+Las RPC están definidas en `supabase/migrations/0002_rpc_read_write.sql` y
+`0005_role_discovery.sql`. El acceso se controla con `ciya.roles`,
+`ciya_access(panel)` y `ciya_my_roles()`.
 
 ## Contratos entre módulos
 
 - Cada HTML funcional en `apps/web/` es un shell delgado con un punto de montaje:
-  `#portal-root`, `#qr-root`, `#recepcion-root`, `#admin-root` y `#escenario-root`.
-  El JS dueño renderiza allí todo el markup dinámico. `bases.html` es contenido
-  oficial estático y no tiene JS propio.
+  `#acceso-root` (`index.html`), `#portal-root` (`portal.html`), `#qr-root`,
+  `#recepcion-root`, `#admin-root` y `#escenario-root`. El JS dueño renderiza allí
+  todo el markup dinámico. `bases.html` es contenido oficial estático y no tiene
+  JS propio.
+- `index.html` autentica la cuenta mediante `CIYA_STORE.loginAccount()` (o
+  `CIYA_STORE.enterAsistente()` para participantes) y redirige exclusivamente hacia
+  el/los panel(es) asignados al rol; los menús de navegación filtran las pestañas
+  mediante `CIYA_UI.initNav()`.
 - `CIYA_PORTAL.mount()` crea además `#inscripciones-root` y `#buzon-root`, donde
   `CIYA_INSCRIPCIONES.init()` y `CIYA_BUZON.init()` colocan sus formularios.
 - `CIYA_RECEPCION.mount()` y `CIYA_ADMIN.mount()` renderizan sus paneles antes de
@@ -39,7 +45,7 @@ disponibilidad de los objetos globales: `shared/` primero, después los módulos
 al final `shared/css/responsive.css`. Dos órdenes son obligatorios por los puntos
 de montaje:
 
-- `index.html`: `portal.js` antes que `inscripciones.js` y `buzon.js`, para que
+- `portal.html`: `portal.js` antes que `inscripciones.js` y `buzon.js`, para que
   `CIYA_PORTAL.mount()` cree `#inscripciones-root` y `#buzon-root` antes de que
   los formularios busquen esos contenedores.
 - `escenario.html`: `encendido.js` antes que `escenario.js`, para que exista

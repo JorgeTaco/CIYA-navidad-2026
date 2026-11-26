@@ -6,6 +6,7 @@
   const esc = UI.escapeHtml;
   const id = new URLSearchParams(location.search).get('id');
   let activeGold;
+  let goldExpiryTimer = null;
 
   function link(item) { return 'qr.html?id=' + encodeURIComponent(item.id); }
 
@@ -14,8 +15,8 @@
       <main class="container" id="ruta-index"></main>
       <main class="container narrow" id="ruta-detalle" hidden></main>
       <nav class="bottom-actions" aria-label="Actividades del evento">
-        <a class="btn primary" href="index.html?modo=linterna#linterna">Abrir Modo Linterna</a>
-        <a class="btn" href="index.html#buzon" aria-label="Ir al Buzón Compilando Deseos 2027">Ir al Buzón 2027</a>
+        <a class="btn primary" href="portal.html?modo=linterna#linterna">Abrir Modo Linterna</a>
+        <a class="btn" href="portal.html#buzon" aria-label="Ir al Buzón Compilando Deseos 2027">Ir al Buzón 2027</a>
       </nav>`;
   }
 
@@ -65,7 +66,7 @@
       return '<a class="card card-link" href="' + link(t) + '"><span class="badge">' + esc(t.ubicacion) + '</span><h3 style="margin-top:0.7rem">Trivia relámpago</h3><p class="muted">' + esc(t.pregunta) + '</p></a>';
     }).join('');
     document.getElementById('lista-memes').innerHTML = Data.memes.map(function (m) {
-      return '<a class="card card-link" href="' + link(m) + '"><span class="badge">' + esc(m.ubicacion) + '</span><p style="margin-top:0.7rem">' + esc(m.texto.replace('|', ' vs. ')) + '</p></a>';
+      return '<a class="card card-link" href="' + link(m) + '"><span class="badge">' + esc(m.ubicacion || m.plantilla) + '</span><p style="margin-top:0.7rem">' + esc(m.texto.replace('|', ' vs. ')) + '</p></a>';
     }).join('');
     target.querySelector('[data-print-route]').onclick = function () { window.print(); };
     document.getElementById('copiar-base').onclick = function () { UI.copy(new URL('qr.html', location.href).href); };
@@ -129,9 +130,8 @@
     const button = document.getElementById('gold-refresh');
     const status = document.getElementById('gold-status');
     const code = document.getElementById('gold-code');
-    let expiryTimer;
     async function refresh() {
-      clearTimeout(expiryTimer);
+      clearTimeout(goldExpiryTimer);
       code.textContent = '';
       status.textContent = 'Consultando disponibilidad…';
       button.disabled = true;
@@ -143,7 +143,7 @@
         status.textContent = labels[result.status] || 'Clave válida durante dos minutos.';
         if (result.status === 'available') {
           code.textContent = result.code;
-          expiryTimer = setTimeout(function () {
+          goldExpiryTimer = setTimeout(function () {
             code.textContent = '';
             status.textContent = 'Clave vencida. Actualízala al llegar a recepción.';
           }, result.seconds * 1000);
@@ -161,6 +161,8 @@
   function renderRoute() {
     const secret = new URLSearchParams(location.hash.slice(1)).get('dorado');
     if (secret === activeGold) return;
+    clearTimeout(goldExpiryTimer);
+    goldExpiryTimer = null;
     activeGold = secret;
     if (secret) renderGold(secret);
     else if (id) renderDetail();
@@ -171,8 +173,14 @@
     document.getElementById('qr-root').innerHTML = shell();
   }
 
-  mount();
-  UI.initNav('qr');
-  window.addEventListener('hashchange', renderRoute);
-  renderRoute();
+  const hasDeepQr = Boolean(id || new URLSearchParams(location.hash.slice(1)).get('dorado'));
+  if (!hasDeepQr && !Store.hasAccessSession()) {
+    location.replace('index.html');
+  } else {
+    if (hasDeepQr && !Store.hasAccessSession()) Store.enterAsistente();
+    mount();
+    UI.initNav('qr');
+    window.addEventListener('hashchange', renderRoute);
+    renderRoute();
+  }
 })();

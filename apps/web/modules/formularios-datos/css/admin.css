@@ -1,3 +1,5 @@
+.break-url { overflow-wrap: anywhere; }
+
 @media print {
   body.print-gold header, body.print-gold footer, body.print-gold main > :not(#panel),
   body.print-gold #panel > :not(#admin-gold), body.print-gold button { display: none !important; }

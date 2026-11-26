@@ -38,9 +38,22 @@ async function sendReceipt(receipt: Receipt, apiKey: string, sender: string): Pr
   }
 }
 
+function secretMatches(supplied: string | null, expected: string | undefined): boolean {
+  if (!supplied || !expected) return false;
+  const encoder = new TextEncoder();
+  const a = encoder.encode(supplied);
+  const b = encoder.encode(expected);
+  const len = Math.max(a.length, b.length);
+  let diff = a.length ^ b.length;
+  for (let i = 0; i < len; i++) {
+    diff |= (a[i] ?? 0) ^ (b[i] ?? 0);
+  }
+  return diff === 0;
+}
+
 Deno.serve(async (request) => {
   const workerSecret = Deno.env.get('CIYA_WORKER_SECRET');
-  if (request.method !== 'POST' || !workerSecret || request.headers.get('x-ciya-worker-secret') !== workerSecret) {
+  if (request.method !== 'POST' || !secretMatches(request.headers.get('x-ciya-worker-secret'), workerSecret)) {
     return new Response(null, { status: 403 });
   }
   const project = Deno.env.get('SUPABASE_URL');

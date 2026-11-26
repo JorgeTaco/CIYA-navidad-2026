@@ -4,37 +4,26 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07151c">
-  <title>CIYA Navidad 2026 | Portal estudiantil</title>
+  <title>CIYA Navidad 2026 | Iniciar sesión</title>
   <link rel="stylesheet" href="shared/css/tokens.css">
   <link rel="stylesheet" href="shared/css/base.css">
   <link rel="stylesheet" href="shared/css/components.css">
-  <link rel="stylesheet" href="modules/portal-linterna/css/portal.css">
-  <link rel="stylesheet" href="modules/portal-linterna/css/linterna.css">
+  <link rel="stylesheet" href="modules/formularios-datos/css/forms.css">
   <link rel="stylesheet" href="shared/css/responsive.css">
 </head>
-<body class="portal-page">
+<body class="reception-page">
   <header class="topbar event-topbar">
     <div class="topbar-inner">
       <a class="brand" href="index.html"><span class="brand-mark">CIYA</span><span>Navidad 2026</span></a>
-      <details class="site-menu">
-        <summary>Menú</summary>
-        <nav aria-label="Información y organización">
-          <a href="index.html#registro">Gran Sorteo</a>
-          <a href="index.html#muro">Muro de la Empatía</a>
-          <a href="index.html#puertas">Puertas Decoradas</a>
-          <a href="index.html#ranking">Copa Solidaria</a>
-          <a href="bases.html#cronograma">Cronograma</a>
-          <a href="bases.html">Bases oficiales</a>
-          <div class="menu-divider">Organización</div>
-          <a href="recepcion.html">Recepción</a>
-          <a href="escenario.html">Escenario</a>
-          <a href="admin.html">Administración</a>
-        </nav>
-      </details>
+      <nav class="nav-links" data-role-links aria-label="Navegación principal"></nav>
+      <div class="row">
+        <span class="sync-pill" id="sync-status">Verificando</span>
+        <button class="btn ghost small" type="button" data-logout-btn hidden>Cerrar sesión</button>
+      </div>
     </div>
   </header>
 
-  <main class="container" id="portal-root"></main>
+  <main class="container narrow" id="acceso-root"></main>
 
   <footer class="footer">Facultad CIYA · Carrera de Sistemas y Software</footer>
 
@@ -42,8 +31,6 @@
   <script src="shared/js/data.js"></script>
   <script src="shared/js/store.js"></script>
   <script src="shared/js/ui.js"></script>
-  <script src="modules/portal-linterna/js/portal.js"></script>
-  <script src="modules/formularios-datos/js/inscripciones.js"></script>
-  <script src="modules/formularios-datos/js/buzon.js"></script>
+  <script src="modules/formularios-datos/js/acceso.js"></script>
 </body>
 </html>

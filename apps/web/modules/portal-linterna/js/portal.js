@@ -12,7 +12,7 @@
         <span class="kicker">4 de diciembre de 2026 · Hall principal CIYA</span>
         <h1>Ingenio que ilumina <em>la Navidad</em></h1>
         <nav class="event-actions" aria-label="Actividades principales">
-          <a class="event-action lantern-link" href="index.html?modo=linterna#linterna">
+          <a class="event-action lantern-link" href="portal.html?modo=linterna#linterna">
             <span class="action-icon" aria-hidden="true">✦</span><span>Mar de Linternas</span>
           </a>
           <a class="event-action route-link" href="qr.html">
@@ -111,7 +111,7 @@
       </section>
 
       <section class="section" id="ranking">
-        <div class="section-head"><h2>Copa Solidaria Inter-Carreras</h2><span class="sync-pill" id="sync-status">Consultando marcador</span></div>
+        <div class="section-head"><h2>Copa Solidaria Inter-Carreras</h2></div>
         <div class="card" id="ranking-portal"><p class="empty">Consultando los aportes por carrera…</p></div>
       </section>`;
   }
@@ -173,7 +173,7 @@
       const saved = JSON.parse(localStorage.getItem('ciya2026:linterna') || 'null');
       if (saved && typeof saved.frase === 'string' && Data.carreras.some(function (career) { return career.id === saved.carrera; })) {
         linterna.carrera = saved.carrera;
-        linterna.frase = saved.frase.slice(0, 60);
+        linterna.frase = saved.frase.trim().slice(0, 60) || Data.frasesLinterna[0];
         linterna.blink = saved.blink !== false;
       }
     } catch (error) { console.warn(error); }
@@ -227,7 +227,7 @@
       if (event.key === 'Escape' && !document.fullscreenElement && stage.classList.contains('live')) closePreview();
     });
     document.getElementById('copy-url').addEventListener('click', function () {
-      UI.copy(new URL('index.html?modo=linterna#linterna', location.href).href);
+      UI.copy(new URL('portal.html?modo=linterna#linterna', location.href).href);
     });
     applyLantern();
   }
@@ -268,20 +268,29 @@
   }
 
   async function init() {
+    const isLanternMode = new URLSearchParams(location.search).get('modo') === 'linterna';
+    if (!isLanternMode && !Store.hasAccessSession()) {
+      location.replace('index.html');
+      return;
+    }
+    if (isLanternMode && !Store.hasAccessSession()) {
+      Store.enterAsistente();
+    }
     mount();
     setupLantern();
-    if (new URLSearchParams(location.search).get('modo') === 'linterna') {
+    if (isLanternMode) {
       document.body.classList.add('lantern-page');
-      document.querySelectorAll('main > section:not(#linterna), #sync-status').forEach(function (node) { node.hidden = true; });
+      document.querySelectorAll('main > section:not(#linterna)').forEach(function (node) { node.hidden = true; });
       const sectionTitle = document.querySelector('#linterna h2');
       const title = document.createElement('h1');
       title.textContent = sectionTitle.textContent;
       sectionTitle.replaceWith(title);
       document.title = 'Mar de Linternas | CIYA Navidad 2026';
+      UI.initNav('portal');
       return;
     }
     setupEstaticos();
-    UI.initNav();
+    UI.initNav('portal');
     await Store.init();
     Store.subscribe(render);
   }
