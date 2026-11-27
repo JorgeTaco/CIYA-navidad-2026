@@ -123,7 +123,7 @@ test('store resuelve carreras conocidas, desconocidas y ranking inicial', () => 
   assert.equal(store.carrera('otra').sigla, '?');
   assert.equal(store.ranking().length, data.carreras.length);
   assert.equal(store.ranking().every(r => r.puntos === 0 && r.puesto === 1), true);
-  assert.deepEqual(data.ciclos.map(ciclo => ciclo.id),
+  assert.deepEqual(Array.from(data.ciclos, ciclo => ciclo.id),
     ['nivelacion', 'ciclo1', 'ciclo2', 'ciclo3', 'ciclo4', 'ciclo5', 'ciclo6', 'ciclo7', 'ciclo8']);
 });
 
