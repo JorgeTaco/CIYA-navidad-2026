@@ -60,7 +60,7 @@
       <main class="container narrow" id="ruta-detalle" hidden></main>
       <nav class="container narrow route-shortcuts" aria-label="Actividades del evento">
         <a class="btn primary" href="portal.html?modo=linterna#linterna">Abrir Modo Linterna</a>
-        <a class="btn" href="portal.html#buzon" aria-label="Ir al Buzón Compilando Deseos 2027">Ir al Buzón 2027</a>
+        <a class="btn" href="portal.html?modo=buzon" aria-label="Ir al Buzón Compilando Deseos 2027">Ir al Buzón 2027</a>
       </nav>`;
   }
 
@@ -71,6 +71,9 @@
     detail.hidden = true;
     document.title = 'CIYA Navidad 2026 | Ruta de Códigos QR';
     target.innerHTML = `
+      <nav class="route-back" aria-label="Navegación de actividad">
+        <a class="btn ghost" href="portal.html"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg> Volver al portal</a>
+      </nav>
       <div class="event-hero route-hero">
         <span class="feature-icon">${UI.icon('qr_code_scanner')}</span>
         <h1>Ruta de Códigos QR</h1>

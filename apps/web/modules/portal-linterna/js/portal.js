@@ -22,13 +22,17 @@
   const activities = [
     ['lantern-link', 'portal.html?modo=linterna#linterna', 'wb_twilight', 'Mar de Linternas', 'Ilumina el evento con el color de tu carrera.'],
     ['route-link', 'qr.html', 'qr_code_scanner', 'Ruta Tecnológica QR', 'Explora los códigos del campus.'],
-    ['wishes-link', '#buzon', 'mark_email_unread', 'Buzón Digital 2027', 'Comparte un deseo para el próximo año.'],
-    ['music-link', '#villancicos', 'music_note', 'Villancicos CIYA', 'Inscribe a tu grupo y consulta el orden.']
+    ['wishes-link', 'portal.html?modo=buzon', 'mark_email_unread', 'Buzón Digital 2027', 'Comparte un deseo para el próximo año.'],
+    ['music-link', 'portal.html?modo=villancicos', 'music_note', 'Villancicos CIYA', 'Inscribe a tu grupo y consulta el orden.']
   ];
+  const backArrowSvg = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>';
   let lanternMatrix;
 
   function lanternTemplate(heading) {
     return `
+      <nav class="portal-shortcuts" aria-label="Navegación de actividad">
+        <a class="btn ghost" href="portal.html">${backArrowSvg} Volver al portal</a>
+      </nav>
       <section class="section lantern-section" id="linterna">
         <header class="lantern-heading">
           <span class="feature-icon">${UI.icon('lightbulb')}</span>
@@ -129,8 +133,6 @@
         </div>
       </section>
 
-      ${lanternTemplate('h2')}
-
       <nav class="portal-shortcuts" aria-label="Accesos rápidos">
         <a class="btn primary" href="cronograma.html">${UI.icon('schedule')} Cronograma</a>
         <a class="btn accent" href="qr.html">${UI.icon('qr_code_scanner')} Explorar Ruta QR</a>
@@ -145,45 +147,6 @@
           <li>QR Dorado canjeado: 3 boletos extra.</li>
         </ul>
         <p class="hint">Donaciones y canjes de 08:00 a 17:45. Cada estudiante puede ganar un premio y tiene 45 segundos para presentarse con su identificación.</p>
-      </section>
-
-      <section class="section" id="villancicos" aria-labelledby="villancicos-title">
-        <header class="villancicos-header">
-          <div class="villancicos-lights" aria-hidden="true">${'<span></span>'.repeat(12)}</div>
-          <h2 id="villancicos-title">Concurso de Villancicos <span>CIYA tiene Talento</span></h2>
-          <p><time datetime="${esc(Data.evento.fechaISO)}">${esc(Data.evento.fecha)}</time> · ${esc(villancicos.hora)}</p>
-          <p>Hall Principal · Hasta 3 minutos por grupo</p>
-        </header>
-        <div class="grid cols-2 villancicos-layout">
-          <section class="card villancicos-program" aria-labelledby="villancicos-program-title">
-            <h3 id="villancicos-program-title">Orden de presentación</h3>
-            <div id="lista-grupos"><p class="empty">Consultando los grupos inscritos…</p></div>
-          </section>
-          <div id="inscripciones-root"></div>
-        </div>
-        <details class="card villancicos-criteria">
-          <summary>Criterios de evaluación</summary>
-          <ul>${Data.criteriosVillancicos.map(function (criterion) {
-            return '<li><strong>' + esc(criterion.nombre) + ' · ' + criterion.peso + '%</strong><p>' + esc(criterion.detalle) + '</p></li>';
-          }).join('')}</ul>
-        </details>
-        <dialog class="villancico-dialog" id="villancico-dialog" aria-labelledby="villancico-dialog-title">
-          <div class="villancico-dialog-shell">
-            <header class="villancico-dialog-head">
-              <div><p class="kicker" id="villancico-dialog-turn"></p><h3 id="villancico-dialog-title"></h3></div>
-              <form method="dialog"><button class="btn small" type="submit" autofocus>Cerrar</button></form>
-            </header>
-            <div class="villancico-dialog-body" id="villancico-dialog-body"></div>
-          </div>
-        </dialog>
-      </section>
-
-      <section class="section" id="buzon">
-        <div class="section-head"><div><span class="kicker">QR junto al Rincón Instagrameable</span><h2>Buzón “Compilando Deseos 2027”</h2></div></div>
-        <div class="grid cols-2">
-          <div id="buzon-root"></div>
-          <div class="card"><h3>Frases aprobadas</h3><div class="frases-aprobadas" id="frases-aprobadas"><p class="empty">Consultando las frases aprobadas…</p></div></div>
-        </div>
       </section>
 
       <section class="section card" id="muro">
@@ -204,6 +167,57 @@
       <section class="section" id="ranking">
         <div class="section-head"><h2>Copa Solidaria Inter-Carreras</h2></div>
         <div class="card" id="ranking-portal"><p class="empty">Consultando los aportes por carrera…</p></div>
+      </section>`;
+  }
+
+  function villancicosTemplate() {
+    return `
+      <nav class="portal-shortcuts" aria-label="Navegación de actividad">
+        <a class="btn ghost" href="portal.html">${backArrowSvg} Volver al portal</a>
+      </nav>
+      <section class="section" id="villancicos" aria-labelledby="villancicos-title">
+        <header class="villancicos-header">
+          <div class="villancicos-lights" aria-hidden="true">${'<span></span>'.repeat(12)}</div>
+          <h1 id="villancicos-title">Concurso de Villancicos <span>CIYA tiene Talento</span></h1>
+          <p><time datetime="${esc(Data.evento.fechaISO)}">${esc(Data.evento.fecha)}</time> · ${esc(villancicos.hora)}</p>
+          <p>Hall Principal · Hasta 3 minutos por grupo</p>
+        </header>
+        <div class="grid cols-2 villancicos-layout">
+          <section class="card villancicos-program" aria-labelledby="villancicos-program-title">
+            <h2 id="villancicos-program-title">Orden de presentación</h2>
+            <div id="lista-grupos"><p class="empty">Consultando los grupos inscritos…</p></div>
+          </section>
+          <div id="inscripciones-root"></div>
+        </div>
+        <details class="card villancicos-criteria">
+          <summary>Criterios de evaluación</summary>
+          <ul>${Data.criteriosVillancicos.map(function (criterion) {
+            return '<li><strong>' + esc(criterion.nombre) + ' · ' + criterion.peso + '%</strong><p>' + esc(criterion.detalle) + '</p></li>';
+          }).join('')}</ul>
+        </details>
+        <dialog class="villancico-dialog" id="villancico-dialog" aria-labelledby="villancico-dialog-title">
+          <div class="villancico-dialog-shell">
+            <header class="villancico-dialog-head">
+              <div><p class="kicker" id="villancico-dialog-turn"></p><h3 id="villancico-dialog-title"></h3></div>
+              <form method="dialog"><button class="btn small" type="submit" autofocus>Cerrar</button></form>
+            </header>
+            <div class="villancico-dialog-body" id="villancico-dialog-body"></div>
+          </div>
+        </dialog>
+      </section>`;
+  }
+
+  function buzonTemplate() {
+    return `
+      <nav class="portal-shortcuts" aria-label="Navegación de actividad">
+        <a class="btn ghost" href="portal.html">${backArrowSvg} Volver al portal</a>
+      </nav>
+      <section class="section" id="buzon">
+        <div class="section-head"><div><span class="kicker">QR junto al Rincón Instagrameable</span><h1>Buzón “Compilando Deseos 2027”</h1></div></div>
+        <div class="grid cols-2">
+          <div id="buzon-root"></div>
+          <div class="card"><h2>Frases aprobadas</h2><div class="frases-aprobadas" id="frases-aprobadas"><p class="empty">Consultando las frases aprobadas…</p></div></div>
+        </div>
       </section>`;
   }
 
@@ -445,41 +459,58 @@
   function render(state) {
     const status = document.getElementById('metrics-status');
     const online = Store.isRemote();
-    status.textContent = online ? 'En vivo' : state.ranking.length ? 'Última consulta' : 'Métricas no disponibles';
-    status.classList.toggle('online', online);
-    metrics.forEach(function ([id, key]) {
-      document.getElementById('stat-' + id).textContent = state.counts[key] ?? '—';
-    });
+    if (status) {
+      status.textContent = online ? 'En vivo' : state.ranking.length ? 'Última consulta' : 'Métricas no disponibles';
+      status.classList.toggle('online', online);
+      metrics.forEach(function ([id, key]) {
+        document.getElementById('stat-' + id).textContent = state.counts[key] ?? '—';
+      });
+    }
+    const gruposEl = document.getElementById('lista-grupos');
+    const frasesEl = document.getElementById('frases-aprobadas');
+    const rankingEl = document.getElementById('ranking-portal');
     if (!state.ranking.length) {
-      document.getElementById('lista-grupos').textContent = 'Orden de presentación aún no disponible.';
-      document.getElementById('frases-aprobadas').textContent = 'Frases aprobadas aún no disponibles.';
-      document.getElementById('ranking-portal').textContent = 'Marcador aún no disponible.';
+      if (gruposEl) gruposEl.textContent = 'Orden de presentación aún no disponible.';
+      if (frasesEl) frasesEl.textContent = 'Frases aprobadas aún no disponibles.';
+      if (rankingEl) rankingEl.textContent = 'Marcador aún no disponible.';
       return;
     }
-    renderVillancicos(state.groups);
-    document.getElementById('frases-aprobadas').innerHTML = state.deseos.slice(-3).map(function (wish) {
-      return '<blockquote class="muted">“' + esc(wish.frase) + '” — ' + esc(wish.nombre) + '</blockquote>';
-    }).join('') || '<p class="empty">Aún no hay frases aprobadas.</p>';
-    UI.renderRanking('ranking-portal', Store.ranking());
+    if (gruposEl) renderVillancicos(state.groups);
+    if (frasesEl) {
+      frasesEl.innerHTML = state.deseos.slice(-3).map(function (wish) {
+        return '<blockquote class="muted">“' + esc(wish.frase) + '” — ' + esc(wish.nombre) + '</blockquote>';
+      }).join('') || '<p class="empty">Aún no hay frases aprobadas.</p>';
+    }
+    if (rankingEl) UI.renderRanking('ranking-portal', Store.ranking());
   }
 
-  function mount(isLanternMode) {
-    document.getElementById('portal-root').innerHTML = isLanternMode ? lanternTemplate('h1') : template();
+  function mount(mode) {
+    const root = document.getElementById('portal-root');
+    if (mode === 'linterna') root.innerHTML = lanternTemplate('h1');
+    else if (mode === 'villancicos') root.innerHTML = villancicosTemplate();
+    else if (mode === 'buzon') root.innerHTML = buzonTemplate();
+    else root.innerHTML = template();
   }
 
   async function init() {
-    const isLanternMode = new URLSearchParams(location.search).get('modo') === 'linterna';
-    mount(isLanternMode);
-    setupLantern();
-    if (isLanternMode) {
+    const mode = new URLSearchParams(location.search).get('modo');
+    mount(mode);
+    if (mode === 'linterna') {
+      setupLantern();
       document.body.classList.add('lantern-page');
       document.title = 'Mar de Linternas | CIYA Navidad 2026';
       document.getElementById('sync-status').hidden = true;
       UI.initNav('portal');
       return;
     }
-    setupEstaticos();
-    setupVillancicosDialog();
+    if (mode === 'villancicos') {
+      document.title = 'Villancicos CIYA | CIYA Navidad 2026';
+      setupVillancicosDialog();
+    } else if (mode === 'buzon') {
+      document.title = 'Buzón Digital 2027 | CIYA Navidad 2026';
+    } else {
+      setupEstaticos();
+    }
     UI.initNav('portal');
     if (Store.configured()) await Store.init();
     Store.subscribe(render);
