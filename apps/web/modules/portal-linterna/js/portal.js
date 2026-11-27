@@ -5,12 +5,12 @@
   const esc = UI.escapeHtml;
   const linterna = { carrera: 'sistemas', frase: 'Feliz Navidad CIYA', brillo: 'med' };
   const brightnessLevels = ['min', 'med', 'max'];
-  const lanternThemes = {
-    electricidad: ['#d4af37', 'bolt'],
-    electromecanica: ['#b52b3b', 'settings'],
-    industrial: ['#c026d3', 'engineering'],
-    hidraulica: ['#0284c7', 'water_drop'],
-    sistemas: ['#10b981', 'terminal']
+  const lanternSymbols = {
+    electricidad: 'bolt',
+    electromecanica: 'settings',
+    industrial: 'engineering',
+    hidraulica: 'water_drop',
+    sistemas: 'terminal'
   };
   const metrics = [
     ['asistentes', 'attendees', 'Asistentes', 'groups'],
@@ -207,11 +207,10 @@
     const message = document.getElementById('lantern-message');
     const meta = document.getElementById('lantern-carrera');
     const carrera = Store.carrera(linterna.carrera);
-    const [color] = lanternThemes[carrera.id];
-    stage.style.setProperty('--lantern-color', color);
+    stage.style.setProperty('--lantern-color', carrera.color);
     message.textContent = linterna.frase;
     meta.textContent = carrera.nombre;
-    if (lanternMatrix) lanternMatrix.show(linterna.frase, color);
+    if (lanternMatrix) lanternMatrix.show(linterna.frase, carrera.color);
     document.querySelectorAll('#linterna-carreras .chip, #linterna-frases .chip').forEach(function (button) {
       const selected = button.dataset.id === (button.parentElement.id === 'linterna-carreras' ? linterna.carrera : linterna.frase);
       button.classList.toggle('active', selected);
@@ -242,8 +241,7 @@
     } catch (error) { console.warn(error); }
 
     renderChips('linterna-carreras', Data.carreras.map(function (career) {
-      const [color, symbol] = lanternThemes[career.id];
-      return { id: career.id, nombre: career.nombre, color, symbol };
+      return { ...career, symbol: lanternSymbols[career.id] };
     }), chooseLanternCarrera);
     renderChips('linterna-frases', Data.frasesLinterna.map(function (phrase) {
       return { id: phrase, nombre: phrase };
