@@ -20,3 +20,12 @@
 .qr-story.gold-view { border-color: #d9b467; }
 .gold-view .gold-code { margin-block: .5rem; font-variant-numeric: tabular-nums; }
 #gold-refresh { min-height: 44px; }
+
+.qr-message-card { display: flex; flex-direction: column; justify-content: space-between; gap: .9rem; }
+.qr-code-box { display: flex; flex-direction: column; align-items: center; gap: .45rem; padding-top: .75rem; border-top: 1px solid var(--line); }
+.qr-svg { width: min(160px, 100%); height: auto; border-radius: 10px; border: 1px solid var(--line); background: #ffffff; display: block; }
+.qr-scan-hint { font-size: .78rem; color: var(--muted); text-align: center; }
+
+@media print {
+  .qr-svg { width: 140px; break-inside: avoid; }
+}

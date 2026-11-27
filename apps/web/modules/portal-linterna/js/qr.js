@@ -3,12 +3,25 @@
   const Store = window.CIYA_STORE;
   const Data = window.CIYA_DATA;
   const Sound = window.CIYA_SOUND;
+  const QRCode = window.CIYA_QR_CODE;
   const esc = UI.escapeHtml;
   const id = new URLSearchParams(location.search).get('id');
   let activeGold;
   let goldExpiryTimer = null;
 
   function link(item) { return 'qr.html?id=' + encodeURIComponent(item.id); }
+  function fullLink(item) { return new URL(link(item), location.href).href; }
+
+  function renderQrCard(item, title, qrLabel, hint) {
+    const qrMarkup = QRCode
+      ? '<div class="qr-code-box">' + QRCode.toSvg(fullLink(item), { label: qrLabel }) +
+        '<span class="qr-scan-hint">' + esc(hint) + '</span></div>'
+      : '';
+    return '<a class="card card-link qr-message-card" href="' + link(item) + '">' +
+      '<div class="qr-card-body"><span class="badge">' + esc(item.ubicacion) + '</span>' +
+      '<h3 style="margin-top:0.7rem">' + esc(title) + '</h3></div>' +
+      qrMarkup + '</a>';
+  }
 
   function shell() {
     return `
@@ -61,10 +74,10 @@
       </section>`;
 
     document.getElementById('lista-mensajes').innerHTML = Data.mensajesQR.map(function (m) {
-      return '<a class="card card-link" href="' + link(m) + '"><span class="badge">' + esc(m.ubicacion) + '</span><h3 style="margin-top:0.7rem">' + esc(m.titulo) + '</h3><p class="muted">' + esc(m.texto.slice(0, 120)) + '…</p></a>';
+      return renderQrCard(m, m.titulo, 'Código QR para ' + m.titulo, 'Escanea o toca para abrir el mensaje');
     }).join('');
     document.getElementById('lista-trivias').innerHTML = Data.trivias.map(function (t) {
-      return '<a class="card card-link" href="' + link(t) + '"><span class="badge">' + esc(t.ubicacion) + '</span><h3 style="margin-top:0.7rem">Trivia relámpago</h3><p class="muted">' + esc(t.pregunta) + '</p></a>';
+      return renderQrCard(t, 'Trivia relámpago', 'Código QR para trivia en ' + t.ubicacion, 'Escanea o toca para responder la trivia');
     }).join('');
     document.getElementById('lista-memes').innerHTML = Data.memes.map(function (m) {
       return '<a class="card card-link" href="' + link(m) + '"><span class="badge">' + esc(m.ubicacion || m.plantilla) + '</span><p style="margin-top:0.7rem">' + esc(m.texto.replace('|', ' vs. ')) + '</p></a>';
