@@ -215,6 +215,21 @@ small, .muted { color: var(--muted); }
 .nav-links a.active { background: var(--bg-soft); color: var(--red); }
 .nav-links .material-symbols-outlined { font-size: 1.12rem; }
 
+.nav-links .session-return {
+  gap: .6rem;
+  padding-inline: .9rem;
+  border: 1px solid var(--line);
+  border-radius: .7rem;
+  background: var(--panel-2);
+  color: var(--primary);
+}
+.nav-links .session-return:hover { border-color: var(--tint); background: var(--panel-strong); }
+.nav-links .session-return .material-symbols-outlined {
+  display: inline-block;
+  font-size: .9rem;
+  transform: rotate(180deg);
+}
+
 .sync-pill {
   display: inline-flex;
   align-items: center;

@@ -14,6 +14,7 @@
       label: 'Recepción',
       shortLabel: 'Recepción',
       href: 'recepcion.html',
+      symbol: 'groups',
       actor: 'Equipo de Recepción (Industrial)',
       description: 'Acreditación presencial, donaciones por carrera, canje de QR Dorados y cierre de recepción.'
     },
@@ -22,6 +23,7 @@
       label: 'Escenario',
       shortLabel: 'Escenario',
       href: 'escenario.html',
+      symbol: 'dashboard',
       actor: 'Producción / Escenario (Sistemas y Software)',
       description: 'Ranking en vivo, concurso de villancicos, Encendido 5 en 1 (local/offline) y Gran Ruleta Digital.'
     },
@@ -30,10 +32,14 @@
       label: 'Administración',
       shortLabel: 'Administración',
       href: 'admin.html',
+      symbol: 'admin_panel_settings',
       actor: 'Docentes Organizadores y Asociación (Curadores)',
       description: 'Moderación y exportación de Deseos 2027, puertas decoradas, puntajes y QR Dorados.'
     }
   };
+  const staffPanels = ['recepcion', 'escenario', 'admin'];
+  const sessionMenuHref = 'index.html#acceso-panels';
+  const sessionReturnLabel = 'Volver a Sesión activa';
   let lastNavActive = '';
   let lastNavOptions = null;
 
@@ -102,10 +108,12 @@
     return new Promise(function (resolve) {
       const overlay = document.createElement('div');
       overlay.className = 'pin-overlay';
-      const allowedLinks = info.roles.map(function (role) {
-        const panel = PANELS[role];
-        return panel ? '<a class="btn primary" href="' + panel.href + '">Ir a ' + escapeHtml(panel.label) + '</a>' : '';
-      }).join('');
+      const allowedLinks = staffPanelsFor(info.roles).length > 1
+        ? '<a class="btn primary" href="' + sessionMenuHref + '">' + sessionReturnLabel + '</a>'
+        : info.roles.map(function (role) {
+          const panel = PANELS[role];
+          return panel ? '<a class="btn primary" href="' + panel.href + '">Ir a ' + escapeHtml(panel.label) + '</a>' : '';
+        }).join('');
       overlay.innerHTML =
         '<div class="pin-card"><h2>Acceso restringido por rol</h2>' +
         '<p class="muted">La sesión actual (<strong>' + escapeHtml(info.email || 'usuario') + '</strong>) no tiene permiso para <strong>' + escapeHtml(title) + '</strong>.</p>' +
@@ -227,10 +235,12 @@
     portal: ['portal.html', 'Portal', 'holiday_village'],
     qr: ['qr.html', 'Ruta QR', 'qr_code_scanner'],
     cronograma: ['cronograma.html', 'Cronograma', 'schedule'],
-    recepcion: ['recepcion.html', 'Recepción', 'groups'],
-    escenario: ['escenario.html', 'Escenario', 'dashboard'],
-    admin: ['admin.html', 'Administración', 'admin_panel_settings']
+    sesion: [sessionMenuHref, 'Sesión activa', 'dashboard']
   };
+  staffPanels.forEach(function (role) {
+    const panel = PANELS[role];
+    navItems[role] = [panel.href, panel.label, panel.symbol];
+  });
 
   function icon(name) {
     return '<span class="material-symbols-outlined" aria-hidden="true">' + escapeHtml(name) + '</span>';
@@ -248,13 +258,22 @@
       </dl>`;
   }
 
+  function staffPanelsFor(roles) {
+    return staffPanels.filter(function (role) { return roles.includes(role); });
+  }
+
   function buildNavLinks(roles, active, isLocal) {
-    const staff = ['recepcion', 'escenario', 'admin'].filter(function (role) { return roles.includes(role); });
-    const isPublic = ['acceso', 'portal', 'qr', 'cronograma'].includes(active);
+    const staff = staffPanelsFor(roles);
+    const publicLinks = ['portal', 'qr', 'cronograma'];
+    const isPublic = active === 'acceso' || publicLinks.includes(active);
     let items;
     if (isLocal) items = ['escenario'];
+    else if (staff.length > 1 && staffPanels.includes(active)) {
+      return '<a class="session-return" href="' + sessionMenuHref + '" data-nav="sesion">' +
+        icon('arrow_forward_ios') + '<span>' + sessionReturnLabel + '</span></a>';
+    } else if (staff.length > 1) items = [...publicLinks, 'sesion'];
     else if (staff.length) items = [...staff, 'cronograma'];
-    else if (isPublic || roles.includes('asistente')) items = ['portal', 'qr', 'cronograma'];
+    else if (isPublic || roles.includes('asistente')) items = publicLinks;
     else items = ['cronograma'];
 
     return items.map(function (id) {

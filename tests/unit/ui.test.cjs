@@ -186,6 +186,37 @@ test('sin configuración no hay sesión, Roles ni operaciones', async () => {
   await assert.rejects(() => sinConfig.store.action('wish', {}), /Falta la configuración/);
 });
 
+test('una sesión con varios roles vuelve al selector desde cualquier panel autorizado', () => {
+  const { ui, roleLinksEl, logoutBtn } = loadShared({
+    storedSession: { access_token: 'token', expires_at: 4102444800 },
+    storedRoles: { email: 'organizacion@example.test', roles: ['recepcion', 'escenario', 'admin'], mode: 'staff' }
+  });
+
+  for (const panel of ['recepcion', 'escenario', 'admin']) {
+    ui.initNav(panel);
+    assert.match(roleLinksEl.innerHTML, /href="index\.html#acceso-panels"/);
+    assert.match(roleLinksEl.innerHTML, /Volver a Sesión activa/);
+    assert.equal([...roleLinksEl.innerHTML.matchAll(/<a /g)].length, 1);
+    assert.equal(logoutBtn.hidden, false);
+  }
+
+  ui.initNav('escenario', { local: true });
+  assert.equal(roleLinksEl.hidden, true);
+  assert.doesNotMatch(roleLinksEl.innerHTML, /acceso-panels/);
+});
+
+test('las vistas públicas dirigen al selector a la cuenta con varios módulos', () => {
+  const { ui, roleLinksEl } = loadShared({
+    storedSession: { access_token: 'token', expires_at: 4102444800 },
+    storedRoles: { email: 'organizacion@example.test', roles: ['recepcion', 'escenario'], mode: 'staff' }
+  });
+  for (const page of ['portal', 'qr', 'cronograma']) {
+    ui.initNav(page);
+    assert.deepEqual(Array.from(roleLinksEl.innerHTML.matchAll(/data-nav="([^"]+)"/g), match => match[1]),
+      ['portal', 'qr', 'cronograma', 'sesion']);
+  }
+});
+
 test('la navegación pública funciona sin sesión ni configuración de Supabase', () => {
   const { ui, roleLinksEl, logoutBtn } = loadShared({ configured: false });
   for (const page of ['portal', 'qr', 'cronograma']) {

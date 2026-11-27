@@ -77,11 +77,12 @@
         <div class="access-card-heading">
           <span class="feature-icon">${UI.icon('admin_panel_settings')}</span>
           <div>
-            <h2 id="access-session">Sesión activa</h2>
+            <h2 id="access-session" tabindex="-1">Sesión activa</h2>
             <p id="acceso-user"></p>
           </div>
         </div>
-        <div class="grid" id="acceso-role-cards"></div>
+        <h3 id="access-modules-title">Elige un módulo</h3>
+        <nav class="grid access-module-menu" id="acceso-role-cards" aria-labelledby="access-modules-title"></nav>
         <button class="btn ghost small" id="acceso-logout" type="button">Cerrar sesión</button>
       </section>`;
   }
@@ -106,15 +107,17 @@
     byId('acceso-config').hidden = true;
     byId('acceso-grid').hidden = true;
     byId('acceso-panels').hidden = false;
-    byId('acceso-user').textContent = (info.email ? info.email + ' · ' : '') +
-      info.roles.map(function (role) { return UI.panels[role] ? UI.panels[role].label : role; }).join(', ');
+    byId('acceso-user').textContent = info.email;
+    byId('acceso-user').hidden = !info.email;
     byId('acceso-role-cards').innerHTML = info.roles.map(function (role) {
       const panel = UI.panels[role];
       if (!panel) return '';
       return '<a class="card-link access-panel-link" href="' + panel.href + '">' +
+        '<span class="feature-icon">' + UI.icon(panel.symbol) + '</span>' +
         '<div><h3>' + esc(panel.label) + '</h3><p>' + esc(panel.description) + '</p></div>' +
         UI.icon('arrow_forward_ios') + '</a>';
     }).join('');
+    byId('access-session').focus({ preventScroll: location.hash !== '#acceso-panels' });
   }
 
   function showLogin() {

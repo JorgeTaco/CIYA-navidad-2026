@@ -185,19 +185,25 @@
 }
 
 .access-activities .material-symbols-outlined { font-size: .95rem; }
-.access-signed-in { align-self: start; }
+.access-signed-in { align-self: start; order: -1; }
 .access-signed-in > .btn { margin-top: .85rem; }
+.access-signed-in .access-card-heading { margin-bottom: 1.1rem; }
+.access-module-menu { gap: .6rem; }
 
 .access-panel-link {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: .5rem;
-  padding: .75rem;
+  gap: .65rem;
+  min-height: 4.5rem;
+  padding: .7rem .75rem;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface-gradient);
 }
+.access-panel-link:hover, .access-panel-link:focus-visible { background: var(--bg-soft); }
+.access-panel-link .feature-icon { width: 2.3rem; height: 2.3rem; }
+.access-panel-link > .material-symbols-outlined { color: var(--tint); font-size: .9rem; }
 .access-panel-link h3 { margin: 0 0 .2rem; }
 .access-panel-link p { margin: 0; color: var(--muted); font-size: .82rem; }
 

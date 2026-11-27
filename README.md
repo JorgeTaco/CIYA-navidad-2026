@@ -12,7 +12,7 @@ el backend es el proyecto Supabase de `supabase/`.
   **Ciclo** (Nivelación, 1er a 8vo ciclo). El ciclo se valida en `ciya_write` y se
   conserva en la base con la migración `0006_ciclo.sql`; la lista de asistentes
   muestra el ciclo registrado.
-- La portada de acceso no muestra navegación; el selector está en el cuerpo de la página. Dentro de la aplicación, la navegación pública se muestra abajo en móvil y en la cabecera en escritorio con Portal, Ruta QR y Cronograma. Recepción, Administración y Escenario muestran la navegación habilitada para la cuenta. En la consola local se oculta esa barra.
+- La portada de acceso contiene el selector de módulos. La navegación pública se muestra abajo en móvil y en la cabecera en escritorio con Portal, Ruta QR y Cronograma. Las cuentas con varios roles regresan desde Recepción, Escenario o Administración a **Sesión activa** para abrir otro módulo. En la consola local se oculta esa barra.
 - El Mar de Linternas usa los tonos y el marco LED del ejemplo. Los botones **Mín.**, **Med.** y **Máx.** ajustan el brillo visual y guardan la preferencia localmente. La URL directa dibuja solo la linterna y permite cambiar de mensaje, carrera y nivel de brillo tras desconectar la red. La pausa de la marquesina, las partes de movimiento reducido y la pantalla completa siguen disponibles en sus modos correspondientes.
 - Ruta QR, Cronograma, Recepción, Administración y Escenario comparten tarjetas, formularios, tablas y estados visuales. La superficie proyectada permanece oscura y conserva la relación 16:9. El servidor de escenario sirve las fuentes desde la laptop. Se conservan los contratos de Supabase, los archivos de respaldo y las exportaciones.
 

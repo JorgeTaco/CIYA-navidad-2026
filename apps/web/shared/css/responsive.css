@@ -32,6 +32,18 @@
   }
   .nav-links a:focus-visible { outline-offset: -4px; }
   .nav-links a.active { background: var(--panel); }
+  .nav-links:has(> .session-return) {
+    padding: .4rem max(.75rem, env(safe-area-inset-right))
+      calc(.4rem + env(safe-area-inset-bottom)) max(.75rem, env(safe-area-inset-left));
+    background: var(--surface-gradient);
+  }
+  .nav-links .session-return {
+    flex-direction: row;
+    max-width: 28rem;
+    min-height: calc(var(--navigation-height) - .8rem);
+    padding-inline: .7rem;
+    font-size: .85rem;
+  }
   .site-logout { width: 44px; min-width: 44px; }
   .site-logout .logout-label { display: none; }
   .nav-links .material-symbols-outlined { display: inline-block; font-size: 1.35rem; }
