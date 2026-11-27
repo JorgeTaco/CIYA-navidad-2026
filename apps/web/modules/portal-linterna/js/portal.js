@@ -6,12 +6,12 @@
   const villancicos = Data.cronograma.find(function (actividad) { return actividad.id === 'villancicos'; });
   const linterna = { carrera: 'sistemas', frase: 'Feliz Navidad CIYA', brillo: 'med' };
   const brightnessLevels = ['min', 'med', 'max'];
-  const lanternSymbols = {
-    electricidad: 'bolt',
-    electromecanica: 'settings',
-    industrial: 'engineering',
-    hidraulica: 'water_drop',
-    sistemas: 'terminal'
+  const lanternStyles = {
+    electricidad: { symbol: 'bolt' },
+    electromecanica: { symbol: 'settings' },
+    industrial: { symbol: 'engineering' },
+    hidraulica: { symbol: 'water_drop', color: '#2774ff' },
+    sistemas: { symbol: 'terminal', color: '#48ef2d' }
   };
   const metrics = [
     ['asistentes', 'attendees', 'Asistentes', 'groups'],
@@ -231,10 +231,11 @@
     const message = document.getElementById('lantern-message');
     const meta = document.getElementById('lantern-carrera');
     const carrera = Store.carrera(linterna.carrera);
-    stage.style.setProperty('--lantern-color', carrera.color);
+    const color = lanternStyles[carrera.id]?.color || carrera.color;
+    stage.style.setProperty('--lantern-color', color);
     message.textContent = linterna.frase;
     meta.textContent = carrera.nombre;
-    if (lanternMatrix) lanternMatrix.show(linterna.frase, carrera.color);
+    if (lanternMatrix) lanternMatrix.show(linterna.frase, color);
     document.querySelectorAll('#linterna-carreras .chip, #linterna-frases .chip').forEach(function (button) {
       const selected = button.dataset.id === (button.parentElement.id === 'linterna-carreras' ? linterna.carrera : linterna.frase);
       button.classList.toggle('active', selected);
@@ -265,7 +266,7 @@
     } catch (error) { console.warn(error); }
 
     renderChips('linterna-carreras', Data.carreras.map(function (career) {
-      return { ...career, symbol: lanternSymbols[career.id] };
+      return { ...career, ...lanternStyles[career.id] };
     }), chooseLanternCarrera);
     renderChips('linterna-frases', Data.frasesLinterna.map(function (phrase) {
       return { id: phrase, nombre: phrase };

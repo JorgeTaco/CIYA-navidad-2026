@@ -32,6 +32,7 @@
   color: #dae8f5;
   box-shadow: inset 0 1px 0 #425167, 0 3px 9px #061a332b;
   --focus: #abc9ed;
+  --lantern-color: #48ef2d;
 }
 
 .lantern-screen-header, .lantern-bar {
@@ -68,7 +69,7 @@
   max-width: 100%;
   margin: 0;
   padding: .55rem;
-  color: color-mix(in srgb, var(--lantern-color, #10b981) 66%, white);
+  color: color-mix(in srgb, var(--lantern-color) 66%, white);
   font-size: clamp(1.35rem, 5vw, 3.1rem);
   font-weight: 800;
   line-height: 1.2;
@@ -89,7 +90,7 @@
 .lantern-stage[data-brightness="max"] :is(#lantern-canvas, .lantern-message) { filter: brightness(1.24) saturate(1.1); }
 
 .lantern-bar { flex-wrap: wrap; border-top: 1px solid #314153; padding-top: .28rem; }
-.lantern-meta { color: color-mix(in srgb, var(--lantern-color, #10b981) 64%, white); font-family: ui-monospace, monospace; font-size: .72rem; font-weight: 700; letter-spacing: .035em; }
+.lantern-meta { color: color-mix(in srgb, var(--lantern-color) 64%, white); font-family: ui-monospace, monospace; font-size: .72rem; font-weight: 700; letter-spacing: .035em; }
 .lantern-progress { color: #dae8f5; font-size: .78rem; }
 .lantern-stage .btn { background: #1b3248; border-color: #496783; color: #fff; }
 
@@ -113,7 +114,7 @@
   min-height: 0;
   border: 0;
   background-image: radial-gradient(ellipse at center,
-    color-mix(in srgb, var(--lantern-color, #10b981) 12%, #040a11), transparent 76%);
+    color-mix(in srgb, var(--lantern-color) 12%, #040a11), transparent 76%);
 }
 
 .lantern-setup fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
