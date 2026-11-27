@@ -223,13 +223,6 @@ details p:last-child { margin-bottom: 0; }
   color: var(--primary-soft);
 }
 
-.access-intro { margin-bottom: 1rem; }
-.access-intro h1 { margin-bottom: .4rem; }
-.access-page .card .feature-icon { margin-bottom: .6rem; }
-.access-page .organization-icon { background: var(--red-soft); color: #900a24; }
-.access-page #acceso-asistente .feature-icon { background: var(--green-soft); color: var(--green); }
-.access-note { margin: .6rem 0 0; }
-
 .ranking-row { margin-bottom: .85rem; }
 .ranking-head { display: flex; justify-content: space-between; gap: .5rem; margin-bottom: .25rem; font-size: .85rem; }
 .bar { height: .7rem; overflow: hidden; border-radius: 999px; background: var(--panel-2); }

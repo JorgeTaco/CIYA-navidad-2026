@@ -12,6 +12,19 @@ el backend es el proyecto Supabase de `supabase/`.
 - El Mar de Linternas usa los tonos y el marco LED del ejemplo. Los botones **Mín.**, **Med.** y **Máx.** ajustan el brillo visual y guardan la preferencia localmente. La URL directa dibuja solo la linterna y permite cambiar de mensaje, carrera y nivel de brillo tras desconectar la red. La pausa de la marquesina, las partes de movimiento reducido y la pantalla completa siguen disponibles en sus modos correspondientes.
 - Ruta QR, Cronograma, Recepción, Administración y Escenario comparten tarjetas, formularios, tablas y estados visuales. La superficie proyectada permanece oscura y conserva la relación 16:9. El servidor de escenario sirve las fuentes desde la laptop. Se conservan los contratos de Supabase, los archivos de respaldo y las exportaciones.
 
+### Portada de acceso
+
+La pantalla de acceso presenta el Cotopaxi y su árbol de circuitos en un marco
+nocturno con una guirnalda luminosa. El formulario de organización y la entrada
+libre de estudiantes y docentes tienen tarjetas y botones diferenciados. El
+botón de inicio de sesión muestra el estado del envío, y la selección de
+paneles para cuentas con varios roles comparte el mismo diseño. La portada usa
+los recursos gráficos y las fuentes locales del sitio.
+
+Se comprobó en Chromium de 360 a 1440 px, incluida la navegación con teclado,
+la entrada libre con y sin configuración de Supabase y los recorridos de
+organización con autenticación simulada.
+
 ## Qué cambió en esta reorganización
 
 El comportamiento funcional se conservó. Cambió la ubicación y la propiedad de
@@ -66,7 +79,7 @@ CIYA-navidad-2026/
 │  └─ modules/
 │     ├─ portal-linterna/          # portal, ruta QR y letrero de focos
 │     ├─ cronograma/               # cronograma.css y cronograma.js
-│     ├─ formularios-datos/        # forms.css, recepcion.css, admin.css / acceso.js, inscripciones.js, buzon.js, recepcion.js, admin.js
+│     ├─ formularios-datos/        # acceso.css, forms.css, recepcion.css, admin.css / acceso.js, inscripciones.js, buzon.js, recepcion.js, admin.js
 │     ├─ pantalla-gigante/         # ranking.css, villancicos.css, ruleta.css, respaldo.css / escenario.js, draw.js
 │     └─ hardware-encendido/       # encendido.css / encendido.js
 ├─ supabase/                       # BACKEND: proyecto Supabase

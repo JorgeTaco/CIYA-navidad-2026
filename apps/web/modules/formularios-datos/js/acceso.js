@@ -6,17 +6,32 @@
 
   function template() {
     return `
-      <section class="hero access-intro">
-        <span class="kicker">${UI.icon('calendar_month')} 4 de diciembre de 2026 · Hall CIYA</span>
-        <h1>Acceso a <em>CIYA Navidad 2026</em></h1>
-        <p>Entra al portal del evento o accede a tu panel de organización.</p>
+      <section class="access-banner" aria-labelledby="access-title">
+        <div class="access-lights" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="access-banner-copy">
+          <div class="access-event-date">${UI.icon('calendar_month')} 4 de diciembre · Hall principal CIYA</div>
+          <h1 id="access-title">Ingenio que ilumina <em>la Navidad</em></h1>
+          <p>CIYA Navidad 2026</p>
+        </div>
+        <div class="access-art">
+          <span class="access-sparkle sparkle-top" aria-hidden="true"></span>
+          <span class="access-sparkle sparkle-bottom" aria-hidden="true"></span>
+          <img src="modules/portal-linterna/media/cotopaxi.svg" alt="El Cotopaxi bajo un árbol navideño de circuitos" width="340" height="190">
+        </div>
+        <p class="access-motto">5 carreras, 1 energía solidaria</p>
       </section>
 
-      <div class="grid cols-2" id="acceso-grid">
-        <section class="card" id="acceso-login">
-          <span class="feature-icon organization-icon">${UI.icon('admin_panel_settings')}</span>
-          <h2>Acceso de organización</h2>
-          <p class="muted">Para Recepción (Industrial), Producción / Escenario (Sistemas y Software) y Curadores / Administración.</p>
+      <div class="access-choices" id="acceso-grid">
+        <section class="card access-signin" id="acceso-login" aria-labelledby="access-staff">
+          <div class="access-card-heading">
+            <span class="feature-icon">${UI.icon('admin_panel_settings')}</span>
+            <div>
+              <h2 id="access-staff">Acceso de organización</h2>
+              <p>Recepción, Escenario y Administración</p>
+            </div>
+          </div>
           <form id="form-acceso">
             <div class="field">
               <label for="acceso-email">Correo de organización</label>
@@ -27,35 +42,47 @@
               <input id="acceso-password" type="password" autocomplete="current-password" required>
             </div>
             <p class="pin-error" id="acceso-error" role="alert" hidden></p>
-            <button class="btn primary wide" type="submit">Iniciar sesión</button>
+            <button class="btn primary wide access-submit" type="submit"><span id="acceso-submit-label">Iniciar sesión</span>${UI.icon('arrow_forward_ios')}</button>
           </form>
-
         </section>
 
-        <section class="card" id="acceso-config" hidden>
-          <span class="badge">Configuración pendiente</span>
-          <h2 style="margin-top:0.65rem">Supabase no está configurado</h2>
-          <p class="muted">El acceso de organización estará disponible cuando se configure la conexión con Supabase.</p>
+        <section class="card access-signin" id="acceso-config" hidden>
+          <div class="access-card-heading">
+            <span class="feature-icon">${UI.icon('admin_panel_settings')}</span>
+            <div>
+              <h2>Acceso de organización</h2>
+              <p>Configuración pendiente de Supabase</p>
+            </div>
+          </div>
         </section>
 
-        <section class="card" id="acceso-asistente">
-          <span class="feature-icon">${UI.icon('groups')}</span>
-          <h2>Estudiantes y docentes</h2>
-          <p class="muted">Ingresa como asistente para usar el Mar de Linternas, inscribir grupos de villancicos, enviar mensajes al buzón “Compilando Deseos 2027” y recorrer la Ruta de Códigos QR.</p>
-          <button class="btn primary wide" id="btn-asistente" type="button" style="margin-top:0.6rem">Ingresar como Estudiante / Docente</button>
-          <p class="hint access-note">Acceso libre.</p>
+        <section class="card access-guest" id="acceso-asistente" aria-labelledby="access-guest">
+          <div class="access-card-heading">
+            <span class="feature-icon">${UI.icon('groups')}</span>
+            <div>
+              <h2 id="access-guest">Estudiantes y docentes</h2>
+              <p>Acceso libre al portal del evento</p>
+            </div>
+          </div>
+          <ul class="access-activities" aria-label="Actividades del portal">
+            <li>${UI.icon('lightbulb')} Mar de Linternas</li>
+            <li>${UI.icon('qr_code_scanner')} Ruta QR</li>
+            <li>${UI.icon('mark_email_unread')} Buzón 2027</li>
+          </ul>
+          <button class="btn wide access-submit" id="btn-asistente" type="button"><span>Entrar al portal</span>${UI.icon('arrow_forward_ios')}</button>
         </section>
       </div>
 
-      <section class="card" id="acceso-panels" hidden>
-        <div class="row between" style="margin-bottom:0.8rem">
+      <section class="card access-signin access-signed-in" id="acceso-panels" aria-labelledby="access-session" hidden>
+        <div class="access-card-heading">
+          <span class="feature-icon">${UI.icon('admin_panel_settings')}</span>
           <div>
-            <h2>Sesión activa</h2>
-            <p class="muted" id="acceso-user" style="margin-bottom:0"></p>
+            <h2 id="access-session">Sesión activa</h2>
+            <p id="acceso-user"></p>
           </div>
-          <button class="btn ghost small" id="acceso-logout" type="button">Cerrar sesión</button>
         </div>
         <div class="grid" id="acceso-role-cards"></div>
+        <button class="btn ghost small" id="acceso-logout" type="button">Cerrar sesión</button>
       </section>`;
   }
 
@@ -84,10 +111,9 @@
     byId('acceso-role-cards').innerHTML = info.roles.map(function (role) {
       const panel = UI.panels[role];
       if (!panel) return '';
-      return '<a class="card card-link" href="' + panel.href + '">' +
-        '<span class="badge ok">' + esc(panel.actor) + '</span>' +
-        '<h3 style="margin-top:0.65rem">' + esc(panel.label) + '</h3>' +
-        '<p class="muted">' + esc(panel.description) + '</p></a>';
+      return '<a class="card-link access-panel-link" href="' + panel.href + '">' +
+        '<div><h3>' + esc(panel.label) + '</h3><p>' + esc(panel.description) + '</p></div>' +
+        UI.icon('arrow_forward_ios') + '</a>';
     }).join('');
   }
 
@@ -101,8 +127,10 @@
   async function submitCredentials(email, password) {
     const button = byId('form-acceso').querySelector('[type=submit]');
     const errorBox = byId('acceso-error');
+    const label = byId('acceso-submit-label');
     errorBox.hidden = true;
     button.disabled = true;
+    label.textContent = 'Iniciando sesión…';
     try {
       const info = await Store.loginAccount(email, password);
       const target = destinationFor(info.roles);
@@ -115,6 +143,7 @@
       errorBox.textContent = error.message;
       errorBox.hidden = false;
       button.disabled = false;
+      label.textContent = 'Iniciar sesión';
     }
   }
 
