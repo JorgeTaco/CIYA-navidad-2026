@@ -6,7 +6,7 @@ el backend es el proyecto Supabase de `supabase/`.
 
 ## Rediseño visual
 
-- El HTML de referencia proporcionado define la paleta azul hielo, azul marino, rojo carmesí y verde, la tipografía y la composición del portal. La ilustración del Cotopaxi y el motivo de circuitos se reutilizan como SVG locales. Plus Jakarta Sans y los Material Symbols Outlined utilizados se sirven en WOFF2 con sus licencias en `apps/web/shared/fonts/`.
+- El HTML de referencia proporcionado define la paleta azul hielo, azul marino, rojo carmesí y verde, la tipografía y la composición del portal. El motivo de circuitos se sirve como SVG local. Plus Jakarta Sans y los Material Symbols Outlined utilizados se sirven en WOFF2 con sus licencias en `apps/web/shared/fonts/`.
 - El selector de acceso permanece en la portada. El portal presenta la ilustración, métricas, tarjetas de actividades, Mar de Linternas y accesos rápidos. Las métricas indican si están consultando, en vivo o mostrando la última consulta disponible. El botón principal abre el **Cronograma**, y las URL antiguas de bases siguen redirigiendo al programa.
 - La inscripción de villancicos y la acreditación de recepción piden **Carrera** y
   **Ciclo** (Nivelación, 1er a 8vo ciclo). El ciclo se valida en `ciya_write` y se
@@ -18,9 +18,16 @@ el backend es el proyecto Supabase de `supabase/`.
 
 ### Portada de acceso
 
-La pantalla de acceso presenta el Cotopaxi y su árbol de circuitos en un marco
-nocturno con una guirnalda luminosa. El formulario de organización y la entrada
-libre de estudiantes y docentes tienen tarjetas y botones diferenciados. El
+La pantalla de acceso presenta un árbol de Navidad luminoso acompañado por
+una guirnalda. El portal y la portada comparten una versión transparente en
+WebP de la ilustración proporcionada. El fondo toma un tono azul hielo en modo
+claro y azul profundo en modo oscuro, incluso al cambiar de tema en la página.
+El árbol permanece fijo. El halo del fondo, los destellos, la estrella y
+las luces se animan de forma continua. Con movimiento reducido, la
+ambientación se muestra estática.
+La introducción del portal muestra el título y su descripción junto al árbol.
+El formulario de organización y la entrada libre de estudiantes y docentes
+tienen tarjetas y botones diferenciados. El
 botón de inicio de sesión muestra el estado del envío, y la selección de
 paneles para cuentas con varios roles comparte el mismo diseño. La línea que
 separa la cabecera del contenido lleva en la portada y en el portal una

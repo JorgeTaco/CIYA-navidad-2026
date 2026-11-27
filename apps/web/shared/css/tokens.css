@@ -39,8 +39,6 @@
   --danger-ink: #900a24;
   --input-line: #9aa9bc;
   --snow-color: #6a96c6;
-  --art-mat: transparent;
-  --art-backdrop: radial-gradient(ellipse at 52% 52%, #f6fbff, #d6e8f3 60%, #90b6c4);
   --shadow: 0 5px 18px rgba(18, 52, 81, .09);
   --radius: .75rem;
   --header-height: 4.75rem;
@@ -77,8 +75,6 @@
     --danger-ink: #ffb5c0;
     --input-line: #718bae;
     --snow-color: #dceeff;
-    --art-mat: radial-gradient(ellipse at 50% 35%, #899fbb, #405d79);
-    --art-backdrop: radial-gradient(ellipse at 52% 42%, #acbfd4, #6885a3 65%, #415c7b);
     --shadow: 0 6px 22px #030b18a6;
   }
 }

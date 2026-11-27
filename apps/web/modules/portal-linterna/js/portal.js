@@ -85,12 +85,18 @@
     return `
       <section class="portal-hero" id="inicio">
         <div class="portal-intro">
-          <span class="portal-date">${UI.icon('calendar_month')} 4 dic 2026 · Hall CIYA · UTC Latacunga</span>
           <h1>Ingenio que ilumina <em>la Navidad</em></h1>
           <p>Punto de encuentro, ciencia aplicada y fraternidad navideña de la comunidad universitaria UTC.</p>
         </div>
         <figure class="portal-illustration">
-          <img src="modules/portal-linterna/media/cotopaxi.svg" width="340" height="190" alt="El Cotopaxi junto a un árbol navideño con luces y circuitos">
+          <div class="tree-art">
+            <div class="tree-art-content">
+              <img src="modules/portal-linterna/media/arbol-navidad.webp" width="1024" height="1024" alt="Árbol de Navidad verde con luces y una estrella doradas">
+            </div>
+            <div class="tree-sparkles" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
           <figcaption>5 carreras, 1 energía solidaria</figcaption>
         </figure>
       </section>

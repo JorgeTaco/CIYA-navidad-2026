@@ -15,10 +15,13 @@
           <h1 id="access-title">Ingenio que ilumina <em>la Navidad</em></h1>
           <p>CIYA Navidad 2026</p>
         </div>
-        <div class="access-art">
-          <span class="access-sparkle sparkle-top" aria-hidden="true"></span>
-          <span class="access-sparkle sparkle-bottom" aria-hidden="true"></span>
-          <img src="modules/portal-linterna/media/cotopaxi.svg" alt="El Cotopaxi junto a un árbol navideño con luces y circuitos" width="340" height="190">
+        <div class="tree-art access-art">
+          <div class="tree-art-content">
+            <img src="modules/portal-linterna/media/arbol-navidad.webp" width="1024" height="1024" alt="Árbol de Navidad verde con luces y una estrella doradas">
+          </div>
+          <div class="tree-sparkles" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
         </div>
         <p class="access-motto">5 carreras, 1 energía solidaria</p>
       </section>

@@ -27,22 +27,6 @@
   content: '';
 }
 
-.portal-date {
-  display: inline-flex;
-  align-items: center;
-  gap: .4rem;
-  margin-bottom: .55rem;
-  padding: .32rem .68rem;
-  border-radius: 999px;
-  background: var(--panel-strong);
-  color: var(--primary-soft);
-  font-size: .65rem;
-  font-weight: 800;
-  letter-spacing: .025em;
-  text-transform: uppercase;
-}
-
-.portal-date .material-symbols-outlined { color: var(--red); font-size: 1rem; }
 .portal-intro h1 { max-width: 19ch; margin: 0 0 .4rem; font-size: clamp(1.63rem, 4.5vw, 3.2rem); }
 .portal-intro h1 em, .access-intro h1 em { color: var(--red); font-style: normal; }
 .portal-intro p { max-width: 40ch; margin: 0; color: var(--muted); font-size: .875rem; }
@@ -69,7 +53,7 @@
   content: '';
 }
 
-.portal-illustration img { display: block; width: min(100%, 340px); height: auto; border-radius: .5rem; background: var(--art-mat); }
+.portal-illustration .tree-art { width: min(100%, 24rem); }
 .portal-illustration figcaption {
   padding: .35rem .7rem;
   border-radius: var(--radius);
