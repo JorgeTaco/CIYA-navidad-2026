@@ -1,7 +1,9 @@
 (function () {
   const root = document.documentElement;
   const key = 'ciya2026:theme';
-  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
+  const { userAgentData, userAgent } = window.navigator;
+  const isPhone = userAgentData?.mobile ?? /iPhone|iPod|Windows Phone|Android.*Mobile/i.test(userAgent);
+  const defaultTheme = isPhone ? 'dark' : 'light';
   const chrome = document.querySelector('meta[name="theme-color"]');
   let preference;
   let button;
@@ -16,7 +18,7 @@
   }
 
   function applyTheme() {
-    const theme = preference || (systemTheme.matches ? 'dark' : 'light');
+    const theme = preference || defaultTheme;
     const dark = theme === 'dark';
     root.dataset.theme = theme;
     if (chrome) chrome.content = dark ? '#0d1b2c' : '#f8f9ff';
@@ -30,7 +32,6 @@
 
   readPreference();
   applyTheme();
-  systemTheme.addEventListener('change', applyTheme);
   window.addEventListener('pageshow', function (event) {
     if (event.persisted) {
       readPreference();

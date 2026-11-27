@@ -7,7 +7,7 @@ const { runInNewContext } = require('node:vm');
 const source = readFileSync(join(__dirname, '../../apps/web/shared/js/appearance.js'), 'utf8');
 const key = 'ciya2026:theme';
 
-function loadAppearance({ dark = false, saved = null, storageBlocked = false } = {}) {
+function loadAppearance({ mobile, userAgent = '', saved = null, storageBlocked = false } = {}) {
   const root = { dataset: {} };
   const meta = {};
   const events = new Map();
@@ -20,8 +20,6 @@ function loadAppearance({ dark = false, saved = null, storageBlocked = false } =
     addEventListener: (name, callback) => buttonEvents.set(name, callback)
   };
   let stored = saved;
-  let systemChanged;
-  const system = { matches: dark, addEventListener: (_, callback) => { systemChanged = callback; } };
   runInNewContext(source, {
     document: {
       documentElement: root,
@@ -30,7 +28,7 @@ function loadAppearance({ dark = false, saved = null, storageBlocked = false } =
       createElement: tag => tag === 'button' ? button : { getContext: () => null }
     },
     window: {
-      matchMedia: () => system,
+      navigator: { userAgentData: mobile === undefined ? undefined : { mobile }, userAgent },
       addEventListener: (name, callback) => events.set(name, callback)
     },
     localStorage: {
@@ -50,14 +48,22 @@ function loadAppearance({ dark = false, saved = null, storageBlocked = false } =
     root, meta, attributes, events,
     ready: () => documentEvents.get('DOMContentLoaded')(),
     click: () => buttonEvents.get('click')(),
-    setSystem(value) { system.matches = value; systemChanged(); },
     setStored(value) { stored = value; },
     getStored: () => stored
   };
 }
 
-test('el tema inicial sigue al dispositivo hasta que el usuario elige', () => {
-  const app = loadAppearance({ dark: true, saved: 'inválido' });
+test('el tema inicial es claro en computadoras y oscuro en teléfonos', () => {
+  assert.equal(loadAppearance({ mobile: false }).root.dataset.theme, 'light');
+  assert.equal(loadAppearance({ mobile: true }).root.dataset.theme, 'dark');
+  assert.equal(loadAppearance({ userAgent: 'Mozilla/5.0 (iPhone) Safari/604.1' }).root.dataset.theme, 'dark');
+  assert.equal(loadAppearance({ userAgent: 'Mozilla/5.0 (Android 14) Mobile Firefox/128.0' }).root.dataset.theme, 'dark');
+  assert.equal(loadAppearance({ userAgent: 'Mozilla/5.0 (Windows NT 10.0) Firefox/128.0' }).root.dataset.theme, 'light');
+  assert.equal(loadAppearance({ userAgent: 'Mozilla/5.0 (iPad) Mobile/15E148 Safari/604.1' }).root.dataset.theme, 'light');
+});
+
+test('el selector guarda el tema elegido y actualiza la apariencia', () => {
+  const app = loadAppearance({ mobile: true, saved: 'inválido' });
   assert.equal(app.root.dataset.theme, 'dark');
   assert.equal(app.meta.content, '#0d1b2c');
   app.ready();
@@ -65,21 +71,21 @@ test('el tema inicial sigue al dispositivo hasta que el usuario elige', () => {
   app.click();
   assert.equal(app.getStored(), 'light');
   assert.equal(app.attributes.get('aria-pressed'), 'false');
-  app.setSystem(false);
-  app.setSystem(true);
   assert.equal(app.root.dataset.theme, 'light');
+  assert.equal(app.meta.content, '#f8f9ff');
+  assert.equal(loadAppearance({ mobile: true, saved: app.getStored() }).root.dataset.theme, 'light');
 });
 
 test('actualiza la preferencia al volver a la página y al cambiarla en otra pestaña', () => {
-  const app = loadAppearance({ saved: 'dark' });
+  const app = loadAppearance({ mobile: true, saved: 'light' });
   app.ready();
-  app.setStored('light');
+  app.setStored('dark');
   app.events.get('pageshow')({ persisted: true });
-  assert.equal(app.root.dataset.theme, 'light');
-  app.events.get('storage')({ key, newValue: 'dark' });
   assert.equal(app.root.dataset.theme, 'dark');
-  app.events.get('storage')({ key: null, newValue: null });
+  app.events.get('storage')({ key, newValue: 'light' });
   assert.equal(app.root.dataset.theme, 'light');
+  app.events.get('storage')({ key: null, newValue: null });
+  assert.equal(app.root.dataset.theme, 'dark');
 });
 
 test('se puede alternar el tema con el almacenamiento local desactivado', () => {
