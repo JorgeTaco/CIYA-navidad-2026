@@ -1,10 +1,3 @@
-.access-page {
-  background:
-    radial-gradient(ellipse at 96% 12%, #e4eefc, transparent 36rem),
-    radial-gradient(ellipse at 5% 92%, #e5f0ed, transparent 35rem),
-    var(--bg);
-}
-
 .access-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
@@ -24,14 +17,11 @@
   overflow: hidden;
   min-width: 0;
   padding: clamp(1.5rem, 4vw, 2.7rem);
-  border: 1px solid #294d61;
+  border: 1px solid var(--line);
   border-radius: 1.25rem;
-  background:
-    radial-gradient(ellipse at 93% 7%, #542b44, transparent 44%),
-    radial-gradient(ellipse at 15% 96%, #0c514f, transparent 58%),
-    #09263a;
-  box-shadow: 0 14px 32px #0e304629;
-  color: #fff;
+  background: var(--surface-gradient);
+  box-shadow: var(--shadow);
+  color: var(--primary);
 }
 
 .access-banner::before {
@@ -41,8 +31,7 @@
   width: 11rem;
   aspect-ratio: 1;
   background: url('../../portal-linterna/media/circuito.svg') center / contain no-repeat;
-  opacity: .42;
-  filter: brightness(1.7);
+  opacity: .35;
   pointer-events: none;
   content: '';
 }
@@ -60,7 +49,7 @@
 .access-lights::before {
   position: absolute;
   inset: -.8rem 0 .4rem;
-  border-bottom: 1px solid #cad5d966;
+  border-bottom: 1px solid #7089a566;
   border-radius: 0 0 50% 50%;
   content: '';
 }
@@ -87,27 +76,27 @@
   align-items: center;
   gap: .36rem;
   padding: .3rem .62rem;
-  border: 1px solid #82a8bc70;
+  border: 1px solid var(--line);
   border-radius: 999px;
-  background: #daeaff15;
-  color: #eaf3ff;
+  background: var(--panel-2);
+  color: var(--primary-soft);
   font-size: .73rem;
   font-weight: 700;
 }
 
-.access-event-date .material-symbols-outlined { color: #ffd69a; font-size: 1.08rem; }
+.access-event-date .material-symbols-outlined { color: var(--red); font-size: 1.08rem; }
 
 .access-banner h1 {
   max-width: 13ch;
   margin: .85rem 0 .55rem;
-  color: #fff;
+  color: var(--primary);
   font-size: clamp(2.4rem, 4.6vw, 4.35rem);
   font-weight: 800;
   line-height: 1.03;
 }
 
-.access-banner h1 em { color: #ffd6a1; font-style: normal; white-space: nowrap; }
-.access-banner-copy > p { margin: 0; color: #d4e5f2; font-size: .9rem; font-weight: 750; }
+.access-banner h1 em { color: var(--red); font-style: normal; }
+.access-banner-copy > p { margin: 0; color: var(--muted); font-size: .9rem; font-weight: 750; }
 
 .access-art {
   position: relative;
@@ -132,12 +121,17 @@
   aspect-ratio: 1;
   background: #fff;
   clip-path: polygon(50% 0, 60% 41%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 41%);
+  animation: festive-sparkle 5s ease-in-out infinite alternate;
 }
 
 .sparkle-top { top: 24%; right: 11%; }
-.sparkle-bottom { bottom: 24%; left: 12%; width: .7rem; }
+.sparkle-bottom { bottom: 24%; left: 12%; width: .7rem; animation-delay: -2.5s; }
 
-.access-motto { margin: 0; color: #e4f0f4; text-align: center; font-size: .79rem; font-weight: 750; letter-spacing: .035em; }
+@media (prefers-reduced-motion: reduce) {
+  .access-sparkle { animation: none; }
+}
+
+.access-motto { margin: 0; color: var(--muted); text-align: center; font-size: .79rem; font-weight: 750; letter-spacing: .035em; }
 
 .access-choices { display: grid; align-content: start; gap: .85rem; }
 
@@ -153,7 +147,6 @@
   overflow: hidden;
   border-color: #c3ddd6;
   border-inline-start: 4px solid var(--green);
-  background: linear-gradient(145deg, #fafffd, #e9f5f0);
 }
 
 .access-card-heading { display: flex; align-items: center; gap: .65rem; margin-bottom: .9rem; }
@@ -203,7 +196,7 @@
   padding: .75rem;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: var(--bg-soft);
+  background: var(--surface-gradient);
 }
 .access-panel-link h3 { margin: 0 0 .2rem; }
 .access-panel-link p { margin: 0; color: var(--muted); font-size: .82rem; }

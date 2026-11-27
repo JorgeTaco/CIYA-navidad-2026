@@ -39,5 +39,6 @@
   --radius: .75rem;
   --header-height: 4.75rem;
   --navigation-height: 4rem;
+  --surface-gradient: linear-gradient(120deg, var(--panel), var(--bg-soft));
   --festive-rule: linear-gradient(90deg, var(--green), var(--tint), var(--red));
 }

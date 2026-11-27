@@ -17,6 +17,6 @@
 .qr-story .btn.ghost { margin-top: .8rem; }
 .qr-story .trivia-option { min-height: 48px; justify-content: flex-start; overflow-wrap: anywhere; }
 .trivia-option span { display: grid; place-items: center; flex: 0 0 1.6rem; aspect-ratio: 1; border-radius: 6px; background: var(--panel-strong); color: var(--primary); }
-.qr-story.gold-view { border-color: #d9b467; background: radial-gradient(ellipse at 50% 12%, var(--gold-soft), transparent 80%), var(--panel); }
+.qr-story.gold-view { border-color: #d9b467; }
 .gold-view .gold-code { margin-block: .5rem; font-variant-numeric: tabular-nums; }
 #gold-refresh { min-height: 44px; }
