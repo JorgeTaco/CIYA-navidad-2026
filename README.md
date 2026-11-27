@@ -8,7 +8,11 @@ el backend es el proyecto Supabase de `supabase/`.
 
 - El HTML de referencia proporcionado define la paleta azul hielo, azul marino, rojo carmesí y verde, la tipografía y la composición del portal. La ilustración del Cotopaxi y el motivo de circuitos se reutilizan como SVG locales. Plus Jakarta Sans y los Material Symbols Outlined utilizados se sirven en WOFF2 con sus licencias en `apps/web/shared/fonts/`.
 - El selector de acceso permanece en la portada. El portal presenta la ilustración, métricas, tarjetas de actividades, Mar de Linternas y accesos rápidos. Las métricas indican si están consultando, en vivo o mostrando la última consulta disponible. El botón principal abre el **Cronograma**, y las URL antiguas de bases siguen redirigiendo al programa.
-- La navegación pública se muestra abajo en móvil y en la cabecera en escritorio. **Acceso** abre el selector con `index.html?modo=acceso` también después de entrar como asistente. Recepción, Administración y Escenario muestran la navegación habilitada para la cuenta. En la consola local se oculta esa barra.
+- La inscripción de villancicos y la acreditación de recepción piden **Carrera** y
+  **Ciclo** (Nivelación, 1er a 8vo ciclo). El ciclo se valida en `ciya_write` y se
+  conserva en la base con la migración `0006_ciclo.sql`; la lista de asistentes
+  muestra el ciclo registrado.
+- La portada de acceso no muestra navegación; el selector está en el cuerpo de la página. Dentro de la aplicación, la navegación pública se muestra abajo en móvil y en la cabecera en escritorio con Portal, Ruta QR y Cronograma. Recepción, Administración y Escenario muestran la navegación habilitada para la cuenta. En la consola local se oculta esa barra.
 - El Mar de Linternas usa los tonos y el marco LED del ejemplo. Los botones **Mín.**, **Med.** y **Máx.** ajustan el brillo visual y guardan la preferencia localmente. La URL directa dibuja solo la linterna y permite cambiar de mensaje, carrera y nivel de brillo tras desconectar la red. La pausa de la marquesina, las partes de movimiento reducido y la pantalla completa siguen disponibles en sus modos correspondientes.
 - Ruta QR, Cronograma, Recepción, Administración y Escenario comparten tarjetas, formularios, tablas y estados visuales. La superficie proyectada permanece oscura y conserva la relación 16:9. El servidor de escenario sirve las fuentes desde la laptop. Se conservan los contratos de Supabase, los archivos de respaldo y las exportaciones.
 
@@ -18,8 +22,14 @@ La pantalla de acceso presenta el Cotopaxi y su árbol de circuitos en un marco
 nocturno con una guirnalda luminosa. El formulario de organización y la entrada
 libre de estudiantes y docentes tienen tarjetas y botones diferenciados. El
 botón de inicio de sesión muestra el estado del envío, y la selección de
-paneles para cuentas con varios roles comparte el mismo diseño. La portada usa
-los recursos gráficos y las fuentes locales del sitio.
+paneles para cuentas con varios roles comparte el mismo diseño. La línea que
+separa la cabecera del contenido lleva en la portada y en el portal una
+guirnalda de focos que enciende y cambia de color en secuencia, sin JS y con
+respeto a movimiento reducido. El emblema de copo de nieve de la cabecera se
+sustituyó por el logo de la Universidad Técnica de Cotopaxi en todas las
+páginas: el PNG transparente `shared/media/utc-logo.png` se aplica como fondo
+CSS de `.brand-mark`, sin elemento `<img>`. La portada usa los recursos
+gráficos y las fuentes locales del sitio.
 
 Se comprobó en Chromium de 360 a 1440 px, incluida la navegación con teclado,
 la entrada libre con y sin configuración de Supabase y los recorridos de
@@ -41,8 +51,8 @@ cada archivo:
   lógica de puerto serial/cuenta/relé salió de `escenario.js` hacia
   `hardware-encendido/js/encendido.js`.
 - `supabase-schema.sql` se dividió en migraciones ordenadas; `legacy-import.sql`
-  pasó a ser la cuarta y `0005_role_discovery.sql` la quinta. Cada migración es
-  una transacción independiente.
+  pasó a ser la cuarta, `0005_role_discovery.sql` la quinta y
+  `0006_ciclo.sql` la sexta. Cada migración es una transacción independiente.
 - `tests/draw.test.cjs` pasó a `tests/unit/` y ahora apunta a las nuevas rutas.
 - `tools/local-stage.py` sirve `apps/web/` en `127.0.0.1:8080` y su lista de
   archivos permitidos incluye los nuevos CSS y JS.
@@ -89,10 +99,11 @@ CIYA-navidad-2026/
 │  │  ├─ 0002_rpc_read_write.sql   # RPC de lectura, escritura, acceso y sorteo
 │  │  ├─ 0003_receipts.sql         # cola de comprobantes y permisos
 │  │  ├─ 0004_legacy_import.sql    # importación del respaldo v1
-│  │  └─ 0005_role_discovery.sql   # RPC ciya_my_roles para acceso por rol
+│  │  ├─ 0005_role_discovery.sql   # RPC ciya_my_roles para acceso por rol
+│  │  └─ 0006_ciclo.sql            # ciclo de asistentes y grupos inscritos
 │  └─ functions/ciya-receipts/     # Edge Function → Brevo
 ├─ tests/
-│  └─ unit/                        # draw.test.cjs y ui.test.cjs
+│  └─ unit/                        # draw, ui, lantern-matrix, ignition, sound y local-stage
 ├─ tools/
 │  ├─ local-stage.py               # consola local con Basic auth
 │  └─ check-structure.py           # IDs y recursos locales
@@ -171,9 +182,10 @@ query** y ejecutarlo **uno por uno**, en este orden exacto:
 0003_receipts.sql          cola de comprobantes por correo
 0004_legacy_import.sql     importador del respaldo v1
 0005_role_discovery.sql    RPC ciya_my_roles() para acceso por rol
+0006_ciclo.sql             columna ciclo y validación en checkin/group
 ```
 
-No pegar los cinco juntos. Si uno marca error, detenerse y corregir antes de
+No pegar los seis juntos. Si uno marca error, detenerse y corregir antes de
 seguir. Si alguno ya está aplicado, omitirlo y continuar desde el siguiente;
 nunca editar una migración ya aplicada. Con esto listo, seguir con el servidor
 estático de abajo.
@@ -268,7 +280,7 @@ supabase db push
 supabase functions deploy ciya-receipts
 ```
 
-`supabase db push` aplica en orden los 5 archivos de `supabase/migrations/`:
+`supabase db push` aplica en orden los 6 archivos de `supabase/migrations/`:
 
 | Archivo | Qué crea |
 |---------|----------|
@@ -277,6 +289,7 @@ supabase functions deploy ciya-receipts
 | `0003_receipts.sql` | Cola de comprobantes por correo |
 | `0004_legacy_import.sql` | Importador de respaldo v1 |
 | `0005_role_discovery.sql` | RPC `ciya_my_roles()` para acceso por rol |
+| `0006_ciclo.sql` | Ciclo de Nivelación a 8vo en acreditaciones y grupos |
 
 Si las migraciones ya están aplicadas, omitir `supabase db push`. Si falta
 alguna, no editar los archivos anteriores: agregar una migración nueva.

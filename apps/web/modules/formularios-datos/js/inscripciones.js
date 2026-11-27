@@ -8,6 +8,9 @@
     const carreras = Data.carreras.map(function (c) {
       return '<option value="' + esc(c.id) + '">' + esc(c.nombre) + '</option>';
     }).join('');
+    const ciclos = Data.ciclos.map(function (c) {
+      return '<option value="' + esc(c.id) + '">' + esc(c.nombre) + '</option>';
+    }).join('');
     const categorias = Data.categoriasVillancicos.map(function (c) {
       return '<option>' + esc(c) + '</option>';
     }).join('');
@@ -17,6 +20,7 @@
         <div class="field"><label for="vil-integrantes">Nómina de integrantes (uno por línea)</label><textarea id="vil-integrantes" required placeholder="Nombre 1&#10;Nombre 2"></textarea></div>
         <div class="field"><label for="vil-representante">Representante del grupo</label><input id="vil-representante" maxlength="120" required></div>
         <div class="field"><label for="vil-carrera">Carrera representada</label><select id="vil-carrera" required>${carreras}</select></div>
+        <div class="field"><label for="vil-ciclo">Ciclo</label><select id="vil-ciclo" required>${ciclos}</select></div>
         <div class="field"><label for="vil-cancion">Obra musical seleccionada</label><input id="vil-cancion" maxlength="160" required></div>
         <div class="field"><label for="vil-categoria">Modalidad</label><select id="vil-categoria" required>${categorias}</select></div>
         <button class="btn primary wide" type="submit"${Store.configured() ? '' : ' disabled'}>Inscribir grupo</button>
@@ -41,7 +45,7 @@
       return UI.submit(event, 'group', {
         nombre: value('vil-grupo'), representante: value('vil-representante'),
         integrantes: integrantes,
-        carrera: value('vil-carrera'), cancion: value('vil-cancion'), categoria: value('vil-categoria')
+        carrera: value('vil-carrera'), ciclo: value('vil-ciclo'), cancion: value('vil-cancion'), categoria: value('vil-categoria')
       }, false, function () {
         group.reset();
         UI.toast('Grupo inscrito en el orden de presentación.');

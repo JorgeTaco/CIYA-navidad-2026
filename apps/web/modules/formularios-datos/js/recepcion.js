@@ -1,6 +1,7 @@
 (function () {
   const UI = window.CIYA_UI;
   const Store = window.CIYA_STORE;
+  const Data = window.CIYA_DATA;
   const esc = UI.escapeHtml;
   const byId = function (id) { return document.getElementById(id); };
   const value = function (id) { return byId(id).value.trim(); };
@@ -13,6 +14,11 @@
     uncertain: 'Envío sin confirmación. Revisa el registro de Brevo y usa el comprobante en pantalla.'
   };
   let displayedReceipt;
+
+  function cicloLabel(id) {
+    const found = Data.ciclos.find(function (c) { return c.id === id; });
+    return found ? found.nombre : '—';
+  }
 
   function template() {
     return `
@@ -36,7 +42,10 @@
                 <div class="grow field"><label for="chk-cedula">Cédula</label><input id="chk-cedula" required inputmode="numeric" pattern="[0-9]{10}"></div>
                 <div class="grow field"><label for="chk-carrera">Carrera</label><select id="chk-carrera" required></select></div>
               </div>
-              <div class="field"><label for="chk-email">Correo para el comprobante</label><input id="chk-email" type="email" maxlength="254" required></div>
+              <div class="form-row">
+                <div class="grow field"><label for="chk-ciclo">Ciclo</label><select id="chk-ciclo" required></select></div>
+                <div class="grow field"><label for="chk-email">Correo para el comprobante</label><input id="chk-email" type="email" maxlength="254" required></div>
+              </div>
               <div class="field"><label for="chk-muro">Mensaje verificado en el Muro de la Empatía</label><input id="chk-muro" maxlength="140"></div>
               <label><input id="chk-confirm" type="checkbox" required> Identidad y elegibilidad verificadas en persona</label>
               <details>
@@ -185,9 +194,10 @@
     else byId('ranking-recepcion').textContent = 'Marcador aún no disponible.';
     byId('count-asistentes').textContent = state.counts.attendees == null ? '—' : state.counts.attendees;
     byId('count-donaciones').textContent = state.counts.donations == null ? '—' : state.counts.donations;
-    byId('lista-asistentes').innerHTML = UI.table(['Estudiante', 'Cédula', 'Carrera', 'Acreditación'],
+    byId('lista-asistentes').innerHTML = UI.table(['Estudiante', 'Cédula', 'Carrera', 'Ciclo', 'Acreditación'],
       state.attendees.filter(function (person) { return person.checked_in_at; }).map(function (person) {
-        return [esc(person.nombre), esc(person.cedula), esc(Store.carrera(person.carrera).nombre), esc(UI.dateTime(person.checked_in_at))];
+        return [esc(person.nombre), esc(person.cedula), esc(Store.carrera(person.carrera).nombre),
+          esc(cicloLabel(person.ciclo)), esc(UI.dateTime(person.checked_in_at))];
       }), true);
     byId('lista-donaciones').innerHTML = UI.table(['Donante', 'Carrera', 'Tipo', 'Cantidad', 'Puntos'],
       state.donations.map(function (item) {
@@ -206,10 +216,14 @@
 
   function setup() {
     setupTabs();
-    const options = window.CIYA_DATA.carreras.map(function (career) {
+    const options = Data.carreras.map(function (career) {
       return '<option value="' + esc(career.id) + '">' + esc(career.nombre) + '</option>';
     }).join('');
+    const ciclos = Data.ciclos.map(function (ciclo) {
+      return '<option value="' + esc(ciclo.id) + '">' + esc(ciclo.nombre) + '</option>';
+    }).join('');
     ['chk-carrera', 'chk-don-carrera', 'don-carrera'].forEach(function (id) { byId(id).innerHTML = options; });
+    byId('chk-ciclo').innerHTML = ciclos;
     byId('chk-carrera').onchange = function () { byId('chk-don-carrera').value = value('chk-carrera'); };
     const checkinDonation = byId('chk-donation-fields');
     function revealCheckinDonation() {
@@ -219,7 +233,7 @@
     byId('chk-don-tipo').onchange = revealCheckinDonation;
     bind('form-checkin', 'checkin', function () {
       return { cedula: value('chk-cedula'), nombre: value('chk-nombre'), email: value('chk-email'),
-        carrera: value('chk-carrera'), wall: value('chk-muro'), confirmed: checked('chk-confirm'),
+        carrera: value('chk-carrera'), ciclo: value('chk-ciclo'), wall: value('chk-muro'), confirmed: checked('chk-confirm'),
         donation: value('chk-don-tipo') ? donation('chk-don-') : null };
     }, function () {
       checkinDonation.closest('details').open = false;

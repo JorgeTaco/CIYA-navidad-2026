@@ -61,7 +61,6 @@
             </div>
             <div class="lantern-controls">
               <button class="btn primary" type="button" id="lantern-fullscreen">Pantalla completa</button>
-              <button class="btn ghost" type="button" id="copy-url">Copiar enlace</button>
             </div>
           </div>
           <div class="lantern-setup">
@@ -307,9 +306,6 @@
     });
     document.addEventListener('keydown', function (event) {
       if (event.key === 'Escape' && !document.fullscreenElement && stage.classList.contains('live')) closePreview();
-    });
-    document.getElementById('copy-url').addEventListener('click', function () {
-      UI.copy(new URL('portal.html?modo=linterna#linterna', location.href).href);
     });
     applyLantern();
   }

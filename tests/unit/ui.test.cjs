@@ -123,14 +123,16 @@ test('store resuelve carreras conocidas, desconocidas y ranking inicial', () => 
   assert.equal(store.carrera('otra').sigla, '?');
   assert.equal(store.ranking().length, data.carreras.length);
   assert.equal(store.ranking().every(r => r.puntos === 0 && r.puesto === 1), true);
+  assert.deepEqual(data.ciclos.map(ciclo => ciclo.id),
+    ['nivelacion', 'ciclo1', 'ciclo2', 'ciclo3', 'ciclo4', 'ciclo5', 'ciclo6', 'ciclo7', 'ciclo8']);
 });
 
 test('initNav oculta pestañas de otros roles en asistente, recepción y modo local', () => {
   const guest = loadShared();
   guest.ui.initNav('acceso');
   assert.deepEqual(Array.from(guest.roleLinksEl.innerHTML.matchAll(/data-nav="([^"]+)"/g), match => match[1]),
-    ['portal', 'qr', 'cronograma', 'acceso']);
-  assert.match(guest.roleLinksEl.innerHTML, /index\.html\?modo=acceso/);
+    ['portal', 'qr', 'cronograma']);
+  assert.doesNotMatch(guest.roleLinksEl.innerHTML, /index\.html/);
   assert.equal(guest.logoutBtn.hidden, true);
 
   guest.store.enterAsistente();

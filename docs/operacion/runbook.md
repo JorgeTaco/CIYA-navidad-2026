@@ -11,7 +11,7 @@
 ## Día del evento
 
 - 08:00–17:45: donaciones y canjes.
-- 17:00–17:45: acreditación.
+- 17:00–17:45: acreditación con carrera y ciclo (Nivelación a 8vo).
 - 17:45: marcar cierre de recepción y descargar el respaldo sellado.
 - Escenario sin red: `python3 tools/local-stage.py` y abrir
   `http://127.0.0.1:8080/escenario.html?modo=local`.

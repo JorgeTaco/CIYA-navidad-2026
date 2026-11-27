@@ -37,7 +37,7 @@
   --focus: #365d83;
   --shadow: 0 5px 18px rgba(18, 52, 81, .09);
   --radius: .75rem;
-  --header-height: 5rem;
+  --header-height: 4.75rem;
   --navigation-height: 4rem;
   --festive-rule: linear-gradient(90deg, var(--green), var(--tint), var(--red));
 }

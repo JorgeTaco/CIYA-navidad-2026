@@ -13,6 +13,17 @@ window.CIYA_DATA = {
     { id: 'hidraulica', nombre: 'Hidráulica', sigla: 'HI', icono: '💧', color: '#4cc9f0', aula: '1 a la 4' },
     { id: 'sistemas', nombre: 'Sistemas y Software', sigla: 'SY', icono: '💻', color: '#06d6a0', aula: '5 a la 8' }
   ],
+  ciclos: [
+    { id: 'nivelacion', nombre: 'Nivelación' },
+    { id: 'ciclo1', nombre: '1er ciclo' },
+    { id: 'ciclo2', nombre: '2do ciclo' },
+    { id: 'ciclo3', nombre: '3er ciclo' },
+    { id: 'ciclo4', nombre: '4to ciclo' },
+    { id: 'ciclo5', nombre: '5to ciclo' },
+    { id: 'ciclo6', nombre: '6to ciclo' },
+    { id: 'ciclo7', nombre: '7mo ciclo' },
+    { id: 'ciclo8', nombre: '8vo ciclo' }
+  ],
   categoriasVillancicos: [
     'Acústico / Rock Navideño',
     'Villancico Parodia CIYA',

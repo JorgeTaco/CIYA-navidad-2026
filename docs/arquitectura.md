@@ -12,9 +12,10 @@ Supabase en `supabase/`. No hay servidor propio ni build.
   `donate`, `redeem`, `seal`, `score`, `door` y `moderate`.
 - `CIYA_STORE.gold(secret)`, `CIYA_STORE.ranking()` y `CIYA_STORE.subscribe()`.
 
-Las RPC están definidas en `supabase/migrations/0002_rpc_read_write.sql` y
-`0005_role_discovery.sql`. El acceso se controla con `ciya.roles`,
-`ciya_access(panel)` y `ciya_my_roles()`.
+Las RPC están definidas en `supabase/migrations/0002_rpc_read_write.sql`,
+`0005_role_discovery.sql` y `0006_ciclo.sql`. El acceso se controla con
+`ciya.roles`, `ciya_access(panel)` y `ciya_my_roles()`. La migración `0006`
+agrega el ciclo (Nivelación a 8vo) a acreditaciones y grupos inscritos.
 
 | Vista | Datos que entrega `ciya_read` |
 | --- | --- |

@@ -227,7 +227,6 @@
     portal: ['portal.html', 'Portal', 'holiday_village'],
     qr: ['qr.html', 'Ruta QR', 'qr_code_scanner'],
     cronograma: ['cronograma.html', 'Cronograma', 'schedule'],
-    acceso: ['index.html?modo=acceso', 'Acceso', 'account_circle'],
     recepcion: ['recepcion.html', 'Recepción', 'groups'],
     escenario: ['escenario.html', 'Escenario', 'dashboard'],
     admin: ['admin.html', 'Administración', 'admin_panel_settings']
@@ -243,8 +242,8 @@
     let items;
     if (isLocal) items = ['escenario'];
     else if (staff.length) items = [...staff, 'cronograma'];
-    else if (isPublic || roles.includes('asistente')) items = ['portal', 'qr', 'cronograma', 'acceso'];
-    else items = ['acceso', 'cronograma'];
+    else if (isPublic || roles.includes('asistente')) items = ['portal', 'qr', 'cronograma'];
+    else items = ['cronograma'];
 
     return items.map(function (id) {
       const [href, label, symbol] = navItems[id];
