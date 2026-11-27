@@ -131,14 +131,23 @@
     if (!screen) return;
     if (activeTab === 'villancicos') {
       const group = activeGroup();
-      screen.innerHTML =
-        '<span class="kicker">CIYA tiene Talento</span>' +
-        '<h2>' + esc(group ? group.nombre : 'Concurso de Villancicos') + '</h2>' +
-        '<p class="muted">' + esc(group ? group.categoria + ' · ' + (group.integrantes || []).length + ' integrantes' : 'Esperando grupos inscritos') + '</p>' +
-        '<div class="big-number">' + formatTime(cron.remaining) + '</div>' +
-        '<div style="width:min(520px,90%);margin-top:1rem"><div class="bar"><span style="width:' + aplauso.value + '%;--bar-color:var(--green)"></span></div>' +
-        '<small>Aplausómetro: ' + (aplauso.db === null ? 'nivel manual ' + Math.round(aplauso.value) + ' / 100' :
-          aplauso.db + ' dBFS') + '</small></div>';
+      const integrantes = group?.integrantes?.length || 0;
+      const level = aplauso.db === null ? 'nivel manual ' + Math.round(aplauso.value) + ' / 100' : aplauso.db + ' dBFS';
+      screen.innerHTML = `
+        <div class="stage-villancicos">
+          <div class="stage-performer">
+            <span class="kicker">CIYA tiene Talento${group ? ' · Turno ' + esc(group.orden) : ''}</span>
+            <h2>${esc(group ? group.nombre : 'Concurso de Villancicos')}</h2>
+            ${group ? UI.villancicoDetails(group) : '<p class="muted">Esperando grupos inscritos</p>'}
+            ${group ? `<p class="stage-song">${group.cancion ? 'Obra musical: <strong>' + esc(group.cancion) + '</strong> · ' : ''}
+              ${integrantes} ${integrantes === 1 ? 'integrante' : 'integrantes'}</p>` : ''}
+          </div>
+          <div class="stage-performance">
+            <div class="big-number" role="timer" aria-label="Tiempo restante">${formatTime(cron.remaining)}</div>
+            <div class="bar"><span style="width:${aplauso.value}%;--bar-color:var(--green)"></span></div>
+            <small>Aplausómetro: ${level}</small>
+          </div>
+        </div>`;
     } else if (activeTab === 'ranking') {
       const rows = ranking();
       const max = Math.max(1, ...rows.map(function (row) { return row.puntos; }));

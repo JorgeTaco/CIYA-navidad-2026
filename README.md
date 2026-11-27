@@ -52,7 +52,7 @@ cada archivo:
   `hardware-encendido/js/encendido.js`.
 - `supabase-schema.sql` se dividió en migraciones ordenadas; `legacy-import.sql`
   pasó a ser la cuarta, `0005_role_discovery.sql` la quinta y
-  `0006_ciclo.sql` la sexta. Cada migración es una transacción independiente.
+  `0006_ciclo.sql` la sexta y `0007_group_details.sql` la séptima. Cada migración es una transacción independiente.
 - `tests/draw.test.cjs` pasó a `tests/unit/` y ahora apunta a las nuevas rutas.
 - `tools/local-stage.py` sirve `apps/web/` en `127.0.0.1:8080` y su lista de
   archivos permitidos incluye los nuevos CSS y JS.
@@ -100,7 +100,8 @@ CIYA-navidad-2026/
 │  │  ├─ 0003_receipts.sql         # cola de comprobantes y permisos
 │  │  ├─ 0004_legacy_import.sql    # importación del respaldo v1
 │  │  ├─ 0005_role_discovery.sql   # RPC ciya_my_roles para acceso por rol
-│  │  └─ 0006_ciclo.sql            # ciclo de asistentes y grupos inscritos
+│  │  ├─ 0006_ciclo.sql            # ciclo de asistentes y grupos inscritos
+│  │  └─ 0007_group_details.sql    # ficha pública de un grupo inscrito
 │  └─ functions/ciya-receipts/     # Edge Function → Brevo
 ├─ tests/
 │  └─ unit/                        # draw, ui, lantern-matrix, ignition, sound y local-stage
@@ -183,9 +184,10 @@ query** y ejecutarlo **uno por uno**, en este orden exacto:
 0004_legacy_import.sql     importador del respaldo v1
 0005_role_discovery.sql    RPC ciya_my_roles() para acceso por rol
 0006_ciclo.sql             columna ciclo y validación en checkin/group
+0007_group_details.sql     consulta de la ficha pública de un grupo
 ```
 
-No pegar los seis juntos. Si uno marca error, detenerse y corregir antes de
+No pegar todas las migraciones juntas. Si una marca error, detenerse y corregir antes de
 seguir. Si alguno ya está aplicado, omitirlo y continuar desde el siguiente;
 nunca editar una migración ya aplicada. Con esto listo, seguir con el servidor
 estático de abajo.
@@ -280,7 +282,7 @@ supabase db push
 supabase functions deploy ciya-receipts
 ```
 
-`supabase db push` aplica en orden los 6 archivos de `supabase/migrations/`:
+`supabase db push` aplica en orden los 7 archivos de `supabase/migrations/`:
 
 | Archivo | Qué crea |
 |---------|----------|
@@ -290,6 +292,7 @@ supabase functions deploy ciya-receipts
 | `0004_legacy_import.sql` | Importador de respaldo v1 |
 | `0005_role_discovery.sql` | RPC `ciya_my_roles()` para acceso por rol |
 | `0006_ciclo.sql` | Ciclo de Nivelación a 8vo en acreditaciones y grupos |
+| `0007_group_details.sql` | Ficha pública de villancicos con representante, obra musical y nómina |
 
 Si las migraciones ya están aplicadas, omitir `supabase db push`. Si falta
 alguna, no editar los archivos anteriores: agregar una migración nueva.

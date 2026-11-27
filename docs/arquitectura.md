@@ -11,9 +11,12 @@ Supabase en `supabase/`. No hay servidor propio ni build.
 - `CIYA_STORE.action(accion, payload, privada)` para `wish`, `group`, `checkin`,
   `donate`, `redeem`, `seal`, `score`, `door` y `moderate`.
 - `CIYA_STORE.gold(secret)`, `CIYA_STORE.ranking()` y `CIYA_STORE.subscribe()`.
+- `CIYA_STORE.groupDetails(id)` consulta `ciya_group_details(group_id)` al abrir
+  una ficha pública de villancicos. La RPC incluye representante, nómina y
+  obra musical junto con los datos resumidos del grupo.
 
 Las RPC están definidas en `supabase/migrations/0002_rpc_read_write.sql`,
-`0005_role_discovery.sql` y `0006_ciclo.sql`. El acceso se controla con
+`0005_role_discovery.sql`, `0006_ciclo.sql` y `0007_group_details.sql`. El acceso se controla con
 `ciya.roles`, `ciya_access(panel)` y `ciya_my_roles()`. La migración `0006`
 agrega el ciclo (Nivelación a 8vo) a acreditaciones y grupos inscritos.
 

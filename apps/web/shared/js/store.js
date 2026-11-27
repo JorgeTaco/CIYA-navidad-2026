@@ -247,6 +247,9 @@
     gold: function (secret) {
       return rpc('ciya_gold', { secret }, false);
     },
+    groupDetails: function (id) {
+      return rpc('ciya_group_details', { group_id: id }, false);
+    },
     ranking: function () {
       return state.ranking.length ? state.ranking : window.CIYA_DATA.carreras.map(function (carrera) {
         return { ...carrera, puntos: 0, juguetes: 0, caramelos: 0, total: 0, donantes: 0, puesto: 1 };
@@ -255,6 +258,9 @@
     carrera: function (id) {
       return window.CIYA_DATA.carreras.find(function (carrera) { return carrera.id === id; }) ||
         { id, nombre: id, color: '#ffffff', sigla: '?' };
+    },
+    cicloNombre: function (id) {
+      return window.CIYA_DATA.ciclos.find(function (item) { return item.id === id; })?.nombre;
     }
   };
 

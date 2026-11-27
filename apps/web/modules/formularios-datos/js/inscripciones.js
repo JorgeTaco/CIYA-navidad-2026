@@ -23,9 +23,10 @@
         <div class="field"><label for="vil-ciclo">Ciclo</label><select id="vil-ciclo" required>${ciclos}</select></div>
         <div class="field"><label for="vil-cancion">Obra musical seleccionada</label><input id="vil-cancion" maxlength="160" required></div>
         <div class="field"><label for="vil-categoria">Modalidad</label><select id="vil-categoria" required>${categorias}</select></div>
+        <p class="hint">La ficha pública del grupo incluye el nombre del representante y la nómina de integrantes.</p>
         <button class="btn primary wide" type="submit"${Store.configured() ? '' : ' disabled'}>Inscribir grupo</button>
         ${Store.configured() ? '' : '<p class="hint">La inscripción estará disponible cuando se configure la conexión.</p>'}
-        <p class="hint">Inscripción oficial abierta hasta el jueves 3 de diciembre de 2026, 17:30. Evaluación: 30% creatividad, 30% musicalidad, 20% puesta en escena y 20% aplausómetro.</p>
+        <p class="hint">Inscripción oficial abierta hasta el jueves 3 de diciembre de 2026, 17:30.</p>
       </form>`;
   }
 

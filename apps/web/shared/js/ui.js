@@ -236,6 +236,18 @@
     return '<span class="material-symbols-outlined" aria-hidden="true">' + escapeHtml(name) + '</span>';
   }
 
+  function villancicoDetails(group) {
+    const { fecha, fechaISO } = window.CIYA_DATA.evento;
+    const ciclo = Store.cicloNombre(group.ciclo);
+    return `
+      <dl class="villancico-details">
+        <div><dt>Fecha</dt><dd><time datetime="${escapeHtml(fechaISO)}">${escapeHtml(fecha)}</time></dd></div>
+        <div><dt>Modalidad</dt><dd>${escapeHtml(group.categoria || 'Sin registrar')}</dd></div>
+        <div><dt>Carrera</dt><dd>${escapeHtml(Store.carrera(group.carrera).nombre || 'Sin registrar')}</dd></div>
+        <div><dt>Ciclo</dt><dd>${escapeHtml(ciclo || 'Sin registrar')}</dd></div>
+      </dl>`;
+  }
+
   function buildNavLinks(roles, active, isLocal) {
     const staff = ['recepcion', 'escenario', 'admin'].filter(function (role) { return roles.includes(role); });
     const isPublic = ['acceso', 'portal', 'qr', 'cronograma'].includes(active);
@@ -358,6 +370,7 @@
     download: download,
     copy: copy,
     dateTime: dateTime,
+    villancicoDetails: villancicoDetails,
     initNav: initNav,
     csv: csv,
     renderRanking: renderRanking,

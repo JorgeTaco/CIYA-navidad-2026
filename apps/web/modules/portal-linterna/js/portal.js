@@ -3,6 +3,7 @@
   const Store = window.CIYA_STORE;
   const Data = window.CIYA_DATA;
   const esc = UI.escapeHtml;
+  const villancicos = Data.cronograma.find(function (actividad) { return actividad.id === 'villancicos'; });
   const linterna = { carrera: 'sistemas', frase: 'Feliz Navidad CIYA', brillo: 'med' };
   const brightnessLevels = ['min', 'med', 'max'];
   const lanternSymbols = {
@@ -140,12 +141,35 @@
         <p class="hint">Donaciones y canjes de 08:00 a 17:45. Cada estudiante puede ganar un premio y tiene 45 segundos para presentarse con su identificación.</p>
       </section>
 
-      <section class="section" id="villancicos">
-        <div class="section-head"><div><span class="kicker">Actividad I · 17:45 – 18:25</span><h2>Concurso de Villancicos “CIYA tiene Talento”</h2></div></div>
-        <div class="grid cols-2">
+      <section class="section" id="villancicos" aria-labelledby="villancicos-title">
+        <header class="villancicos-header">
+          <div class="villancicos-lights" aria-hidden="true">${'<span></span>'.repeat(12)}</div>
+          <h2 id="villancicos-title">Concurso de Villancicos <span>CIYA tiene Talento</span></h2>
+          <p><time datetime="${esc(Data.evento.fechaISO)}">${esc(Data.evento.fecha)}</time> · ${esc(villancicos.hora)}</p>
+          <p>Hall Principal · Hasta 3 minutos por grupo</p>
+        </header>
+        <div class="grid cols-2 villancicos-layout">
+          <section class="card villancicos-program" aria-labelledby="villancicos-program-title">
+            <h3 id="villancicos-program-title">Orden de presentación</h3>
+            <div id="lista-grupos"><p class="empty">Consultando los grupos inscritos…</p></div>
+          </section>
           <div id="inscripciones-root"></div>
-          <div class="card"><h3>Orden de presentación</h3><div id="lista-grupos"><p class="empty">Consultando los grupos inscritos…</p></div></div>
         </div>
+        <details class="card villancicos-criteria">
+          <summary>Criterios de evaluación</summary>
+          <ul>${Data.criteriosVillancicos.map(function (criterion) {
+            return '<li><strong>' + esc(criterion.nombre) + ' · ' + criterion.peso + '%</strong><p>' + esc(criterion.detalle) + '</p></li>';
+          }).join('')}</ul>
+        </details>
+        <dialog class="villancico-dialog" id="villancico-dialog" aria-labelledby="villancico-dialog-title">
+          <div class="villancico-dialog-shell">
+            <header class="villancico-dialog-head">
+              <div><p class="kicker" id="villancico-dialog-turn"></p><h3 id="villancico-dialog-title"></h3></div>
+              <form method="dialog"><button class="btn small" type="submit" autofocus>Cerrar</button></form>
+            </header>
+            <div class="villancico-dialog-body" id="villancico-dialog-body"></div>
+          </div>
+        </dialog>
       </section>
 
       <section class="section" id="buzon">
@@ -317,6 +341,100 @@
     }).join('');
   }
 
+  function renderVillancicos(groups) {
+    const list = document.getElementById('lista-grupos');
+    if (!groups.length) {
+      list.innerHTML = '<p class="empty">Aún no hay grupos inscritos.</p>';
+      return;
+    }
+    list.innerHTML = `<ol class="villancico-list" role="list">${groups.map(function (group) {
+      return `
+        <li class="villancico-entry">
+          <div class="villancico-entry-head">
+            <span class="villancico-turn">Turno ${esc(group.orden)}</span>
+            <button class="villancico-trigger" type="button" data-group-id="${esc(group.id)}"
+              aria-haspopup="dialog" aria-controls="villancico-dialog">
+              <span class="villancico-name">${esc(group.nombre)}</span>
+              <span class="villancico-view">Ver ficha ${UI.icon('arrow_forward_ios')}</span>
+            </button>
+          </div>
+          ${UI.villancicoDetails(group)}
+        </li>`;
+    }).join('')}</ol>`;
+  }
+
+  function villancicoFullDetails(group) {
+    const integrantes = Array.isArray(group.integrantes) ? group.integrantes.filter(function (name) {
+      return typeof name === 'string' && name.trim();
+    }) : [];
+    return `
+      <div class="villancico-representative">
+        <span class="feature-icon">${UI.icon('groups')}</span>
+        <div><span>Representante del grupo</span><strong>${esc(group.representante || 'Sin registrar')}</strong></div>
+      </div>
+      ${UI.villancicoDetails(group)}
+      <div class="villancico-song"><h4>Obra musical</h4><p>${esc(group.cancion || 'Sin registrar')}</p></div>
+      <section class="villancico-members" aria-labelledby="villancico-members-title">
+        <h4 id="villancico-members-title">Integrantes${integrantes.length ? ' (' + integrantes.length + ')' : ''}</h4>
+        ${integrantes.length ? '<ol>' + integrantes.map(function (name) {
+          return '<li>' + esc(name) + '</li>';
+        }).join('') + '</ol>' : '<p class="muted">Sin integrantes registrados.</p>'}
+      </section>`;
+  }
+
+  function setupVillancicosDialog() {
+    const list = document.getElementById('lista-grupos');
+    const dialog = document.getElementById('villancico-dialog');
+    const title = document.getElementById('villancico-dialog-title');
+    const turn = document.getElementById('villancico-dialog-turn');
+    const body = document.getElementById('villancico-dialog-body');
+    let active;
+
+    async function loadDetails(selection) {
+      const summary = UI.villancicoDetails(selection.group);
+      body.innerHTML = '<p class="empty" role="status">Cargando la ficha del grupo…</p>' + summary;
+      try {
+        const group = await Store.groupDetails(selection.group.id);
+        if (!dialog.open || active !== selection) return;
+        body.innerHTML = group ? villancicoFullDetails(group) :
+          '<p class="empty" role="status">Este grupo ya no figura en el orden de presentación.</p>';
+      } catch {
+        if (!dialog.open || active !== selection) return;
+        body.innerHTML = '<p class="empty" role="status">No se pudo cargar la ficha completa.</p>' + summary +
+          '<button class="btn small villancico-retry" type="button">Reintentar</button>';
+        body.querySelector('.villancico-retry').addEventListener('click', function () {
+          dialog.querySelector('button[autofocus]').focus();
+          loadDetails(selection);
+        });
+      }
+    }
+
+    list.addEventListener('click', function (event) {
+      const trigger = event.target.closest('.villancico-trigger');
+      if (!trigger) return;
+      const group = Store.get().groups.find(function (item) { return item.id === trigger.dataset.groupId; });
+      if (!group) return;
+      active = { group, trigger };
+      title.textContent = group.nombre;
+      turn.textContent = 'Turno ' + group.orden;
+      dialog.showModal();
+      dialog.scrollTop = 0;
+      loadDetails(active);
+    });
+    dialog.addEventListener('click', function (event) {
+      if (event.target === dialog) dialog.close();
+    });
+    dialog.addEventListener('close', function () {
+      if (!active || dialog.open) return;
+      const trigger = active.trigger.isConnected ? active.trigger :
+        Array.from(list.querySelectorAll('.villancico-trigger')).find(function (button) {
+          return button.dataset.groupId === active.group.id;
+        });
+      if (trigger) trigger.focus();
+      active = null;
+    });
+  }
+
   function render(state) {
     const status = document.getElementById('metrics-status');
     const online = Store.isRemote();
@@ -331,11 +449,7 @@
       document.getElementById('ranking-portal').textContent = 'Marcador aún no disponible.';
       return;
     }
-    document.getElementById('lista-grupos').innerHTML = state.groups.map(function (group) {
-      return '<div class="timeline-step"><span class="step-index">' + group.orden + '</span><div><strong>' +
-        esc(group.nombre) + '</strong><br><small>' + esc(group.categoria) + ' · ' +
-        esc(Store.carrera(group.carrera).nombre) + '</small></div></div>';
-    }).join('') || '<p class="empty">Aún no hay grupos inscritos.</p>';
+    renderVillancicos(state.groups);
     document.getElementById('frases-aprobadas').innerHTML = state.deseos.slice(-3).map(function (wish) {
       return '<blockquote class="muted">“' + esc(wish.frase) + '” — ' + esc(wish.nombre) + '</blockquote>';
     }).join('') || '<p class="empty">Aún no hay frases aprobadas.</p>';
@@ -358,6 +472,7 @@
       return;
     }
     setupEstaticos();
+    setupVillancicosDialog();
     UI.initNav('portal');
     if (Store.configured()) await Store.init();
     Store.subscribe(render);

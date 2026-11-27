@@ -127,6 +127,22 @@ test('store resuelve carreras conocidas, desconocidas y ranking inicial', () => 
     ['nivelacion', 'ciclo1', 'ciclo2', 'ciclo3', 'ciclo4', 'ciclo5', 'ciclo6', 'ciclo7', 'ciclo8']);
 });
 
+test('la ficha de villancicos muestra la fecha y traduce los identificadores de carrera y ciclo', () => {
+  const { ui } = loadShared();
+  const html = ui.villancicoDetails({ carrera: 'sistemas', ciclo: 'ciclo4', categoria: 'Coro de Carrera' });
+  assert.match(html, /<time datetime="2026-12-04">Viernes 4 de diciembre de 2026<\/time>/);
+  assert.match(html, /<dt>Modalidad<\/dt><dd>Coro de Carrera<\/dd>/);
+  assert.match(html, /<dt>Carrera<\/dt><dd>Sistemas y Software<\/dd>/);
+  assert.match(html, /<dt>Ciclo<\/dt><dd>4to ciclo<\/dd>/);
+});
+
+test('la ficha conserva grupos anteriores sin ciclo y escapa la modalidad guardada', () => {
+  const { ui } = loadShared();
+  const html = ui.villancicoDetails({ carrera: 'industrial', categoria: '<Modalidad>' });
+  assert.match(html, /<dt>Modalidad<\/dt><dd>&lt;Modalidad&gt;<\/dd>/);
+  assert.match(html, /<dt>Ciclo<\/dt><dd>Sin registrar<\/dd>/);
+});
+
 test('initNav oculta pestañas de otros roles en asistente, recepción y modo local', () => {
   const guest = loadShared();
   guest.ui.initNav('acceso');

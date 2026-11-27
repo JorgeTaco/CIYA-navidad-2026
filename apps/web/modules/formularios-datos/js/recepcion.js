@@ -15,11 +15,6 @@
   };
   let displayedReceipt;
 
-  function cicloLabel(id) {
-    const found = Data.ciclos.find(function (c) { return c.id === id; });
-    return found ? found.nombre : '—';
-  }
-
   function template() {
     return `
       <div class="section-head reception-heading">
@@ -197,7 +192,7 @@
     byId('lista-asistentes').innerHTML = UI.table(['Estudiante', 'Cédula', 'Carrera', 'Ciclo', 'Acreditación'],
       state.attendees.filter(function (person) { return person.checked_in_at; }).map(function (person) {
         return [esc(person.nombre), esc(person.cedula), esc(Store.carrera(person.carrera).nombre),
-          esc(cicloLabel(person.ciclo)), esc(UI.dateTime(person.checked_in_at))];
+          esc(Store.cicloNombre(person.ciclo) || '—'), esc(UI.dateTime(person.checked_in_at))];
       }), true);
     byId('lista-donaciones').innerHTML = UI.table(['Donante', 'Carrera', 'Tipo', 'Cantidad', 'Puntos'],
       state.donations.map(function (item) {
