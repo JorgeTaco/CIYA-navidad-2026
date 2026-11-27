@@ -6,21 +6,52 @@
   const QRCode = window.CIYA_QR_CODE;
   const esc = UI.escapeHtml;
   const id = new URLSearchParams(location.search).get('id');
+  const DORADOS_KEY = 'ciya2026:dorados:v1';
   let activeGold;
   let goldExpiryTimer = null;
+
+  function readDoradosState() {
+    try {
+      const raw = localStorage.getItem(DORADOS_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function writeDoradosState(state) {
+    try {
+      localStorage.setItem(DORADOS_KEY, JSON.stringify(state));
+    } catch {}
+  }
+
+  function resetDoradosState() {
+    try {
+      localStorage.removeItem(DORADOS_KEY);
+    } catch {}
+  }
+
+  function generateGoldCode(numero) {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let suffix = '';
+    for (let i = 0; i < 4; i++) {
+      suffix += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return 'DORADO-' + numero + '-' + suffix;
+  }
 
   function link(item) { return 'qr.html?id=' + encodeURIComponent(item.id); }
   function fullLink(item) { return new URL(link(item), location.href).href; }
 
-  function renderQrCard(item, title, qrLabel, hint) {
+  function renderQrCard(item, badge, title, qrLabel, hint) {
     const qrMarkup = QRCode
       ? '<div class="qr-code-box">' + QRCode.toSvg(fullLink(item), { label: qrLabel }) +
-        '<span class="qr-scan-hint">' + esc(hint) + '</span></div>'
+      '<span class="qr-scan-hint">' + esc(hint) + '</span></div>'
       : '';
-    return '<a class="card card-link qr-message-card" href="' + link(item) + '">' +
-      '<div class="qr-card-body"><span class="badge">' + esc(item.ubicacion) + '</span>' +
+    return '<article class="card qr-message-card">' +
+      '<div class="qr-card-body"><span class="badge">' + esc(badge) + '</span>' +
       '<h3 style="margin-top:0.7rem">' + esc(title) + '</h3></div>' +
-      qrMarkup + '</a>';
+      qrMarkup + '</article>';
   }
 
   function shell() {
@@ -66,35 +97,90 @@
       <section class="section card" id="dorados">
         <h2>QR Dorados</h2>
         <p>El primer estudiante que canjee cada QR Dorado gana tres boletos extra. Muestra la pantalla activa y tu credencial estudiantil en recepción antes de las 17:45.</p>
+        <div class="grid auto" id="lista-dorados"></div>
+        <div class="row qr-gold-tools">
+          <button class="btn ghost small" id="reset-dorados" type="button">Reiniciar validación de QR Dorados (pruebas)</button>
+        </div>
       </section>
       <section class="section card">
         <h2>Impresión de la ruta</h2>
-        <p class="muted">Genera los impresos públicos con el enlace de cada tarjeta (<code>qr.html?id=…</code>) y colócalos en los puntos sugeridos.</p>
-        <div class="row"><button class="btn" data-print-route>Imprimir listado</button><button class="btn ghost" id="copiar-base">Copiar URL base de la ruta</button></div>
+        <p class="muted">Imprime esta ruta con los códigos QR ya generados y colócalos en los puntos indicados de la facultad.</p>
+        <div class="row"><button class="btn" data-print-route>Imprimir listado</button></div>
       </section>`;
 
     document.getElementById('lista-mensajes').innerHTML = Data.mensajesQR.map(function (m) {
-      return renderQrCard(m, m.titulo, 'Código QR para ' + m.titulo, 'Escanea o toca para abrir el mensaje');
+      return renderQrCard(m, m.ubicacion, m.titulo, 'Código QR para ' + m.titulo, 'Escanea con tu teléfono para abrir el mensaje');
     }).join('');
     document.getElementById('lista-trivias').innerHTML = Data.trivias.map(function (t) {
-      return renderQrCard(t, 'Trivia relámpago', 'Código QR para trivia en ' + t.ubicacion, 'Escanea o toca para responder la trivia');
+      return renderQrCard(t, t.ubicacion, 'Trivia relámpago', 'Código QR para trivia en ' + t.ubicacion, 'Escanea con tu teléfono para responder la trivia');
     }).join('');
     document.getElementById('lista-memes').innerHTML = Data.memes.map(function (m) {
-      return '<a class="card card-link" href="' + link(m) + '"><span class="badge">' + esc(m.ubicacion || m.plantilla) + '</span><p style="margin-top:0.7rem">' + esc(m.texto.replace('|', ' vs. ')) + '</p></a>';
+      return renderQrCard(m, m.ubicacion || 'Meme', m.plantilla, 'Código QR para meme ' + m.plantilla, 'Escanea con tu teléfono para ver el meme');
     }).join('');
+    renderDoradosList();
+    document.getElementById('reset-dorados').onclick = function () {
+      resetDoradosState();
+      renderDoradosList();
+      if (UI.toast) UI.toast('QR Dorados reiniciados para pruebas.', 'ok');
+    };
     target.querySelector('[data-print-route]').onclick = function () { window.print(); };
-    document.getElementById('copiar-base').onclick = function () { UI.copy(new URL('qr.html', location.href).href); };
+  }
+
+  function renderDoradosList() {
+    const state = readDoradosState();
+    const container = document.getElementById('lista-dorados');
+    if (!container || !Array.isArray(Data.dorados)) return;
+    container.innerHTML = Data.dorados.map(function (d) {
+      const claimed = Boolean(state[d.id]);
+      const statusBadge = claimed
+        ? '<span class="badge warn">Ya escaneado</span>'
+        : '<span class="badge ok">Disponible</span>';
+      const qrMarkup = QRCode
+        ? '<div class="qr-code-box">' + QRCode.toSvg(fullLink(d), { label: 'Código QR Dorado ' + d.numero }) +
+          '<span class="qr-scan-hint">' + (claimed ? 'Este QR Dorado ya fue validado' : 'Escanea con tu teléfono para canjear (+3 boletos)') + '</span></div>'
+        : '';
+      return '<article class="card qr-message-card qr-gold-card' + (claimed ? ' is-claimed' : '') + '">' +
+        '<div class="qr-card-body"><div class="qr-gold-badges"><span class="badge">' + esc(d.titulo) + '</span>' + statusBadge + '</div>' +
+        '<p class="qr-gold-desc">' + esc(d.mensaje) + '</p></div>' +
+        qrMarkup + '</article>';
+    }).join('');
   }
 
   function renderDetail() {
     const mensaje = Data.mensajesQR.find(function (m) { return m.id === id; });
     const trivia = Data.trivias.find(function (t) { return t.id === id; });
     const meme = Data.memes.find(function (m) { return m.id === id; });
+    const dorado = Array.isArray(Data.dorados) ? Data.dorados.find(function (d) { return d.id === id; }) : null;
     document.getElementById('ruta-index').hidden = true;
     const target = document.getElementById('ruta-detalle');
     target.hidden = false;
 
-    if (mensaje) {
+    if (dorado) {
+      const state = readDoradosState();
+      const existing = state[dorado.id];
+      if (existing) {
+        Sound.enable();
+        Sound.beep();
+        target.innerHTML = '<article class="event-hero qr-story gold-view is-claimed">' +
+          '<span class="badge warn">Ya escaneado</span>' +
+          '<h1>' + esc(dorado.titulo) + ' ya fue reclamado</h1>' +
+          '<p class="qr-message">Este QR Dorado solo se puede escanear una vez. Ya no está disponible para canje.</p>' +
+          '<a class="btn ghost" href="qr.html">Ver toda la ruta</a></article>';
+      } else {
+        const code = generateGoldCode(dorado.numero);
+        state[dorado.id] = { code: code, at: new Date().toISOString() };
+        writeDoradosState(state);
+        Sound.enable();
+        Sound.success();
+        target.innerHTML = '<article class="event-hero qr-story gold-view">' +
+          '<span class="badge ok">Primer escaneo válido</span>' +
+          '<h1>¡' + esc(dorado.titulo) + ' desbloqueado!</h1>' +
+          '<p class="qr-message">' + esc(dorado.mensaje) + '</p>' +
+          '<div class="gold-code">' + esc(code) + '</div>' +
+          '<p class="muted">Presenta esta pantalla activa y tu credencial estudiantil en recepción antes de las 17:45.</p>' +
+          '<a class="btn ghost" href="qr.html">Ver toda la ruta</a></article>';
+      }
+    } else if (mensaje) {
       target.innerHTML = '<article class="event-hero qr-story"><span class="kicker">' + esc(mensaje.ubicacion) + '</span>' +
         '<h1>' + esc(mensaje.titulo) + '</h1><p class="qr-message">' + esc(mensaje.texto) + '</p>' +
         '<a class="btn ghost" href="qr.html">Ver toda la ruta</a></article>';
@@ -119,16 +205,17 @@
         });
       });
     } else if (meme) {
-      const panels = meme.texto.split('|').map(function (part) {
-        return '<div class="card"><p>' + esc(part.trim()) + '</p></div>';
-      });
-      target.innerHTML = '<article class="event-hero qr-story"><h1>' + esc(meme.plantilla) + '</h1>' +
-        '<div class="grid' + (panels.length > 1 ? ' cols-2' : '') + '">' + panels.join('') + '</div>' +
+      const imageHtml = meme.imagen
+        ? '<figure class="qr-meme-media"><img src="' + esc(meme.imagen) + '" alt="' + esc(meme.plantilla) + '"></figure>'
+        : '';
+      target.innerHTML = '<article class="event-hero qr-story">' +
+        imageHtml +
         '<a class="btn ghost" href="qr.html">Ver toda la ruta</a></article>';
     } else {
       target.innerHTML = '<article class="event-hero qr-story"><h1>Código no encontrado</h1><a class="btn primary" href="qr.html">Volver a la ruta</a></article>';
     }
-    document.title = target.querySelector('h1').textContent + ' | CIYA Navidad 2026';
+    const heading = target.querySelector('h1');
+    document.title = (heading ? heading.textContent : (meme ? meme.plantilla : 'Ruta QR')) + ' | CIYA Navidad 2026';
   }
 
   function renderGold(secret) {
@@ -157,8 +244,10 @@
       try {
         if (!/^[a-f0-9-]{36}$/i.test(secret)) throw new Error('Código no válido.');
         const result = await Store.gold(secret);
-        const labels = { invalid: 'Código no válido.', claimed: 'Este QR Dorado ya fue canjeado.',
-          closed: 'Canjes disponibles el 4 de diciembre de 08:00 a 17:45.' };
+        const labels = {
+          invalid: 'Código no válido.', claimed: 'Este QR Dorado ya fue canjeado.',
+          closed: 'Canjes disponibles el 4 de diciembre de 08:00 a 17:45.'
+        };
         status.textContent = labels[result.status] || 'Clave válida durante dos minutos.';
         if (result.status === 'available') {
           code.textContent = result.code;

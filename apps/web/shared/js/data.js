@@ -141,27 +141,55 @@ window.CIYA_DATA = {
     {
       id: 'meme-cheems',
       plantilla: 'El perro Cheems (Antes vs. Ahora)',
+      imagen: 'modules/portal-linterna/media/memes/perro_cheems.png',
       texto: 'Ingeniero diseñando el mecanismo 5 en 1 con Arduino, sensores y relés. | Yo intentando desenredar las luces del árbol de mi casa.'
     },
     {
       id: 'meme-drake',
       plantilla: 'Drake diciendo No / Sí',
+      imagen: 'modules/portal-linterna/media/memes/drake.png',
       texto: 'Comprar adornos caros en el centro comercial. | Armar un árbol de 4 metros con cartón reciclado, cable UTP y botellas PET a costo $0.'
     },
     {
       id: 'meme-botones',
       plantilla: 'Dos botones rojos',
+      imagen: 'modules/portal-linterna/media/memes/dos_botones.png',
       texto: 'Estudiar para el examen final. | Ir al concurso de villancicos por el Comodín de Prórroga de 24 horas.'
     },
     {
       id: 'meme-spiderman',
       plantilla: 'Spider-Man señalándose (5 Spider-Mans)',
+      imagen: 'modules/portal-linterna/media/memes/spiderman.jpg',
       texto: 'Las 5 carreras de CIYA viendo quién recolectó más juguetes y caramelos para ganar la Copa Solidaria.'
     },
     {
       id: 'meme-gato',
       plantilla: 'Gato en la mesa / Mujer gritando',
+      imagen: 'modules/portal-linterna/media/memes/mujer_gritando_y_gato.png',
       texto: '¡Te dije que el código de la ruleta debía funcionar sin Wi-Fi! | En mi compu sí compilaba.'
+    }
+  ],
+  dorados: [
+    {
+      id: 'dorado-1',
+      numero: 1,
+      ubicacion: 'Punto oculto 1 · CIYA',
+      titulo: 'QR Dorado #1',
+      mensaje: 'El primer estudiante que canjee cada QR Dorado gana tres boletos extra.'
+    },
+    {
+      id: 'dorado-2',
+      numero: 2,
+      ubicacion: 'Punto oculto 2 · CIYA',
+      titulo: 'QR Dorado #2',
+      mensaje: 'El primer estudiante que canjee cada QR Dorado gana tres boletos extra.'
+    },
+    {
+      id: 'dorado-3',
+      numero: 3,
+      ubicacion: 'Punto oculto 3 · CIYA',
+      titulo: 'QR Dorado #3',
+      mensaje: 'El primer estudiante que canjee cada QR Dorado gana tres boletos extra.'
     }
   ],
   cronograma: [

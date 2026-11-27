@@ -53,7 +53,7 @@ test('qr.js renderiza código QR en cada tarjeta de mensajes navideños y muestr
     return el;
   }
 
-  ['qr-root', 'ruta-index', 'ruta-detalle', 'lista-mensajes', 'lista-trivias', 'lista-memes', 'copiar-base']
+  ['qr-root', 'ruta-index', 'ruta-detalle', 'lista-mensajes', 'lista-trivias', 'lista-memes', 'lista-dorados', 'reset-dorados']
     .forEach(makeEl);
 
   const context = createContext({
@@ -86,7 +86,7 @@ test('qr.js renderiza código QR en cada tarjeta de mensajes navideños y muestr
 
   const mensajesHtml = elements.get('lista-mensajes').innerHTML;
   for (const item of context.CIYA_DATA.mensajesQR) {
-    assert.ok(mensajesHtml.includes(`qr.html?id=${item.id}`), `Falta enlace de ${item.id}`);
+    assert.ok(!mensajesHtml.includes(`href="qr.html?id=${item.id}"`), `No debe ser clickable ${item.id}`);
     assert.ok(mensajesHtml.includes(`Código QR para ${item.titulo}`), `Falta QR de ${item.id}`);
     assert.ok(!mensajesHtml.includes(item.texto.slice(0, 40)), `No debe mostrar el texto previo de ${item.id}`);
   }
@@ -94,11 +94,19 @@ test('qr.js renderiza código QR en cada tarjeta de mensajes navideños y muestr
 
   const triviasHtml = elements.get('lista-trivias').innerHTML;
   for (const trivia of context.CIYA_DATA.trivias) {
-    assert.ok(triviasHtml.includes(`qr.html?id=${trivia.id}`), `Falta enlace de ${trivia.id}`);
+    assert.ok(!triviasHtml.includes(`href="qr.html?id=${trivia.id}"`), `No debe ser clickable ${trivia.id}`);
     assert.ok(triviasHtml.includes(`Código QR para trivia en ${trivia.ubicacion}`), `Falta QR de ${trivia.id}`);
     assert.ok(!triviasHtml.includes(trivia.pregunta.slice(0, 30)), `No debe mostrar la pregunta previa de ${trivia.id}`);
   }
   assert.match(triviasHtml, /<svg class="qr-svg"/);
+
+  const memesHtml = elements.get('lista-memes').innerHTML;
+  for (const meme of context.CIYA_DATA.memes) {
+    assert.ok(!memesHtml.includes(`href="qr.html?id=${meme.id}"`), `No debe ser clickable ${meme.id}`);
+    assert.ok(memesHtml.includes(`Código QR para meme ${meme.plantilla}`), `Falta QR de ${meme.id}`);
+    assert.ok(!memesHtml.includes(meme.texto.slice(0, 30)), `No debe mostrar el texto previo de ${meme.id}`);
+  }
+  assert.match(memesHtml, /<svg class="qr-svg"/);
 
   // Ahora simulamos escanear un QR (?id=mensaje-solidario)
   const detailElements = new Map();
@@ -135,4 +143,130 @@ test('qr.js renderiza código QR en cada tarjeta de mensajes navideños y muestr
   const detailHtml = detailElements.get('ruta-detalle').innerHTML;
   assert.match(detailHtml, /Mensaje solidario/);
   assert.match(detailHtml, /diseñando una sonrisa real/);
+
+  // Simulamos abrir un meme (?id=meme-cheems)
+  const memeElements = new Map();
+  ['qr-root', 'ruta-index', 'ruta-detalle'].forEach(id => {
+    memeElements.set(id, {
+      id,
+      innerHTML: '',
+      hidden: false,
+      querySelector() { return null; }
+    });
+  });
+  const memeCtx = createContext({
+    window: {},
+    location: { href: 'https://jorgetaco.github.io/CIYA-navidad-2026/qr.html?id=meme-cheems', search: '?id=meme-cheems', hash: '' },
+    URL: URL,
+    URLSearchParams: URLSearchParams,
+    document: {
+      title: '',
+      getElementById: id => memeElements.get(id) || null,
+      querySelectorAll: () => []
+    },
+    addEventListener() {},
+    setTimeout: setTimeout,
+    clearTimeout: clearTimeout,
+    CIYA_UI: context.CIYA_UI,
+    CIYA_STORE: context.CIYA_STORE,
+    CIYA_SOUND: context.CIYA_SOUND,
+    CIYA_QR_CODE: QRCode
+  });
+  memeCtx.window = memeCtx;
+  runInContext(readFileSync(join(__dirname, '..', '..', 'apps', 'web', 'shared', 'js', 'data.js'), 'utf8'), memeCtx);
+  runInContext(readFileSync(join(__dirname, '..', '..', 'apps', 'web', 'modules', 'portal-linterna', 'js', 'qr.js'), 'utf8'), memeCtx);
+
+  const memeDetailHtml = memeElements.get('ruta-detalle').innerHTML;
+  assert.match(memeDetailHtml, /modules\/portal-linterna\/media\/memes\/perro_cheems\.png/);
+  assert.doesNotMatch(memeDetailHtml, /<h1>/);
+  assert.doesNotMatch(memeDetailHtml, /Ingeniero diseñando el mecanismo/);
+});
+
+test('QR Dorados: son 3, se validan una sola vez y permiten reinicio para pruebas', () => {
+  const storage = new Map();
+  const localStorageMock = {
+    getItem: k => (storage.has(k) ? storage.get(k) : null),
+    setItem: (k, v) => storage.set(k, String(v)),
+    removeItem: k => storage.delete(k)
+  };
+
+  function runQr(search) {
+    const els = new Map();
+    ['qr-root', 'ruta-index', 'ruta-detalle', 'lista-mensajes', 'lista-trivias', 'lista-memes', 'lista-dorados', 'reset-dorados']
+      .forEach(id => {
+        els.set(id, {
+          id,
+          innerHTML: '',
+          hidden: false,
+          onclick: null,
+          querySelector(sel) {
+            if (sel === 'h1') {
+              const match = els.get(id).innerHTML.match(/<h1>([^<]+)<\/h1>/);
+              return match ? { textContent: match[1] } : null;
+            }
+            return { onclick: null };
+          }
+        });
+      });
+    const ctx = createContext({
+      window: {},
+      location: { href: 'https://jorgetaco.github.io/CIYA-navidad-2026/qr.html' + search, search, hash: '', reload() {} },
+      URL: URL,
+      URLSearchParams: URLSearchParams,
+      localStorage: localStorageMock,
+      document: {
+        title: '',
+        getElementById: id => els.get(id) || null,
+        querySelectorAll: () => []
+      },
+      addEventListener() {},
+      setTimeout: setTimeout,
+      clearTimeout: clearTimeout,
+      CIYA_UI: {
+        escapeHtml: v => String(v == null ? '' : v).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c])),
+        icon: name => `<span>${name}</span>`,
+        initNav() {},
+        copy() {},
+        toast() {}
+      },
+      CIYA_STORE: { configured: () => false },
+      CIYA_SOUND: { enable() {}, success() {}, beep() {} },
+      CIYA_QR_CODE: QRCode
+    });
+    ctx.window = ctx;
+    runInContext(readFileSync(join(__dirname, '..', '..', 'apps', 'web', 'shared', 'js', 'data.js'), 'utf8'), ctx);
+    runInContext(readFileSync(join(__dirname, '..', '..', 'apps', 'web', 'modules', 'portal-linterna', 'js', 'qr.js'), 'utf8'), ctx);
+    return { els, data: ctx.CIYA_DATA };
+  }
+
+  const index1 = runQr('');
+  const doradosHtml1 = index1.els.get('lista-dorados').innerHTML;
+  assert.equal(index1.data.dorados.length, 3);
+  assert.match(doradosHtml1, /QR Dorado #1/);
+  assert.match(doradosHtml1, /QR Dorado #2/);
+  assert.match(doradosHtml1, /QR Dorado #3/);
+  assert.match(doradosHtml1, /gana tres boletos extra/);
+  assert.doesNotMatch(doradosHtml1, /href="qr\.html\?id=dorado-/);
+
+  // Primer escaneo de dorado-1: válido
+  const firstScan = runQr('?id=dorado-1');
+  const firstHtml = firstScan.els.get('ruta-detalle').innerHTML;
+  assert.match(firstHtml, /Primer escaneo válido/);
+  assert.match(firstHtml, /DORADO-1-/);
+  assert.doesNotMatch(firstHtml, /reset-single-dorado/);
+
+  // Segundo escaneo de dorado-1: bloqueado
+  const secondScan = runQr('?id=dorado-1');
+  const secondHtml = secondScan.els.get('ruta-detalle').innerHTML;
+  assert.match(secondHtml, /Ya escaneado/);
+  assert.match(secondHtml, /solo se puede escanear una vez/);
+  assert.doesNotMatch(secondHtml, /reset-single-dorado/);
+
+  // En el índice dorado-1 figura como ya escaneado
+  const index2 = runQr('');
+  assert.match(index2.els.get('lista-dorados').innerHTML, /Ya escaneado/);
+
+  // Botón de reinicio de pruebas vuelve a habilitar los 3
+  index2.els.get('reset-dorados').onclick();
+  assert.doesNotMatch(index2.els.get('lista-dorados').innerHTML, /Ya escaneado/);
 });
