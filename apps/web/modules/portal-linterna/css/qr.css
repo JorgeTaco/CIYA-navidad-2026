@@ -1,22 +1,22 @@
 .trivia-option { width: 100%; text-align: left; margin-bottom: 0.55rem; }
-.trivia-option.correct { border-color: var(--green); background: rgba(6, 214, 160, 0.18); }
-.trivia-option.wrong { border-color: var(--red); background: rgba(239, 71, 111, 0.16); }
+.trivia-option.correct { border-color: var(--green); background: var(--green-soft); }
+.trivia-option.wrong { border-color: var(--red); background: var(--red-soft); }
 
 .gold-code { font-size: clamp(1.6rem, 6vw, 3rem); font-weight: 900; letter-spacing: 0.1em; color: var(--gold); }
 
-.route-page { padding-bottom: calc(4.6rem + env(safe-area-inset-bottom)); }
 .route-hero p, .qr-story p { max-width: 58ch; color: var(--muted); }
-.route-hero h1 { font-size: clamp(2rem, 5vw, 3.45rem); }
+.route-hero .feature-icon { margin-bottom: .5rem; }
 .section-links { display: flex; flex-wrap: wrap; gap: .4rem; }
 .section-links a { display: inline-flex; align-items: center; min-height: 44px; padding: .3rem .7rem; color: var(--text); text-decoration: none; border: 1px solid var(--line); border-radius: 10px; }
 .section-links a:hover { border-color: var(--gold); }
-.route-page .bottom-actions .btn { min-height: 44px; text-align: center; }
+.route-shortcuts { display: flex; flex-wrap: wrap; gap: .55rem; padding-top: 0; }
+.route-shortcuts .btn { flex: 1; text-align: center; font-size: .85rem; }
 .qr-story { min-width: 0; }
 .qr-story h1 { font-size: clamp(1.75rem, 5vw, 2.65rem); }
 .qr-story .qr-message { color: var(--text); font-size: clamp(1.15rem, 3vw, 1.55rem); }
 .qr-story .btn.ghost { margin-top: .8rem; }
 .qr-story .trivia-option { min-height: 48px; justify-content: flex-start; overflow-wrap: anywhere; }
-.trivia-option span { display: grid; place-items: center; flex: 0 0 1.6rem; aspect-ratio: 1; border-radius: 6px; background: #081923; }
-.qr-story.gold-view { background: radial-gradient(ellipse at 50% 12%, #654d23, transparent 73%), var(--bg-soft); }
+.trivia-option span { display: grid; place-items: center; flex: 0 0 1.6rem; aspect-ratio: 1; border-radius: 6px; background: var(--panel-strong); color: var(--primary); }
+.qr-story.gold-view { border-color: #d9b467; background: radial-gradient(ellipse at 50% 12%, var(--gold-soft), transparent 80%), var(--panel); }
 .gold-view .gold-code { margin-block: .5rem; font-variant-numeric: tabular-nums; }
 #gold-refresh { min-height: 44px; }

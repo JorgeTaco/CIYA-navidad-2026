@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#061224">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f8f9ff">
   <title>CIYA Navidad 2026 | Consola de escenario</title>
   <link rel="stylesheet" href="shared/css/tokens.css">
   <link rel="stylesheet" href="shared/css/base.css">
@@ -15,17 +15,23 @@
   <link rel="stylesheet" href="modules/hardware-encendido/css/encendido.css">
   <link rel="stylesheet" href="shared/css/responsive.css">
 </head>
-<body>
+<body class="stage-page">
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="brand" href="escenario.html"><span class="brand-mark">CIYA</span><span>Navidad 2026</span></a>
+      <a class="brand" href="escenario.html">
+        <span class="brand-mark"><span class="material-symbols-outlined" aria-hidden="true">ac_unit</span></span>
+        <span class="brand-copy">
+          <span class="brand-title">CIYA Navidad 2026 <span class="brand-label">UTC</span></span>
+          <span class="brand-subtitle">Facultad de Ciencias de la Ingeniería y Aplicadas</span>
+        </span>
+      </a>
       <nav class="nav-links" data-role-links aria-label="Navegación principal">
         <a href="escenario.html" data-nav="escenario">Escenario</a>
         <a href="cronograma.html" data-nav="cronograma">Cronograma</a>
       </nav>
-      <div class="row">
+      <div class="site-actions">
         <span class="sync-pill" id="sync-status">Modo local</span>
-        <button class="btn ghost small" type="button" data-logout-btn hidden>Cerrar sesión</button>
+        <button class="btn ghost small site-logout" type="button" aria-label="Cerrar sesión" data-logout-btn hidden><span class="material-symbols-outlined" aria-hidden="true">logout</span><span class="logout-label">Cerrar sesión</span></button>
       </div>
     </div>
   </header>

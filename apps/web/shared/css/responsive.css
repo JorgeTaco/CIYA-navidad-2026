@@ -1,42 +1,58 @@
 @media (max-width: 920px) {
   .grid.cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stage-grid { grid-template-columns: 1fr; }
+  .topbar-inner { gap: .55rem; }
+  .nav-links a { padding-inline: .42rem; }
+  .nav-links .material-symbols-outlined { display: none; }
 }
-
-@media (max-width: 640px) {
-  body { font-size: 15px; }
-  .container { padding: 1rem 0.8rem 3rem; }
-  .grid.cols-2, .grid.cols-3, .grid.cols-4 { grid-template-columns: 1fr; }
-  .topbar-inner { padding: 0.55rem 0.8rem; }
-  .nav-links { order: 3; width: 100%; overflow-x: auto; flex-wrap: nowrap; }
-  .card { padding: 1rem; }
-  .row .btn { flex: 1 1 auto; }
-  th, td { padding: 0.5rem 0.55rem; }
-}
-
-@media print {
-  body { background: #fff; color: #000; }
-  .topbar, .footer, .btn, .pin-overlay, .toast-box { display: none !important; }
-  .card, .hero { border-color: #aaa; box-shadow: none; background: #fff; color: #000; }
-  .print-only { display: block; }
-}
-
-[hidden] { display: none !important; }
 
 @media (max-width: 760px) {
-  .event-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .event-art { right: 0; opacity: .6; }
-  .lantern-layout { grid-template-columns: minmax(0, 1fr); }
+  .container { padding-top: 1rem; }
+  html:has(.nav-links:not([hidden])) { scroll-padding-bottom: calc(var(--navigation-height) + env(safe-area-inset-bottom) + .5rem); }
+  body:has(.nav-links:not([hidden])) { padding-bottom: calc(var(--navigation-height) + env(safe-area-inset-bottom)); }
+  .nav-links {
+    position: fixed;
+    inset: auto 0 0;
+    justify-content: center;
+    gap: 0;
+    padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    background: var(--panel);
+    box-shadow: 0 -2px 14px rgba(18, 52, 81, .1);
+  }
+  .nav-links a {
+    flex: 1;
+    flex-direction: column;
+    gap: .24rem;
+    max-width: 8rem;
+    min-width: 0;
+    min-height: var(--navigation-height);
+    padding-inline: .15rem;
+    border-radius: 0;
+    font-size: .72rem;
+  }
+  .nav-links a:focus-visible { outline-offset: -4px; }
+  .nav-links a.active { background: var(--panel); }
+  .site-logout { width: 44px; min-width: 44px; }
+  .site-logout .logout-label { display: none; }
+  .nav-links .material-symbols-outlined { display: inline-block; font-size: 1.35rem; }
+  body:has(.nav-links:not([hidden])) .toast-box { bottom: calc(var(--navigation-height) + env(safe-area-inset-bottom) + .6rem); }
+  :is(.portal-page, .route-page, .schedule-page, .access-page) .topbar .sync-pill { display: none; }
+  :is(.reception-page, .admin-page, .stage-page) .site-actions { flex: none; flex-direction: column-reverse; align-items: flex-end; gap: .15rem; }
+  :is(.reception-page, .admin-page, .stage-page) .brand-title { flex-wrap: wrap; font-size: .95rem; white-space: normal; }
+  :is(.reception-page, .admin-page, .stage-page) .sync-pill {
+    max-width: 7.4rem;
+    padding: .23rem .35rem;
+    font-size: .65rem;
+    line-height: 1.2;
+    white-space: normal;
+  }
 }
 
 @media (max-width: 640px) {
-  .portal-page input, .portal-page select, .portal-page textarea,
-  .reception-page input, .reception-page select, .reception-page textarea { font-size: 16px; }
-  .event-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .event-summary > div:nth-child(even) { border-inline-end: 0; }
-  .event-summary > div:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
-  .event-action { font-size: .88rem; }
-  .route-page .bottom-actions .btn { flex: 1; padding-inline: .35rem; }
+  .grid.cols-2, .grid.cols-3, .grid.cols-4 { grid-template-columns: minmax(0, 1fr); }
+  .card { padding: .9rem; }
+  .row .btn { flex: 1 1 auto; }
+  th, td { padding: .5rem .55rem; }
   .form-row { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .table-stack { border: 0; overflow: visible; }
   .table-stack table, .table-stack tbody { display: block; }
@@ -48,13 +64,14 @@
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+  .btn, .card-link { transition: none; }
   .wheel.spinning { animation-duration: .01s; }
 }
+
 @media print {
-  .portal-page, .route-page, .reception-page, .schedule-page { color-scheme: light; background: #fff; }
-  .route-page { padding-bottom: 0; }
-  .bottom-actions { display: none; }
-  .event-hero { background: #fff; color: #000; box-shadow: none; }
-  .route-page a, .route-page .muted, .route-page .route-hero p { color: #000; }
+  body { padding-bottom: 0 !important; background: #fff; color: #000; }
+  .topbar, .footer, .btn, .pin-overlay, .toast-box, .route-shortcuts { display: none !important; }
+  .card, .hero, .event-hero { border-color: #aaa; box-shadow: none; background: #fff; color: #000; }
+  .print-only { display: block; }
   .route-page .card-link::after { content: attr(href); font-size: .8rem; }
 }

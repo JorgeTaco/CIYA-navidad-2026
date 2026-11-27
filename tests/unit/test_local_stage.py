@@ -5,7 +5,9 @@ from http.client import HTTPConnection
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 from runpy import run_path
+import re
 from threading import Thread
+from urllib.parse import urljoin
 import unittest
 
 
@@ -83,7 +85,16 @@ class LocalStageTests(unittest.TestCase):
         for path in assets.paths:
             with self.subTest(path=path):
                 self.assertNotIn('://', path)
-                self.assertEqual(self.request('/' + path)[0], 200)
+                code, _, resource = self.request('/' + path)
+                self.assertEqual(code, 200)
+                if path.endswith('.css'):
+                    for dependency in re.findall(r"""url\(['"]?([^'")]+)""", resource.decode()):
+                        resolved = urljoin('/' + path, dependency)
+                        self.assertTrue(resolved.startswith('/'))
+                        status, _, payload = self.request(resolved)
+                        self.assertEqual(status, 200, resolved)
+                        if resolved.endswith('.woff2'):
+                            self.assertTrue(payload.startswith(b'wOF2'))
 
     def test_serves_only_stage_files(self):
         for path in ['/portal.html', '/cronograma.html', '/recepcion.html', '/.env.example', '/README.md']:

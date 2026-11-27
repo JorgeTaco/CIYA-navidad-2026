@@ -6,14 +6,15 @@
 
   function template() {
     return `
-      <section class="hero" style="margin-bottom:1.2rem">
-        <span class="kicker">4 de diciembre de 2026 · Facultad CIYA</span>
-        <h1>CIYA Navidad 2026</h1>
-        <p>Inicia sesión según tu rol. El sistema habilitará únicamente las pestañas y funciones correspondientes a tu cuenta.</p>
+      <section class="hero access-intro">
+        <span class="kicker">${UI.icon('calendar_month')} 4 de diciembre de 2026 · Hall CIYA</span>
+        <h1>Acceso a <em>CIYA Navidad 2026</em></h1>
+        <p>Entra al portal del evento o accede a tu panel de organización.</p>
       </section>
 
       <div class="grid cols-2" id="acceso-grid">
         <section class="card" id="acceso-login">
+          <span class="feature-icon organization-icon">${UI.icon('admin_panel_settings')}</span>
           <h2>Acceso de organización</h2>
           <p class="muted">Para Recepción (Industrial), Producción / Escenario (Sistemas y Software) y Curadores / Administración.</p>
           <form id="form-acceso">
@@ -38,11 +39,11 @@
         </section>
 
         <section class="card" id="acceso-asistente">
-          <span class="badge ok">Acceso libre</span>
-          <h2 style="margin-top:0.65rem">Estudiantes y Docentes</h2>
+          <span class="feature-icon">${UI.icon('groups')}</span>
+          <h2>Estudiantes y docentes</h2>
           <p class="muted">Ingresa como asistente para usar el Mar de Linternas, inscribir grupos de villancicos, enviar mensajes al buzón “Compilando Deseos 2027” y recorrer la Ruta de Códigos QR.</p>
           <button class="btn primary wide" id="btn-asistente" type="button" style="margin-top:0.6rem">Ingresar como Estudiante / Docente</button>
-          <p class="hint" style="margin-top:0.8rem">No requiere contraseña. Verás únicamente las pestañas públicas de participantes.</p>
+          <p class="hint access-note">Acceso libre.</p>
         </section>
       </div>
 
@@ -118,7 +119,8 @@
   }
 
   async function init() {
-    if (new URLSearchParams(location.search).get('modo') === 'linterna') {
+    const mode = new URLSearchParams(location.search).get('modo');
+    if (mode === 'linterna') {
       location.replace('portal.html' + location.search + location.hash);
       return;
     }
@@ -159,7 +161,7 @@
       } catch {
         await Store.logout();
       }
-    } else if (Store.sessionRoles().includes('asistente')) {
+    } else if (mode !== 'acceso' && Store.sessionRoles().includes('asistente')) {
       location.replace('portal.html');
       return;
     }

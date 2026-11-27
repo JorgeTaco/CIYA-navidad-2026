@@ -114,7 +114,7 @@ test('initNav es idempotente y respeta el modo escenario local', () => {
   ui.initNav('acceso');
   ui.initNav('acceso');
   assert.equal(statusEl.textContent, 'Sin sincronización');
-  assert.equal(docListeners.length, 2);
+  assert.equal(docListeners.length, 0);
 });
 
 test('store resuelve carreras conocidas, desconocidas y ranking inicial', () => {
@@ -128,7 +128,9 @@ test('store resuelve carreras conocidas, desconocidas y ranking inicial', () => 
 test('initNav oculta pestañas de otros roles en asistente, recepción y modo local', () => {
   const guest = loadShared();
   guest.ui.initNav('acceso');
-  assert.equal(guest.roleLinksEl.innerHTML, '<a href="cronograma.html" data-nav="cronograma">Cronograma</a>');
+  assert.deepEqual(Array.from(guest.roleLinksEl.innerHTML.matchAll(/data-nav="([^"]+)"/g), match => match[1]),
+    ['portal', 'qr', 'cronograma', 'acceso']);
+  assert.match(guest.roleLinksEl.innerHTML, /index\.html\?modo=acceso/);
   assert.equal(guest.logoutBtn.hidden, true);
 
   guest.store.enterAsistente();
@@ -150,7 +152,8 @@ test('initNav oculta pestañas de otros roles en asistente, recepción y modo lo
 
   const localStage = loadShared();
   localStage.ui.initNav('escenario', { local: true });
-  assert.equal(localStage.roleLinksEl.innerHTML, '<a href="escenario.html" data-nav="escenario">Escenario</a>');
+  assert.deepEqual(Array.from(localStage.roleLinksEl.innerHTML.matchAll(/data-nav="([^"]+)"/g), match => match[1]), ['escenario']);
+  assert.equal(localStage.roleLinksEl.hidden, true);
   assert.equal(localStage.logoutBtn.hidden, true);
 });
 

@@ -1,2 +1,2 @@
-.stage-screen h2 { font-size: clamp(1.6rem, 4vw, 3rem); }
-.stage-screen .big-number { font-size: clamp(3rem, 11vw, 9rem); font-weight: 900; line-height: 1; letter-spacing: -0.08em; color: var(--gold); font-variant-numeric: tabular-nums; }
+.stage-screen h2 { font-size: clamp(1rem, min(5cqw, 8cqh), 3rem); }
+.stage-screen .big-number { font-size: clamp(1.65rem, min(15cqw, 27cqh), 9rem); font-weight: 900; line-height: 1; letter-spacing: -0.08em; color: var(--gold); font-variant-numeric: tabular-nums; }

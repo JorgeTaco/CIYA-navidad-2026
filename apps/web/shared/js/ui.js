@@ -171,7 +171,6 @@
     location.replace('index.html');
   }
 
-  let navListenersBound = false;
   let syncPaintTimer = null;
 
   async function submit(event, action, payload, privateCall, onSuccess) {
@@ -224,31 +223,33 @@
     return date.toLocaleString('es-EC', { dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Guayaquil' });
   }
 
+  const navItems = {
+    portal: ['portal.html', 'Portal', 'holiday_village'],
+    qr: ['qr.html', 'Ruta QR', 'qr_code_scanner'],
+    cronograma: ['cronograma.html', 'Cronograma', 'schedule'],
+    acceso: ['index.html?modo=acceso', 'Acceso', 'account_circle'],
+    recepcion: ['recepcion.html', 'Recepción', 'groups'],
+    escenario: ['escenario.html', 'Escenario', 'dashboard'],
+    admin: ['admin.html', 'Administración', 'admin_panel_settings']
+  };
+
+  function icon(name) {
+    return '<span class="material-symbols-outlined" aria-hidden="true">' + escapeHtml(name) + '</span>';
+  }
+
   function buildNavLinks(roles, active, isLocal) {
-    if (isLocal) {
-      return '<a href="escenario.html" data-nav="escenario">Escenario</a>';
-    }
-    if (!roles.length) {
-      if (active === 'acceso') return '<a href="cronograma.html" data-nav="cronograma">Cronograma</a>';
-      if (active === 'portal' || active === 'qr' || active === 'cronograma') {
-        return '<a href="portal.html" data-nav="portal">Portal</a><a href="qr.html" data-nav="qr">Ruta QR</a>' +
-          '<a href="cronograma.html" data-nav="cronograma">Cronograma</a><a href="index.html" data-nav="acceso">Acceso</a>';
-      }
-      return '<a href="index.html" data-nav="acceso">Iniciar sesión</a><a href="cronograma.html" data-nav="cronograma">Cronograma</a>';
-    }
-    const items = [];
-    if (roles.includes('asistente')) {
-      items.push('<a href="portal.html" data-nav="portal">Portal</a>');
-      items.push('<a href="qr.html" data-nav="qr">Ruta QR</a>');
-    }
-    ['recepcion', 'escenario', 'admin'].forEach(function (role) {
-      if (roles.includes(role)) {
-        const panel = PANELS[role];
-        items.push('<a href="' + panel.href + '" data-nav="' + panel.id + '">' + escapeHtml(panel.shortLabel) + '</a>');
-      }
-    });
-    items.push('<a href="cronograma.html" data-nav="cronograma">Cronograma</a>');
-    return items.join('');
+    const staff = ['recepcion', 'escenario', 'admin'].filter(function (role) { return roles.includes(role); });
+    const isPublic = ['acceso', 'portal', 'qr', 'cronograma'].includes(active);
+    let items;
+    if (isLocal) items = ['escenario'];
+    else if (staff.length) items = [...staff, 'cronograma'];
+    else if (isPublic || roles.includes('asistente')) items = ['portal', 'qr', 'cronograma', 'acceso'];
+    else items = ['acceso', 'cronograma'];
+
+    return items.map(function (id) {
+      const [href, label, symbol] = navItems[id];
+      return '<a href="' + href + '" data-nav="' + id + '">' + icon(symbol) + '<span>' + label + '</span></a>';
+    }).join('');
   }
 
   function renderRoleNav(active, options) {
@@ -258,9 +259,7 @@
 
     document.querySelectorAll('[data-role-links]').forEach(function (container) {
       container.innerHTML = html;
-    });
-    document.querySelectorAll('[data-role-menu]').forEach(function (container) {
-      container.innerHTML = html;
+      container.hidden = isLocal;
     });
     document.querySelectorAll('[data-logout-btn]').forEach(function (btn) {
       btn.hidden = isLocal || !roles.length;
@@ -282,27 +281,6 @@
       if (isActive) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     });
-    const menu = document.querySelector('.site-menu');
-    if (menu && !menu.dataset.ciyaBound) {
-      menu.dataset.ciyaBound = '1';
-      menu.addEventListener('click', function (event) {
-        if (event.target.closest('a')) menu.open = false;
-      });
-    }
-    if (!navListenersBound) {
-      navListenersBound = true;
-      document.addEventListener('click', function (event) {
-        const activeMenu = document.querySelector('.site-menu');
-        if (activeMenu && activeMenu.open && !activeMenu.contains(event.target)) activeMenu.open = false;
-      });
-      document.addEventListener('keydown', function (event) {
-        const activeMenu = document.querySelector('.site-menu');
-        if (activeMenu && activeMenu.open && event.key === 'Escape') {
-          activeMenu.open = false;
-          activeMenu.querySelector('summary').focus();
-        }
-      });
-    }
     const status = document.getElementById('sync-status');
     if (status && !status.hidden) {
       if (syncPaintTimer) {
@@ -372,6 +350,7 @@
 
   window.CIYA_UI = {
     panels: PANELS,
+    icon: icon,
     escapeHtml: escapeHtml,
     toast: toast,
     requireAccount: requireAccount,

@@ -4,6 +4,14 @@ Aplicación web responsive para **CIYA 4.0 Ingenio que Ilumina la Navidad**, del
 viernes 4 de diciembre de 2026. El frontend es HTML, CSS y JavaScript sin build;
 el backend es el proyecto Supabase de `supabase/`.
 
+## Rediseño visual
+
+- El HTML de referencia proporcionado define la paleta azul hielo, azul marino, rojo carmesí y verde, la tipografía y la composición del portal. La ilustración del Cotopaxi y el motivo de circuitos se reutilizan como SVG locales. Plus Jakarta Sans y los Material Symbols Outlined utilizados se sirven en WOFF2 con sus licencias en `apps/web/shared/fonts/`.
+- El selector de acceso permanece en la portada. El portal presenta la ilustración, métricas, tarjetas de actividades, Mar de Linternas y accesos rápidos. Las métricas indican si están consultando, en vivo o mostrando la última consulta disponible. El botón principal abre el **Cronograma**, y las URL antiguas de bases siguen redirigiendo al programa.
+- La navegación pública se muestra abajo en móvil y en la cabecera en escritorio. **Acceso** abre el selector con `index.html?modo=acceso` también después de entrar como asistente. Recepción, Administración y Escenario muestran la navegación habilitada para la cuenta. En la consola local se oculta esa barra.
+- El Mar de Linternas usa los tonos y el marco LED del ejemplo. Los botones **Mín.**, **Med.** y **Máx.** ajustan el brillo visual y guardan la preferencia localmente. La URL directa dibuja solo la linterna y permite cambiar de mensaje, carrera y nivel de brillo tras desconectar la red. La pausa de la marquesina, las partes de movimiento reducido y la pantalla completa siguen disponibles en sus modos correspondientes.
+- Ruta QR, Cronograma, Recepción, Administración y Escenario comparten tarjetas, formularios, tablas y estados visuales. La superficie proyectada permanece oscura y conserva la relación 16:9. El servidor de escenario sirve las fuentes desde la laptop. Se conservan los contratos de Supabase, los archivos de respaldo y las exportaciones.
+
 ## Qué cambió en esta reorganización
 
 El comportamiento funcional se conservó. Cambió la ubicación y la propiedad de
@@ -53,6 +61,7 @@ CIYA-navidad-2026/
 │  ├─ escenario.html               # proyección, ranking, villancicos, ruleta y encendido
 │  ├─ shared/
 │  │  ├─ css/ tokens.css · base.css · components.css · responsive.css
+│  │  ├─ fonts/                     # fuentes WOFF2 locales y licencias
 │  │  └─ js/  config.js · data.js · store.js · ui.js · sound.js
 │  └─ modules/
 │     ├─ portal-linterna/          # portal, ruta QR y letrero de focos
@@ -353,6 +362,15 @@ y `unittest` de Python. El conjunto offline cubre la linterna, el respaldo
 sellado, la recuperación del sorteo, el audio local y el puerto serial simulado.
 Las pruebas Python comprueban la autenticación del servidor de escenario y la
 carga de todos sus archivos mediante una conexión de bucle local.
+
+Para comprobar el rediseño se comparó el portal con la referencia a 390 px. En
+Chromium se recorrieron las vistas públicas y los tres paneles a 360, 768 y
+1440 px, con respuestas de prueba para los roles, los formularios y los QR
+Dorados. También se comprobó la recuperación de las métricas después de un
+corte, el brillo y la orientación de la linterna sin red. La consola de
+laptop se probó sin acceso externo con JSON de prueba, ranking, ruleta, audio
+y disparo simulado. Las pruebas del servidor local incluyen las fuentes de
+escenario.
 
 ## Límites y decisiones a vigilar
 

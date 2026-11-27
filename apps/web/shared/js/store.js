@@ -111,12 +111,14 @@
     if (readPromise) return readPromise;
     readPromise = rpc('ciya_read', { panel: scope }, scope !== 'public').then(function (value) {
       const next = { ...empty, ...value };
-      const changed = JSON.stringify(next) !== JSON.stringify(state);
+      const changed = !online || JSON.stringify(next) !== JSON.stringify(state);
       state = next;
       online = true;
       if (changed) listeners.forEach(function (listener) { listener(state); });
     }).catch(function () {
+      if (!online) return;
       online = false;
+      listeners.forEach(function (listener) { listener(state); });
     }).finally(function () { readPromise = null; });
     return readPromise;
   }

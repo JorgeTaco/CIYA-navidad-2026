@@ -1,2 +1,2 @@
-.timeline-step.active { border-color: var(--step-color, var(--gold)); box-shadow: 0 0 0 3px rgba(255, 209, 102, 0.12); background: rgba(255, 255, 255, 0.05); }
+.timeline-step.active { border-color: var(--step-color, var(--gold)); box-shadow: 0 0 0 3px var(--panel-2); background: var(--bg-soft); }
 .timeline-step.done { opacity: 0.62; }

@@ -3,78 +3,132 @@
   const Store = window.CIYA_STORE;
   const Data = window.CIYA_DATA;
   const esc = UI.escapeHtml;
-  const linterna = { carrera: 'sistemas', frase: 'Feliz Navidad CIYA' };
+  const linterna = { carrera: 'sistemas', frase: 'Feliz Navidad CIYA', brillo: 'med' };
+  const brightnessLevels = ['min', 'med', 'max'];
+  const lanternThemes = {
+    electricidad: ['#d4af37', 'bolt'],
+    electromecanica: ['#b52b3b', 'settings'],
+    industrial: ['#c026d3', 'engineering'],
+    hidraulica: ['#0284c7', 'water_drop'],
+    sistemas: ['#10b981', 'terminal']
+  };
+  const metrics = [
+    ['asistentes', 'attendees', 'Asistentes', 'groups'],
+    ['boletos', 'tickets', 'Boletos registrados', 'confirmation_number'],
+    ['grupos', 'groups', 'Grupos participantes', 'mic'],
+    ['deseos', 'wishes', 'Deseos aprobados', 'favorite']
+  ];
+  const activities = [
+    ['lantern-link', 'portal.html?modo=linterna#linterna', 'wb_twilight', 'Mar de Linternas', 'Ilumina el evento con el color de tu carrera.'],
+    ['route-link', 'qr.html', 'qr_code_scanner', 'Ruta Tecnológica QR', 'Explora los códigos del campus.'],
+    ['wishes-link', '#buzon', 'mark_email_unread', 'Buzón Digital 2027', 'Comparte un deseo para el próximo año.'],
+    ['music-link', '#villancicos', 'music_note', 'Villancicos CIYA', 'Inscribe a tu grupo y consulta el orden.']
+  ];
   let lanternMatrix;
 
-  function template() {
+  function lanternTemplate(heading) {
     return `
-      <section class="event-hero" id="inicio">
-        <div class="event-art" aria-hidden="true"><span></span></div>
-        <span class="kicker">4 de diciembre de 2026 · Hall principal CIYA</span>
-        <h1>Ingenio que ilumina <em>la Navidad</em></h1>
-        <nav class="event-actions" aria-label="Actividades principales">
-          <a class="event-action lantern-link" href="portal.html?modo=linterna#linterna">
-            <span class="action-icon" aria-hidden="true">✦</span><span>Mar de Linternas</span>
-          </a>
-          <a class="event-action route-link" href="qr.html">
-            <span class="action-icon" aria-hidden="true">▦</span><span>Ruta QR</span>
-          </a>
-          <a class="event-action wishes-link" href="#buzon">
-            <span class="action-icon" aria-hidden="true">✉</span><span>Buzón 2027</span>
-          </a>
-          <a class="event-action music-link" href="#villancicos">
-            <span class="action-icon" aria-hidden="true">♫</span><span>Villancicos</span>
-          </a>
-        </nav>
-      </section>
-
-      <section class="event-summary" aria-label="Resumen en vivo">
-        <div><div class="label">Asistentes</div><div class="stat" id="stat-asistentes">—</div></div>
-        <div><div class="label">Boletos</div><div class="stat" id="stat-boletos">—</div></div>
-        <div><div class="label">Grupos</div><div class="stat" id="stat-grupos">—</div></div>
-        <div><div class="label">Deseos aprobados</div><div class="stat" id="stat-deseos">—</div></div>
-      </section>
-
-      <section class="section" id="linterna">
-        <div class="section-head">
-          <div><span class="kicker">Acto central · 18:25 – 18:55</span><h2>Mar de Linternas</h2></div>
-        </div>
+      <section class="section lantern-section" id="linterna">
+        <header class="lantern-heading">
+          <span class="feature-icon">${UI.icon('lightbulb')}</span>
+          <div><${heading}>Mar de Linternas</${heading}><p>Acto central · 18:25 – 18:55</p></div>
+        </header>
         <div class="lantern-layout">
-          <div class="card lantern-setup">
-            <fieldset class="field">
-              <legend>Carrera</legend>
-              <div class="chips" id="linterna-carreras"></div>
-            </fieldset>
-            <fieldset class="field">
-              <legend>Mensaje</legend>
-              <div class="chips" id="linterna-frases"></div>
-              <label class="custom-message" for="linterna-custom">O escribe tu mensaje (hasta 60 caracteres)</label>
-              <input id="linterna-custom" maxlength="60" placeholder="Tu mensaje navideño" aria-describedby="linterna-feedback">
-              <p class="hint" id="linterna-feedback" role="status" hidden></p>
-            </fieldset>
-          </div>
-          <div>
-            <p class="label">Vista previa</p>
-            <div class="lantern-stage" id="lantern-stage">
-              <button class="btn small ghost lantern-exit" id="lantern-exit" hidden>Salir de pantalla completa</button>
+          <div class="lantern-display">
+            <div class="lantern-stage" id="lantern-stage" data-brightness="med">
+              <div class="lantern-screen-header">
+                <span class="lantern-screen-label">Marquesina LED</span>
+                <button class="btn small lantern-exit" id="lantern-exit" hidden>Salir de pantalla completa</button>
+              </div>
               <div class="lantern-board">
                 <canvas id="lantern-canvas" aria-hidden="true" hidden></canvas>
                 <p class="lantern-message" id="lantern-message">Feliz Navidad CIYA</p>
               </div>
               <div class="lantern-bar">
-                <span class="lantern-meta" id="lantern-carrera">Selecciona tu carrera</span>
+                <span class="lantern-meta" id="lantern-carrera">Sistemas y Software</span>
                 <span class="lantern-progress" id="lantern-part" role="status" hidden></span>
-                <button class="btn small" id="lantern-pause" hidden>Pausar</button>
                 <button class="btn small" id="lantern-next" hidden>Siguiente parte</button>
               </div>
             </div>
+            <div class="lantern-adjustments">
+              <button class="btn small" type="button" id="lantern-pause" disabled>${UI.icon('pause')}<span>Pausar</span></button>
+              <div class="brightness-controls" role="group" aria-label="Brillo visual">
+                ${UI.icon('brightness_medium')}
+                <button class="btn small" type="button" data-brightness="min" aria-pressed="false" aria-label="Brillo mínimo">Mín.</button>
+                <button class="btn small" type="button" data-brightness="med" aria-pressed="true" aria-label="Brillo medio">Med.</button>
+                <button class="btn small" type="button" data-brightness="max" aria-pressed="false" aria-label="Brillo máximo">Máx.</button>
+              </div>
+            </div>
             <div class="lantern-controls">
-              <button class="btn primary wide" id="lantern-fullscreen">Pantalla completa</button>
-              <button class="btn small ghost" id="copy-url">Copiar enlace de la linterna</button>
+              <button class="btn primary" type="button" id="lantern-fullscreen">Pantalla completa</button>
+              <button class="btn ghost" type="button" id="copy-url">Copiar enlace</button>
             </div>
           </div>
+          <div class="lantern-setup">
+            <fieldset class="field">
+              <legend>Carrera</legend>
+              <div class="chips" id="linterna-carreras"></div>
+            </fieldset>
+            <fieldset class="field">
+              <legend>Mensaje navideño</legend>
+              <div class="chips" id="linterna-frases"></div>
+              <label class="custom-message" for="linterna-custom">Mensaje propio (hasta 60 caracteres)</label>
+              <input id="linterna-custom" maxlength="60" placeholder="Tu mensaje navideño" aria-describedby="linterna-feedback">
+              <p class="hint" id="linterna-feedback" role="status" hidden></p>
+            </fieldset>
+          </div>
+        </div>
+      </section>`;
+  }
+
+  function template() {
+    return `
+      <section class="portal-hero" id="inicio">
+        <div class="portal-intro">
+          <span class="portal-date">${UI.icon('calendar_month')} 4 dic 2026 · Hall CIYA · UTC Latacunga</span>
+          <h1>Ingenio que ilumina <em>la Navidad</em></h1>
+          <p>Punto de encuentro, ciencia aplicada y fraternidad navideña de la comunidad universitaria UTC.</p>
+        </div>
+        <figure class="portal-illustration">
+          <img src="modules/portal-linterna/media/cotopaxi.svg" width="340" height="190" alt="El Cotopaxi bajo un árbol navideño dibujado con circuitos">
+          <figcaption>5 carreras, 1 energía solidaria</figcaption>
+        </figure>
+      </section>
+
+      <section class="section" aria-labelledby="event-metrics-title">
+        <div class="section-head portal-section-head">
+          <h2 id="event-metrics-title">${UI.icon('sensors')} Métricas del evento</h2>
+          <p class="metric-status" id="metrics-status" role="status">Consultando métricas…</p>
+        </div>
+        <div class="event-summary">
+          ${metrics.map(function ([name, , label, symbol]) {
+            return `<div class="metric-card metric-${name}">
+              <div class="metric-heading"><span class="label">${label}</span><span class="feature-icon">${UI.icon(symbol)}</span></div>
+              <div class="stat" id="stat-${name}">—</div>
+            </div>`;
+          }).join('')}
         </div>
       </section>
+
+      <section class="section" aria-labelledby="event-activities-title">
+        <h2 id="event-activities-title">Actividades centrales</h2>
+        <div class="event-actions">
+          ${activities.map(function ([className, href, symbol, title, description]) {
+            return `<a class="event-action ${className}" href="${href}">
+              <span class="feature-icon">${UI.icon(symbol)}</span>
+              <div><h3>${title}</h3><p>${description}</p></div>
+              ${UI.icon('arrow_forward_ios')}
+            </a>`;
+          }).join('')}
+        </div>
+      </section>
+
+      ${lanternTemplate('h2')}
+
+      <nav class="portal-shortcuts" aria-label="Accesos rápidos">
+        <a class="btn primary" href="cronograma.html">${UI.icon('schedule')} Cronograma</a>
+        <a class="btn accent" href="qr.html">${UI.icon('qr_code_scanner')} Explorar Ruta QR</a>
+      </nav>
 
       <section class="section card" id="registro">
         <h2>Registro para el Gran Sorteo</h2>
@@ -126,15 +180,27 @@
 
   function renderChips(containerId, items, onChange) {
     const container = document.getElementById(containerId);
-    container.innerHTML = items.map(function (c) {
-      return '<button type="button" class="chip" data-id="' + esc(c.id) + '" style="--chip-color:' + (c.color || 'var(--gold)') + '" aria-pressed="false">' +
-        (c.color ? '<span class="carrera-dot" style="--dot-color:' + c.color + '"></span>' : '') + esc(c.nombre) + '</button>';
+    container.innerHTML = items.map(function (item) {
+      const style = item.color ? ' style="--chip-color:' + item.color + '"' : '';
+      return '<button type="button" class="chip" data-id="' + esc(item.id) + '"' + style + ' aria-pressed="false">' +
+        (item.symbol ? UI.icon(item.symbol) : '') + '<span>' + esc(item.nombre) + '</span></button>';
     }).join('');
     container.querySelectorAll('.chip').forEach(function (button) {
-      button.addEventListener('click', function () {
-        onChange(button.dataset.id);
-      });
+      button.addEventListener('click', function () { onChange(button.dataset.id); });
     });
+  }
+
+  function saveLantern() {
+    try { localStorage.setItem('ciya2026:linterna', JSON.stringify(linterna)); } catch {}
+  }
+
+  function setLanternBrightness(level) {
+    linterna.brillo = level;
+    document.getElementById('lantern-stage').dataset.brightness = level;
+    document.querySelectorAll('.brightness-controls button').forEach(function (button) {
+      button.setAttribute('aria-pressed', button.dataset.brightness === level);
+    });
+    saveLantern();
   }
 
   function applyLantern() {
@@ -142,16 +208,17 @@
     const message = document.getElementById('lantern-message');
     const meta = document.getElementById('lantern-carrera');
     const carrera = Store.carrera(linterna.carrera);
-    stage.style.setProperty('--lantern-color', carrera.color);
+    const [color] = lanternThemes[carrera.id];
+    stage.style.setProperty('--lantern-color', color);
     message.textContent = linterna.frase;
-    meta.textContent = carrera.icono + ' ' + carrera.nombre;
-    if (lanternMatrix) lanternMatrix.show(linterna.frase, carrera.color);
+    meta.textContent = carrera.nombre;
+    if (lanternMatrix) lanternMatrix.show(linterna.frase, color);
     document.querySelectorAll('#linterna-carreras .chip, #linterna-frases .chip').forEach(function (button) {
       const selected = button.dataset.id === (button.parentElement.id === 'linterna-carreras' ? linterna.carrera : linterna.frase);
       button.classList.toggle('active', selected);
       button.setAttribute('aria-pressed', selected);
     });
-    try { localStorage.setItem('ciya2026:linterna', JSON.stringify(linterna)); } catch (error) { console.warn(error); }
+    saveLantern();
   }
 
   function chooseLanternCarrera(id) {
@@ -171,10 +238,14 @@
       if (saved && typeof saved.frase === 'string' && Data.carreras.some(function (career) { return career.id === saved.carrera; })) {
         linterna.carrera = saved.carrera;
         linterna.frase = saved.frase.trim().slice(0, 60) || Data.frasesLinterna[0];
+        if (brightnessLevels.includes(saved.brillo)) linterna.brillo = saved.brillo;
       }
     } catch (error) { console.warn(error); }
 
-    renderChips('linterna-carreras', Data.carreras, chooseLanternCarrera);
+    renderChips('linterna-carreras', Data.carreras.map(function (career) {
+      const [color, symbol] = lanternThemes[career.id];
+      return { id: career.id, nombre: career.nombre, color, symbol };
+    }), chooseLanternCarrera);
     renderChips('linterna-frases', Data.frasesLinterna.map(function (phrase) {
       return { id: phrase, nombre: phrase };
     }), chooseLanternFrase);
@@ -194,8 +265,9 @@
     const progress = document.getElementById('lantern-part');
     const feedback = document.getElementById('linterna-feedback');
     lanternMatrix = window.CIYA_LANTERN_MATRIX.create(canvas, function (state) {
-      pause.hidden = state.mode !== 'scroll';
-      pause.textContent = state.paused ? 'Reanudar' : 'Pausar';
+      pause.disabled = state.mode !== 'scroll';
+      pause.querySelector('.material-symbols-outlined').textContent = state.paused ? 'play_arrow' : 'pause';
+      pause.lastElementChild.textContent = state.paused ? 'Reanudar' : 'Pausar';
       next.hidden = progress.hidden = state.mode !== 'parts';
       progress.textContent = next.hidden ? '' : 'Parte ' + state.part + ' de ' + state.count;
       feedback.hidden = state.missing.size === 0;
@@ -207,6 +279,11 @@
       pause.addEventListener('click', lanternMatrix.togglePlaying);
       next.addEventListener('click', lanternMatrix.nextPart);
     }
+    document.querySelectorAll('.brightness-controls button').forEach(function (button) {
+      button.addEventListener('click', function () { setLanternBrightness(button.dataset.brightness); });
+    });
+    setLanternBrightness(linterna.brillo);
+
     const fullscreen = document.getElementById('lantern-fullscreen');
     fullscreen.addEventListener('click', async function () {
       stage.classList.add('live');
@@ -247,9 +324,12 @@
   }
 
   function render(state) {
-    const counters = { asistentes: 'attendees', boletos: 'tickets', grupos: 'groups', deseos: 'wishes' };
-    Object.keys(counters).forEach(function (id) {
-      document.getElementById('stat-' + id).textContent = state.counts[counters[id]] == null ? '—' : state.counts[counters[id]];
+    const status = document.getElementById('metrics-status');
+    const online = Store.isRemote();
+    status.textContent = online ? 'En vivo' : state.ranking.length ? 'Última consulta' : 'Métricas no disponibles';
+    status.classList.toggle('online', online);
+    metrics.forEach(function ([id, key]) {
+      document.getElementById('stat-' + id).textContent = state.counts[key] ?? '—';
     });
     if (!state.ranking.length) {
       document.getElementById('lista-grupos').textContent = 'Orden de presentación aún no disponible.';
@@ -268,21 +348,16 @@
     UI.renderRanking('ranking-portal', Store.ranking());
   }
 
-  function mount() {
-    document.getElementById('portal-root').innerHTML = template();
+  function mount(isLanternMode) {
+    document.getElementById('portal-root').innerHTML = isLanternMode ? lanternTemplate('h1') : template();
   }
 
   async function init() {
     const isLanternMode = new URLSearchParams(location.search).get('modo') === 'linterna';
-    mount();
+    mount(isLanternMode);
     setupLantern();
     if (isLanternMode) {
       document.body.classList.add('lantern-page');
-      document.querySelectorAll('main > section:not(#linterna)').forEach(function (node) { node.hidden = true; });
-      const sectionTitle = document.querySelector('#linterna h2');
-      const title = document.createElement('h1');
-      title.textContent = sectionTitle.textContent;
-      sectionTitle.replaceWith(title);
       document.title = 'Mar de Linternas | CIYA Navidad 2026';
       document.getElementById('sync-status').hidden = true;
       UI.initNav('portal');

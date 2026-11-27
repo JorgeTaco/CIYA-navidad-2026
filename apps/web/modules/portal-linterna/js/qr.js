@@ -14,7 +14,7 @@
     return `
       <main class="container" id="ruta-index"></main>
       <main class="container narrow" id="ruta-detalle" hidden></main>
-      <nav class="bottom-actions" aria-label="Actividades del evento">
+      <nav class="container narrow route-shortcuts" aria-label="Actividades del evento">
         <a class="btn primary" href="portal.html?modo=linterna#linterna">Abrir Modo Linterna</a>
         <a class="btn" href="portal.html#buzon" aria-label="Ir al Buzón Compilando Deseos 2027">Ir al Buzón 2027</a>
       </nav>`;
@@ -28,6 +28,7 @@
     document.title = 'CIYA Navidad 2026 | Ruta de Códigos QR';
     target.innerHTML = `
       <div class="event-hero route-hero">
+        <span class="feature-icon">${UI.icon('qr_code_scanner')}</span>
         <h1>Ruta de Códigos QR</h1>
         <p>Explora los pasillos, las gradas y los laboratorios de CIYA. Hay tres QR Dorados ocultos en la facultad.</p>
         <nav class="section-links" aria-label="Contenido de la ruta">

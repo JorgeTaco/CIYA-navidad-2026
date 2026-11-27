@@ -32,6 +32,8 @@ class StageHandler(SimpleHTTPRequestHandler):
             '/shared/css/base.css',
             '/shared/css/components.css',
             '/shared/css/responsive.css',
+            '/shared/fonts/plus-jakarta-sans.woff2',
+            '/shared/fonts/material-symbols.woff2',
             '/modules/pantalla-gigante/css/ranking.css',
             '/modules/pantalla-gigante/css/villancicos.css',
             '/modules/pantalla-gigante/css/ruleta.css',

@@ -151,7 +151,7 @@
       const aprobados = wishes();
       const frase = aprobados[rotacion.index % Math.max(1, aprobados.length)];
       screen.innerHTML = '<span class="kicker">Compilando Deseos 2027</span>' +
-        '<h2 style="font-size:clamp(1.6rem,4.5vw,3rem);text-wrap:balance">' + (frase ? '“' + esc(frase.frase) + '”' : 'Esperando frases aprobadas') + '</h2>' +
+        '<h2 class="stage-quote">' + (frase ? '“' + esc(frase.frase) + '”' : 'Esperando frases aprobadas') + '</h2>' +
         '<p class="muted">' + (frase ? esc(frase.nombre) + ' · ' + esc(frase.rol) + ' · ' + esc(frase.carrera) : 'La curaduría aprobará las frases enviadas') + '</p>';
     } else if (activeTab === 'encendido') {
       const estado = Ignite.status();

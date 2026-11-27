@@ -1,29 +1,43 @@
-:root {
-  --bg: #061224;
-  --bg-soft: #0b1c33;
-  --panel: #102745;
-  --panel-2: #143156;
-  --line: rgba(255, 255, 255, 0.12);
-  --text: #f4f8ff;
-  --muted: #a9bdd8;
-  --gold: #ffd166;
-  --red: #ef476f;
-  --green: #06d6a0;
-  --blue: #4cc9f0;
-  --shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
-  --radius: 18px;
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('../fonts/plus-jakarta-sans.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
 }
 
-.portal-page, .route-page, .reception-page, .rules-page {
-  --bg: #07151c;
-  --bg-soft: #0c1c25;
-  --panel: #122832;
-  --panel-2: #1b3642;
-  --text: #f7f5ec;
-  --muted: #b3c7cb;
-  --gold: #ffda88;
-  --green: #72e1b1;
-  --blue: #91d8fa;
-  color-scheme: dark;
-  background: radial-gradient(ellipse at 79% 0%, #163a39 0%, transparent 42rem), var(--bg);
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  src: url('../fonts/material-symbols.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+}
+
+:root {
+  color-scheme: light;
+  --bg: #f8f9ff;
+  --bg-soft: #eff4ff;
+  --panel: #fff;
+  --panel-2: #e6eeff;
+  --panel-strong: #dce9ff;
+  --line: #d7deea;
+  --text: #0d1c2e;
+  --muted: #43474d;
+  --primary: #001f36;
+  --primary-soft: #123451;
+  --tint: #436180;
+  --red: #b22839;
+  --red-soft: #ffdad9;
+  --green: #003a2f;
+  --green-soft: #dbf3eb;
+  --gold: #845415;
+  --gold-soft: #fff2d2;
+  --blue: #2a4967;
+  --focus: #365d83;
+  --shadow: 0 5px 18px rgba(18, 52, 81, .09);
+  --radius: .75rem;
+  --header-height: 5rem;
+  --navigation-height: 4rem;
+  --festive-rule: linear-gradient(90deg, var(--green), var(--tint), var(--red));
 }
