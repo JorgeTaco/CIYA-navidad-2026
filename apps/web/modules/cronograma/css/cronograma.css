@@ -3,7 +3,7 @@
 
 .schedule-filters { display: flex; flex-wrap: wrap; gap: .5rem; }
 .schedule-filters .btn { min-height: 44px; padding-inline: .8rem; }
-.schedule-filters [aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: #fff; }
+.schedule-filters [aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--action-ink); }
 .schedule-count { margin: .85rem 0 .65rem; font-size: .9rem; }
 
 .schedule-list {
@@ -32,7 +32,7 @@
   padding: 0;
   border: 1px solid var(--line);
   border-radius: 13px;
-  background: var(--surface-gradient);
+  background: var(--card-gradient);
   box-shadow: var(--shadow);
 }
 .schedule-entry details[open] { border-color: var(--tint); }

@@ -3,7 +3,7 @@
 .reception-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .35rem; padding: .3rem; margin-bottom: .7rem; border: 1px solid var(--line); border-radius: 13px; background: var(--bg-soft); }
 .reception-tabs button { padding: .5rem .3rem; min-height: 44px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: var(--muted); font: inherit; font-weight: 750; cursor: pointer; }
 .reception-tabs button:hover { color: var(--text); border-color: var(--line); }
-.reception-tabs [aria-selected="true"] { color: #fff; background: var(--primary); }
+.reception-tabs [aria-selected="true"] { color: var(--action-ink); background: var(--primary); }
 .wall-confirmation, .receipt-card, .gold-availability { margin: .75rem 0 0; }
 .wall-confirmation form, .record-list summary + div { margin-top: 1rem; }
 .gold-availability { display: flex; flex-wrap: wrap; gap: .4rem; }

@@ -18,7 +18,7 @@
         <div class="access-art">
           <span class="access-sparkle sparkle-top" aria-hidden="true"></span>
           <span class="access-sparkle sparkle-bottom" aria-hidden="true"></span>
-          <img src="modules/portal-linterna/media/cotopaxi.svg" alt="El Cotopaxi bajo un árbol navideño de circuitos" width="340" height="190">
+          <img src="modules/portal-linterna/media/cotopaxi.svg" alt="El Cotopaxi junto a un árbol navideño con luces y circuitos" width="340" height="190">
         </div>
         <p class="access-motto">5 carreras, 1 energía solidaria</p>
       </section>

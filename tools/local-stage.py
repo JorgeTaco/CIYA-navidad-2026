@@ -41,6 +41,7 @@ class StageHandler(SimpleHTTPRequestHandler):
             '/modules/pantalla-gigante/css/respaldo.css',
             '/modules/hardware-encendido/css/encendido.css',
             '/shared/js/config.js',
+            '/shared/js/appearance.js',
             '/shared/js/data.js',
             '/shared/js/store.js',
             '/shared/js/ui.js',

@@ -90,7 +90,7 @@
           <p>Punto de encuentro, ciencia aplicada y fraternidad navideña de la comunidad universitaria UTC.</p>
         </div>
         <figure class="portal-illustration">
-          <img src="modules/portal-linterna/media/cotopaxi.svg" width="340" height="190" alt="El Cotopaxi bajo un árbol navideño dibujado con circuitos">
+          <img src="modules/portal-linterna/media/cotopaxi.svg" width="340" height="190" alt="El Cotopaxi junto a un árbol navideño con luces y circuitos">
           <figcaption>5 carreras, 1 energía solidaria</figcaption>
         </figure>
       </section>

@@ -136,7 +136,7 @@
 }
 
 #linterna-carreras .chip:last-child { grid-column: 1 / -1; }
-#linterna-carreras .material-symbols-outlined { color: color-mix(in srgb, var(--chip-color) 70%, #001f36); font-size: 1.13rem; }
+#linterna-carreras .material-symbols-outlined { color: color-mix(in srgb, var(--chip-color) 70%, var(--primary)); font-size: 1.13rem; }
 #linterna-carreras .chip.active { border-color: var(--tint); background: var(--panel-strong); }
 .custom-message { margin-top: .65rem; }
 

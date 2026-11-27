@@ -9,38 +9,84 @@
 <stop offset="0%" stop-color="#123451"></stop>
 <stop offset="100%" stop-color="#001f36"></stop>
 </linearGradient>
-<radialGradient cx="50%" cy="50%" id="starGlow" r="50%">
-<stop offset="0%" stop-color="#fd606b" stop-opacity="0.8"></stop>
-<stop offset="50%" stop-color="#ffdad9" stop-opacity="0.4"></stop>
-<stop offset="100%" stop-color="#ffffff" stop-opacity="0"></stop>
+<linearGradient id="firBoughs" x1="0" y1="0" x2="1" y2="1">
+  <stop offset="0" stop-color="#63ba94"/>
+  <stop offset=".46" stop-color="#248764"/>
+  <stop offset="1" stop-color="#0b483b"/>
+</linearGradient>
+<linearGradient id="firTrunk" x1="0" y1="0" x2="1" y2="0">
+  <stop offset="0" stop-color="#a77045"/>
+  <stop offset="1" stop-color="#533927"/>
+</linearGradient>
+<radialGradient id="starGlow">
+  <stop offset="0" stop-color="#fff4bc" stop-opacity=".95"/>
+  <stop offset=".48" stop-color="#ffdd83" stop-opacity=".56"/>
+  <stop offset="1" stop-color="#ffd683" stop-opacity="0"/>
 </radialGradient>
 </defs>
 <path d="M10 160 Q 90 150 170 155 T 330 160" stroke="#d5e3fc" stroke-dasharray="4 4" stroke-width="1.2"></path>
 <path d="M25 172 Q 130 166 210 170 T 315 174" stroke="#e6eeff" stroke-width="1.5"></path>
 <path d="M45 175 L140 75 L200 75 L295 175 Z" fill="url(#cotopaxiSlope)"></path>
 <path d="M140 75 L150 95 L160 88 L170 102 L180 89 L190 96 L200 75 Z" fill="url(#cotopaxiSnow)"></path>
-<path d="M170 32 L170 168" stroke="#a5f2da" stroke-linecap="round" stroke-width="2"></path>
-<path d="M170 48 L155 60 L142 60" stroke="#fd606b" stroke-linecap="round" stroke-width="1.6"></path>
-<path d="M170 48 L185 60 L198 60" stroke="#fd606b" stroke-linecap="round" stroke-width="1.6"></path>
-<circle cx="142" cy="60" fill="#b22839" r="3.5"></circle>
-<circle cx="198" cy="60" fill="#b22839" r="3.5"></circle>
-<path d="M170 76 L144 94 L126 94" stroke="#89d5bf" stroke-linecap="round" stroke-width="1.6"></path>
-<path d="M170 76 L196 94 L214 94" stroke="#89d5bf" stroke-linecap="round" stroke-width="1.6"></path>
-<rect fill="#003a2f" height="7" rx="1.5" width="7" x="122" y="90"></rect>
-<rect fill="#003a2f" height="7" rx="1.5" width="7" x="211" y="90"></rect>
-<path d="M170 108 L134 132 L105 132" stroke="#abc9ed" stroke-linecap="round" stroke-width="1.8"></path>
-<path d="M170 108 L206 132 L235 132" stroke="#abc9ed" stroke-linecap="round" stroke-width="1.8"></path>
-<circle cx="105" cy="132" fill="#123451" r="4"></circle>
-<circle cx="235" cy="132" fill="#123451" r="4"></circle>
-<path d="M170 138 L124 165 L88 165" stroke="#fd606b" stroke-linecap="round" stroke-width="1.5"></path>
-<path d="M170 138 L216 165 L252 165" stroke="#fd606b" stroke-linecap="round" stroke-width="1.5"></path>
-<circle cx="88" cy="165" fill="#b22839" r="3.5"></circle>
-<circle cx="252" cy="165" fill="#b22839" r="3.5"></circle>
-<circle class="animate-ping" cx="152" cy="118" fill="#ffffff" r="2"></circle>
-<circle cx="188" cy="118" fill="#ffffff" r="2"></circle>
-<circle cx="170" cy="92" fill="#ffffff" r="2.5"></circle>
-<circle cx="170" cy="24" fill="url(#starGlow)" r="20"></circle>
-<path d="M170 12 L173 21 L182 24 L173 27 L170 36 L167 27 L158 24 L167 21 Z" fill="#b22839"></path>
-<circle cx="170" cy="24" fill="#ffffff" r="3.5"></circle>
+<g stroke-linecap="round" stroke-linejoin="round">
+  <ellipse cx="251" cy="174" rx="59" ry="4" fill="#0d314b" opacity=".25"/>
+  <path d="M242 148h12l3 26h-19z" fill="url(#firTrunk)"/>
+  <path d="M247 159v12m5-14 2 14" stroke="#d8a367" stroke-width="1.1" opacity=".68"/>
+
+  <g fill="url(#firBoughs)" stroke="#144f42" stroke-width="1">
+    <path d="M248 97c16 25 36 47 57 60-9 6-21 8-32 5l10 8c-20 6-48 8-68 1l7-7c-10 3-22 1-30-4 23-16 42-37 56-63Z"/>
+    <path d="M248 75c13 22 29 39 44 51-7 5-16 7-24 4l8 8c-17 6-40 7-57 1l7-8c-7 3-16 2-21-2 18-14 32-32 43-54Z"/>
+    <path d="M248 54c8 16 20 31 31 42-6 4-12 5-17 3l5 8c-10 5-25 6-38 1l5-8c-7 3-13 1-18-2 14-13 24-27 32-44Z"/>
+    <path d="M248 37c4 15 11 28 21 39-5 3-10 4-15 2l4 6c-7 3-15 3-22 0l5-6c-5 2-10 2-14-1 9-11 17-24 21-40Z"/>
+  </g>
+
+  <g stroke="#b5edcc" stroke-width="1" opacity=".55">
+    <path d="M244 55l-6 12m15-7 7 10M236 86l-7 8m27-9 9 8M227 116l-10 8m50-10 13 9M215 144l-12 10m69-11 15 9"/>
+    <path d="M245 86l-6 6h-7m21 13 9 11h11m-35 20-8 8h-10m35-1 8 9h12"/>
+  </g>
+  <g fill="#95e5c6" opacity=".8">
+    <circle cx="232" cy="92" r="1.4"/>
+    <circle cx="273" cy="116" r="1.4"/>
+    <circle cx="220" cy="144" r="1.4"/>
+    <circle cx="275" cy="152" r="1.4"/>
+  </g>
+  <g stroke="#f5d483" stroke-width="1.5">
+    <path d="M235 74q13 7 29-3"/>
+    <path d="M222 96q26 13 52-2"/>
+    <path d="M210 125q38 15 78-5"/>
+    <path d="M199 155q55 18 98-6"/>
+  </g>
+
+  <g fill="#e76869" stroke="#7c303d" stroke-width=".45">
+    <circle cx="241" cy="77" r="2.9"/>
+    <circle cx="263" cy="101" r="3.2"/>
+    <circle cx="226" cy="130" r="3.6"/>
+    <circle cx="269" cy="162" r="4"/>
+  </g>
+  <g fill="#bddefd" stroke="#5287ad" stroke-width=".45">
+    <circle cx="235" cy="102" r="2.9"/>
+    <circle cx="273" cy="127" r="3.3"/>
+    <circle cx="218" cy="161" r="3.5"/>
+  </g>
+  <g fill="#fff0ab">
+    <circle cx="256" cy="76" r="1.7"/>
+    <circle cx="251" cy="103" r="1.9"/>
+    <circle cx="248" cy="133" r="2.6"/>
+    <circle cx="240" cy="164" r="2.7"/>
+    <circle cx="286" cy="155" r="2"/>
+  </g>
+  <g fill="#fffaf0" opacity=".8">
+    <circle cx="262" cy="100" r=".9"/>
+    <circle cx="225" cy="129" r="1"/>
+    <circle cx="268" cy="161" r="1.1"/>
+    <circle cx="272" cy="126" r=".9"/>
+    <circle cx="217" cy="160" r=".9"/>
+  </g>
+
+  <circle cx="248" cy="31" r="22" fill="url(#starGlow)"/>
+  <path d="m248 18 3.4 8.7 9.3 1-7.2 6 2.3 9.1-7.8-5-7.8 5 2.3-9.1-7.2-6 9.3-1z"
+    fill="#ffda78" stroke="#bd8135" stroke-width=".9"/>
+  <path d="m248 23 1.9 6.5 6.2 1.2-6.2 1.4-1.9 6.5-1.5-6.5-6.3-1.4 6.3-1.2z" fill="#fff9df"/>
+</g>
 <text fill="#7e9dbf" font-family="Plus Jakarta Sans" font-size="8" font-weight="700" letter-spacing="1.5" text-anchor="middle" x="170" y="184">CIYA · INNOVACIÓN Y TRADICIÓN</text>
 </svg>

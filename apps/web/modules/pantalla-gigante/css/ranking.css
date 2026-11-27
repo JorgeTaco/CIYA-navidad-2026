@@ -34,4 +34,4 @@
 
 .stage-tabs { display: flex; gap: .35rem; flex-wrap: wrap; margin-bottom: .85rem; }
 .stage-tabs .btn { flex: 1 1 auto; }
-.stage-tabs .btn.active { background: var(--primary); color: #fff; border-color: transparent; }
+.stage-tabs .btn.active { background: var(--primary); color: var(--action-ink); border-color: transparent; }

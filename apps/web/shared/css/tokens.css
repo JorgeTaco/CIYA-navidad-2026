@@ -35,10 +35,50 @@
   --gold-soft: #fff2d2;
   --blue: #2a4967;
   --focus: #365d83;
+  --action-ink: #fff;
+  --danger-ink: #900a24;
+  --input-line: #9aa9bc;
+  --snow-color: #6a96c6;
+  --art-mat: transparent;
+  --art-backdrop: radial-gradient(ellipse at 52% 52%, #f6fbff, #d6e8f3 60%, #90b6c4);
   --shadow: 0 5px 18px rgba(18, 52, 81, .09);
   --radius: .75rem;
   --header-height: 4.75rem;
   --navigation-height: 4rem;
   --surface-gradient: linear-gradient(120deg, var(--panel), var(--bg-soft));
+  --card-gradient: linear-gradient(120deg, color-mix(in srgb, var(--panel) 81%, transparent),
+    color-mix(in srgb, var(--bg-soft) 86%, transparent));
   --festive-rule: linear-gradient(90deg, var(--green), var(--tint), var(--red));
+}
+
+@media screen {
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0d1b2c;
+    --bg-soft: #182a40;
+    --panel: #101e30;
+    --panel-2: #1f344f;
+    --panel-strong: #294460;
+    --line: #405771;
+    --text: #eaf2ff;
+    --muted: #bdcde0;
+    --primary: #f0f6ff;
+    --primary-soft: #d3e6ff;
+    --tint: #a4bfdc;
+    --red: #ff9fad;
+    --red-soft: #452631;
+    --green: #89e1bd;
+    --green-soft: #193d35;
+    --gold: #ffd480;
+    --gold-soft: #453521;
+    --blue: #aacbff;
+    --focus: #9cc7ff;
+    --action-ink: #101e30;
+    --danger-ink: #ffb5c0;
+    --input-line: #718bae;
+    --snow-color: #dceeff;
+    --art-mat: radial-gradient(ellipse at 50% 35%, #899fbb, #405d79);
+    --art-backdrop: radial-gradient(ellipse at 52% 42%, #acbfd4, #6885a3 65%, #415c7b);
+    --shadow: 0 6px 22px #030b18a6;
+  }
 }
