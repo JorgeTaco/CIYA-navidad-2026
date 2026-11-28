@@ -2,8 +2,6 @@
 .trivia-option.correct { border-color: var(--green); background: var(--green-soft); }
 .trivia-option.wrong { border-color: var(--red); background: var(--red-soft); }
 
-.gold-code { font-size: clamp(1.6rem, 6vw, 3rem); font-weight: 900; letter-spacing: 0.1em; color: var(--gold); }
-
 .route-hero p, .qr-story p { max-width: 58ch; color: var(--muted); }
 .route-hero .feature-icon { margin-bottom: .5rem; }
 .section-links { display: flex; flex-wrap: wrap; gap: .4rem; }
@@ -18,8 +16,26 @@
 .qr-story .trivia-option { min-height: 48px; justify-content: flex-start; overflow-wrap: anywhere; }
 .trivia-option span { display: grid; place-items: center; flex: 0 0 1.6rem; aspect-ratio: 1; border-radius: 6px; background: var(--panel-strong); color: var(--primary); }
 .qr-story.gold-view { border-color: #d9b467; }
-.gold-view .gold-code { margin-block: .5rem; font-variant-numeric: tabular-nums; }
-#gold-refresh { min-height: 44px; }
+.gold-credential {
+  width: fit-content;
+  max-width: 100%;
+  margin-block: 1rem;
+  padding: .75rem 1rem;
+  border: 1px solid #d9b467;
+  border-radius: var(--radius);
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+.gold-credential > span { font-weight: 700; }
+.gold-code {
+  display: block;
+  font: inherit;
+  font-size: clamp(1.35rem, 6vw, 2.25rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .05em;
+  overflow-wrap: anywhere;
+}
 
 .qr-message-card { display: flex; flex-direction: column; justify-content: space-between; gap: .9rem; }
 .qr-code-box { display: flex; flex-direction: column; align-items: center; gap: .45rem; padding-top: .75rem; border-top: 1px solid var(--line); }
@@ -27,12 +43,6 @@
 .qr-scan-hint { font-size: .78rem; color: var(--muted); text-align: center; }
 .qr-meme-media { margin: 0; }
 .qr-meme-media img { width: 100%; max-width: 520px; height: auto; display: block; border-radius: 12px; border: 1px solid var(--line); }
-
-.qr-gold-card { border-color: #d9b467; background: linear-gradient(180deg, rgba(217, 180, 103, 0.14), transparent 55%); }
-.qr-gold-card.is-claimed { opacity: 0.65; filter: grayscale(0.45); }
-.qr-gold-badges { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .4rem; }
-.qr-gold-desc { margin-top: .65rem; font-size: .92rem; color: var(--text); }
-.qr-gold-tools { margin-top: .9rem; }
 
 @media print {
   .qr-svg { width: 140px; break-inside: avoid; }

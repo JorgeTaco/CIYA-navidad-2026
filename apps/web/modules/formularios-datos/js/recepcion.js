@@ -83,16 +83,16 @@
   function goldTemplate() {
     return `
       <form class="card" id="form-gold" aria-labelledby="reception-title">
-        <p class="hint">Verifica la pantalla activa y la credencial estudiantil. El canje está disponible hasta el sellado de recepción.</p>
+        <p class="hint">Verifica la captura del QR Dorado y la credencial estudiantil. El canje está disponible hasta el sellado de recepción.</p>
         <div class="field">
-          <label for="oro-codigo">Clave de la pantalla activa</label>
+          <label for="oro-codigo">Código de canje</label>
           <input id="oro-codigo" required autocomplete="off" autocapitalize="characters" spellcheck="false"
             aria-describedby="oro-codigo-ayuda oro-codigo-error">
-          <p class="hint" id="oro-codigo-ayuda">Escribe o pega la clave oficial de 16 caracteres. Se ajusta automáticamente.</p>
+          <p class="hint" id="oro-codigo-ayuda">Ingresa el código de la captura, por ejemplo CIYA-ORO-01.</p>
           <p class="pin-error" id="oro-codigo-error" role="alert" hidden></p>
         </div>
         <div class="field"><label for="oro-cedula">Cédula del estudiante</label><input id="oro-cedula" inputmode="numeric" pattern="[0-9]{10}" required></div>
-        <label><input id="oro-declaracion" type="checkbox" required> Pantalla activa, credencial estudiantil y juego limpio verificados</label>
+        <label><input id="oro-declaracion" type="checkbox" required> Captura del QR Dorado, credencial estudiantil y juego limpio verificados</label>
         <button class="btn primary wide" type="submit">Validar y asignar 3 boletos</button>
       </form>
       <div class="gold-availability" id="estado-dorados" aria-label="Estado de los QR Dorados"></div>`;
@@ -284,7 +284,7 @@
   }
 
   function normalizeGoldCode(raw) {
-    return raw.replace(/[\s-]/g, '').toUpperCase();
+    return raw.replace(/\s/g, '').toUpperCase();
   }
 
   function setupGold() {
@@ -308,17 +308,18 @@
     codeInput.addEventListener('input', normalizeCodeInput);
     codeInput.addEventListener('compositionend', normalizeCodeInput);
     bind('form-gold', 'redeem', function () {
-      const code = normalizeGoldCode(codeInput.value);
-      if (!/^[0-9A-F]{16}$/.test(code)) {
+      const code = normalizeGoldCode(codeInput.value).replace(/-/g, '');
+      const match = /^CIYAORO(0[1-3])$/.exec(code);
+      if (!match) {
         codeInput.setAttribute('aria-invalid', 'true');
         error.hidden = false;
         error.textContent = /^DORADO[0-9]/.test(code)
-          ? 'Ese es un código de prueba. Usa la clave de 16 caracteres que muestra el QR Dorado oficial.'
-          : 'Revisa la clave. Debe tener 16 caracteres, con números del 0 al 9 y letras de la A a la F.';
+          ? 'Ese es un código de prueba. Usa el código que muestra el QR Dorado impreso.'
+          : 'Revisa que el código sea CIYA-ORO-01, CIYA-ORO-02 o CIYA-ORO-03.';
         codeInput.focus();
         return null;
       }
-      return { cedula: value('oro-cedula'), code, confirmed: checked('oro-declaracion') };
+      return { cedula: value('oro-cedula'), code: 'CIYA-ORO-' + match[1], confirmed: checked('oro-declaracion') };
     });
   }
 

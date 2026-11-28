@@ -22,10 +22,16 @@ el backend es el proyecto Supabase de `supabase/`.
   `?modo=donar` y `?modo=canjear`. Cada vista muestra su formulario y el
   comprobante de la operación. La confirmación del Muro de la Empatía se
   encuentra en **Acreditar**.
-- En **Canjear**, la clave oficial de QR Dorado se convierte a mayúsculas y
-  se eliminan espacios y guiones al escribir o pegar. Si el formato es
-  incorrecto, el campo indica cómo corregirlo dentro del formulario.
-  Los códigos de prueba de la Ruta QR muestran un aviso específico.
+- Los tres **QR Dorados** oficiales se obtienen en **Administración →
+  Impresión privada de los QR Dorados**. Al escanearlos se muestra el mensaje
+  «¡BINGO!», el código de canje en un recuadro y la indicación de llevar una
+  captura a Recepción Solidaria antes de las 17:45. Los enlaces públicos de
+  prueba ahora indican que se debe escanear el QR impreso.
+- **Recepción Solidaria → Canjear** admite `CIYA-ORO-01`, `CIYA-ORO-02`
+  y `CIYA-ORO-03`. El formulario ajusta mayúsculas y separadores al enviar.
+  El operador verifica la captura y la credencial. El primer canje de cada
+  QR registra al ganador y asigna tres boletos, con un máximo de un QR por
+  estudiante.
 - En el **Resumen** de Recepción Solidaria, las tarjetas desplegables de
   **Asistentes registrados** y **Donaciones registradas** destacan sus
   totales con iconos y colores. Los registros se leen en tablas de ancho
@@ -132,7 +138,8 @@ CIYA-navidad-2026/
 │  │  ├─ 0006_ciclo.sql            # ciclo de asistentes y grupos inscritos
 │  │  ├─ 0007_group_details.sql    # ficha pública de un grupo inscrito
 │  │  ├─ 0008_recepcion_sin_horario.sql # captura en recepción hasta el sellado
-│  │  └─ 0009_registros_sin_horario.sql # inscripción y QR Dorados sin bloqueo de horario
+│  │  ├─ 0009_registros_sin_horario.sql # inscripción y QR Dorados sin bloqueo de horario
+│  │  └─ 0010_qr_dorados_codigo_fijo.sql # códigos fijos emitidos al escanear el QR oficial
 │  └─ functions/ciya-receipts/     # Edge Function → Brevo
 ├─ tests/
 │  └─ unit/                        # draw, ui, lantern-matrix, ignition, sound y local-stage
@@ -176,9 +183,11 @@ Las funciones `ciya_access` y `ciya_write` validan los roles en Supabase.
 `0008_recepcion_sin_horario.sql` habilita la captura de acreditaciones,
 mensajes del muro y donaciones fuera de horario. `0009_registros_sin_horario.sql`
 extiende esa disponibilidad a la inscripción de villancicos y a la emisión y
-el canje de claves de QR Dorados. Las claves siguen siendo válidas durante
-dos minutos desde su emisión y pueden actualizarse. La curaduría y la
-exportación pueden realizarse desde que se reciben las frases.
+el canje de claves de QR Dorados. `0010_qr_dorados_codigo_fijo.sql` hace que
+el código fijo se habilite al escanear el QR oficial y siga aceptándose
+hasta el primer canje o el sellado. Las 17:45 indican la hora de
+presentación en la mesa. La curaduría y la exportación pueden realizarse
+desde que se reciben las frases.
 
 ## Requisitos funcionales — Módulo A: Portal y Mar de Linternas
 
@@ -221,6 +230,7 @@ query** y ejecutarlo **uno por uno**, en este orden exacto:
 0007_group_details.sql     consulta de la ficha pública de un grupo
 0008_recepcion_sin_horario.sql habilita captura en recepción hasta el sellado
 0009_registros_sin_horario.sql habilita inscripción y canje sin horario
+0010_qr_dorados_codigo_fijo.sql emite CIYA-ORO-01, CIYA-ORO-02 y CIYA-ORO-03
 ```
 
 No pegar todas las migraciones juntas. Si una marca error, detenerse y corregir antes de
@@ -331,6 +341,7 @@ supabase functions deploy ciya-receipts
 | `0007_group_details.sql` | Ficha pública de villancicos con representante, obra musical y nómina |
 | `0008_recepcion_sin_horario.sql` | Acreditación, registro del muro y donaciones en cualquier fecha hasta el sellado |
 | `0009_registros_sin_horario.sql` | Inscripción de villancicos y emisión y canje de QR Dorados fuera del horario del evento |
+| `0010_qr_dorados_codigo_fijo.sql` | Código fijo por QR oficial, válido desde el escaneo hasta el primer canje o el sellado |
 
 Si las migraciones ya están aplicadas, omitir `supabase db push`. Si falta
 alguna, no editar los archivos anteriores: agregar una migración nueva.
@@ -351,7 +362,7 @@ repositorio:
 cd /home/eser/Documentos/GitHub/CIYA-navidad-2026
 read -rsp 'URI directa de Postgres: ' DATABASE_URL; printf '\n'
 export DATABASE_URL
-for f in supabase/migrations/000*.sql; do
+for f in supabase/migrations/*.sql; do
   psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -f "$f"
 done
 unset DATABASE_URL

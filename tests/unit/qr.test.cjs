@@ -53,7 +53,7 @@ test('qr.js renderiza código QR en cada tarjeta de mensajes navideños y muestr
     return el;
   }
 
-  ['qr-root', 'ruta-index', 'ruta-detalle', 'lista-mensajes', 'lista-trivias', 'lista-memes', 'lista-dorados', 'reset-dorados']
+  ['qr-root', 'ruta-index', 'ruta-detalle', 'lista-mensajes', 'lista-trivias', 'lista-memes']
     .forEach(makeEl);
 
   const context = createContext({
@@ -83,6 +83,10 @@ test('qr.js renderiza código QR en cada tarjeta de mensajes navideños y muestr
 
   runInContext(readFileSync(join(__dirname, '..', '..', 'apps', 'web', 'shared', 'js', 'data.js'), 'utf8'), context);
   runInContext(readFileSync(join(__dirname, '..', '..', 'apps', 'web', 'modules', 'portal-linterna', 'js', 'qr.js'), 'utf8'), context);
+
+  const index = elements.get('ruta-index').innerHTML;
+  assert.match(index, /QR Dorados impresos en la facultad/);
+  assert.doesNotMatch(index, /CIYA-ORO-0[1-3]|reset-dorados|lista-dorados/);
 
   const mensajesHtml = elements.get('lista-mensajes').innerHTML;
   for (const item of context.CIYA_DATA.mensajesQR) {
@@ -182,91 +186,76 @@ test('qr.js renderiza código QR en cada tarjeta de mensajes navideños y muestr
   assert.doesNotMatch(memeDetailHtml, /Ingeniero diseñando el mecanismo/);
 });
 
-test('QR Dorados: son 3, se validan una sola vez y permiten reinicio para pruebas', () => {
-  const storage = new Map();
-  const localStorageMock = {
-    getItem: k => (storage.has(k) ? storage.get(k) : null),
-    setItem: (k, v) => storage.set(k, String(v)),
-    removeItem: k => storage.delete(k)
-  };
+test('QR Dorados: muestran el mensaje y el código oficial por separado mientras están disponibles', async () => {
+  const secret = '12345678-1234-4234-8234-1234567890ab';
+  const hash = '#dorado=' + secret;
+  const dataFile = join(__dirname, '../../apps/web/shared/js/data.js');
+  const qrFile = join(__dirname, '../../apps/web/modules/portal-linterna/js/qr.js');
 
-  function runQr(search) {
-    const els = new Map();
-    ['qr-root', 'ruta-index', 'ruta-detalle', 'lista-mensajes', 'lista-trivias', 'lista-memes', 'lista-dorados', 'reset-dorados']
-      .forEach(id => {
-        els.set(id, {
-          id,
-          innerHTML: '',
-          hidden: false,
-          onclick: null,
-          querySelector(sel) {
-            if (sel === 'h1') {
-              const match = els.get(id).innerHTML.match(/<h1>([^<]+)<\/h1>/);
-              return match ? { textContent: match[1] } : null;
-            }
-            return { onclick: null };
-          }
-        });
-      });
-    const ctx = createContext({
-      window: {},
-      location: { href: 'https://jorgetaco.github.io/CIYA-navidad-2026/qr.html' + search, search, hash: '', reload() {} },
-      URL: URL,
-      URLSearchParams: URLSearchParams,
-      localStorage: localStorageMock,
-      document: {
-        title: '',
-        getElementById: id => els.get(id) || null,
-        querySelectorAll: () => []
+  async function runQr(result, search = '', fragment = hash) {
+    const ids = ['qr-root', 'ruta-index', 'ruta-detalle', 'gold-title', 'gold-status',
+      'gold-reward', 'gold-code', 'gold-refresh'];
+    const elements = new Map(ids.map(id => [id, {
+      innerHTML: '',
+      textContent: '',
+      hidden: id === 'gold-reward',
+      querySelector() { return null; },
+      addEventListener() {}
+    }]));
+    const requests = [];
+    const context = createContext({
+      location: {
+        href: 'https://example.test/qr.html' + search + fragment,
+        search,
+        hash: fragment
       },
+      URL, URLSearchParams,
+      document: { getElementById: id => elements.get(id) },
       addEventListener() {},
-      setTimeout: setTimeout,
-      clearTimeout: clearTimeout,
-      CIYA_UI: {
-        escapeHtml: v => String(v == null ? '' : v).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c])),
-        icon: name => `<span>${name}</span>`,
-        initNav() {},
-        copy() {},
-        toast() {}
-      },
-      CIYA_STORE: { configured: () => false },
-      CIYA_SOUND: { enable() {}, success() {}, beep() {} },
-      CIYA_QR_CODE: QRCode
+      CIYA_UI: { escapeHtml: String, initNav() {} },
+      CIYA_STORE: {
+        configured: () => true,
+        async gold(value) {
+          requests.push(value);
+          return result;
+        }
+      }
     });
-    ctx.window = ctx;
-    runInContext(readFileSync(join(__dirname, '..', '..', 'apps', 'web', 'shared', 'js', 'data.js'), 'utf8'), ctx);
-    runInContext(readFileSync(join(__dirname, '..', '..', 'apps', 'web', 'modules', 'portal-linterna', 'js', 'qr.js'), 'utf8'), ctx);
-    return { els, data: ctx.CIYA_DATA };
+    context.window = context;
+    runInContext(readFileSync(dataFile, 'utf8'), context);
+    runInContext(readFileSync(qrFile, 'utf8'), context);
+    await new Promise(resolve => setImmediate(resolve));
+    return { elements, requests };
   }
 
-  const index1 = runQr('');
-  const doradosHtml1 = index1.els.get('lista-dorados').innerHTML;
-  assert.equal(index1.data.dorados.length, 3);
-  assert.match(doradosHtml1, /QR Dorado #1/);
-  assert.match(doradosHtml1, /QR Dorado #2/);
-  assert.match(doradosHtml1, /QR Dorado #3/);
-  assert.match(doradosHtml1, /gana tres boletos extra/);
-  assert.doesNotMatch(doradosHtml1, /href="qr\.html\?id=dorado-/);
+  for (const slot of [1, 2, 3]) {
+    const code = 'CIYA-ORO-0' + slot;
+    const { elements, requests } = await runQr({ status: 'available', code });
+    assert.deepEqual(requests, [secret]);
+    assert.equal(elements.get('gold-title').textContent, '¡BINGO! ENCONTRASTE UN QR DORADO CIYA 2026');
+    assert.equal(elements.get('gold-code').textContent, code);
+    assert.equal(elements.get('gold-status').hidden, true);
+    assert.equal(elements.get('gold-reward').hidden, false);
+    const html = elements.get('ruta-detalle').innerHTML;
+    assert.match(html, /<code class="gold-code" id="gold-code"><\/code>/);
+    assert.match(html, /premio instantáneo y \+3 boletos extra/);
+    assert.match(html, /Toma una captura de pantalla ahora mismo y preséntate en la Mesa de Recepción Solidaria antes de las 17:45/);
+    assert.match(html, /Válido únicamente para el primer estudiante en canjearlo/);
+  }
 
-  // Primer escaneo de dorado-1: válido
-  const firstScan = runQr('?id=dorado-1');
-  const firstHtml = firstScan.els.get('ruta-detalle').innerHTML;
-  assert.match(firstHtml, /Primer escaneo válido/);
-  assert.match(firstHtml, /DORADO-1-/);
-  assert.doesNotMatch(firstHtml, /reset-single-dorado/);
+  for (const [status, message] of [
+    ['invalid', 'Código no válido.'],
+    ['claimed', 'Este QR Dorado ya fue canjeado.'],
+    ['closed', 'Recepción ya selló los registros de canje.']
+  ]) {
+    const { elements } = await runQr({ status });
+    assert.equal(elements.get('gold-code').textContent, '');
+    assert.equal(elements.get('gold-reward').hidden, true);
+    assert.equal(elements.get('gold-status').textContent, message);
+  }
 
-  // Segundo escaneo de dorado-1: bloqueado
-  const secondScan = runQr('?id=dorado-1');
-  const secondHtml = secondScan.els.get('ruta-detalle').innerHTML;
-  assert.match(secondHtml, /Ya escaneado/);
-  assert.match(secondHtml, /solo se puede escanear una vez/);
-  assert.doesNotMatch(secondHtml, /reset-single-dorado/);
-
-  // En el índice dorado-1 figura como ya escaneado
-  const index2 = runQr('');
-  assert.match(index2.els.get('lista-dorados').innerHTML, /Ya escaneado/);
-
-  // Botón de reinicio de pruebas vuelve a habilitar los 3
-  index2.els.get('reset-dorados').onclick();
-  assert.doesNotMatch(index2.els.get('lista-dorados').innerHTML, /Ya escaneado/);
+  const legacy = await runQr(null, '?id=dorado-1', '');
+  assert.deepEqual(legacy.requests, []);
+  assert.match(legacy.elements.get('ruta-detalle').innerHTML, /Escanea el QR Dorado impreso/);
+  assert.doesNotMatch(legacy.elements.get('ruta-detalle').innerHTML, /CIYA-ORO-01|gold-code/);
 });

@@ -6,39 +6,7 @@
   const QRCode = window.CIYA_QR_CODE;
   const esc = UI.escapeHtml;
   const id = new URLSearchParams(location.search).get('id');
-  const DORADOS_KEY = 'ciya2026:dorados:v1';
   let activeGold;
-  let goldExpiryTimer = null;
-
-  function readDoradosState() {
-    try {
-      const raw = localStorage.getItem(DORADOS_KEY);
-      return raw ? JSON.parse(raw) : {};
-    } catch {
-      return {};
-    }
-  }
-
-  function writeDoradosState(state) {
-    try {
-      localStorage.setItem(DORADOS_KEY, JSON.stringify(state));
-    } catch {}
-  }
-
-  function resetDoradosState() {
-    try {
-      localStorage.removeItem(DORADOS_KEY);
-    } catch {}
-  }
-
-  function generateGoldCode(numero) {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let suffix = '';
-    for (let i = 0; i < 4; i++) {
-      suffix += chars[Math.floor(Math.random() * chars.length)];
-    }
-    return 'DORADO-' + numero + '-' + suffix;
-  }
 
   function link(item) { return 'qr.html?id=' + encodeURIComponent(item.id); }
   function fullLink(item) { return new URL(link(item), location.href).href; }
@@ -99,11 +67,7 @@
       </section>
       <section class="section card" id="dorados">
         <h2>QR Dorados</h2>
-        <p>El primer estudiante que canjee cada QR Dorado gana tres boletos extra. Muestra la pantalla activa y tu credencial estudiantil en recepción antes del sellado.</p>
-        <div class="grid auto" id="lista-dorados"></div>
-        <div class="row qr-gold-tools">
-          <button class="btn ghost small" id="reset-dorados" type="button">Reiniciar validación de QR Dorados (pruebas)</button>
-        </div>
+        <p>Escanea uno de los tres QR Dorados impresos en la facultad para ver tu código de canje. El primer estudiante que valide cada hallazgo en Recepción Solidaria gana tres boletos extra.</p>
       </section>
       <section class="section card">
         <h2>Impresión de la ruta</h2>
@@ -120,69 +84,21 @@
     document.getElementById('lista-memes').innerHTML = Data.memes.map(function (m) {
       return renderQrCard(m, m.ubicacion || 'Meme', m.plantilla, 'Código QR para meme ' + m.plantilla, 'Escanea con tu teléfono para ver el meme');
     }).join('');
-    renderDoradosList();
-    document.getElementById('reset-dorados').onclick = function () {
-      resetDoradosState();
-      renderDoradosList();
-      if (UI.toast) UI.toast('QR Dorados reiniciados para pruebas.', 'ok');
-    };
     target.querySelector('[data-print-route]').onclick = function () { window.print(); };
-  }
-
-  function renderDoradosList() {
-    const state = readDoradosState();
-    const container = document.getElementById('lista-dorados');
-    if (!container || !Array.isArray(Data.dorados)) return;
-    container.innerHTML = Data.dorados.map(function (d) {
-      const claimed = Boolean(state[d.id]);
-      const statusBadge = claimed
-        ? '<span class="badge warn">Ya escaneado</span>'
-        : '<span class="badge ok">Disponible</span>';
-      const qrMarkup = QRCode
-        ? '<div class="qr-code-box">' + QRCode.toSvg(fullLink(d), { label: 'Código QR Dorado ' + d.numero }) +
-          '<span class="qr-scan-hint">' + (claimed ? 'Este QR Dorado ya fue validado' : 'Escanea con tu teléfono para canjear (+3 boletos)') + '</span></div>'
-        : '';
-      return '<article class="card qr-message-card qr-gold-card' + (claimed ? ' is-claimed' : '') + '">' +
-        '<div class="qr-card-body"><div class="qr-gold-badges"><span class="badge">' + esc(d.titulo) + '</span>' + statusBadge + '</div>' +
-        '<p class="qr-gold-desc">' + esc(d.mensaje) + '</p></div>' +
-        qrMarkup + '</article>';
-    }).join('');
   }
 
   function renderDetail() {
     const mensaje = Data.mensajesQR.find(function (m) { return m.id === id; });
     const trivia = Data.trivias.find(function (t) { return t.id === id; });
     const meme = Data.memes.find(function (m) { return m.id === id; });
-    const dorado = Array.isArray(Data.dorados) ? Data.dorados.find(function (d) { return d.id === id; }) : null;
     document.getElementById('ruta-index').hidden = true;
     const target = document.getElementById('ruta-detalle');
     target.hidden = false;
 
-    if (dorado) {
-      const state = readDoradosState();
-      const existing = state[dorado.id];
-      if (existing) {
-        Sound.enable();
-        Sound.beep();
-        target.innerHTML = '<article class="event-hero qr-story gold-view is-claimed">' +
-          '<span class="badge warn">Ya escaneado</span>' +
-          '<h1>' + esc(dorado.titulo) + ' ya fue reclamado</h1>' +
-          '<p class="qr-message">Este QR Dorado solo se puede escanear una vez. Ya no está disponible para canje.</p>' +
-          '<a class="btn ghost" href="qr.html">Ver toda la ruta</a></article>';
-      } else {
-        const code = generateGoldCode(dorado.numero);
-        state[dorado.id] = { code: code, at: new Date().toISOString() };
-        writeDoradosState(state);
-        Sound.enable();
-        Sound.success();
-        target.innerHTML = '<article class="event-hero qr-story gold-view">' +
-          '<span class="badge ok">Primer escaneo válido</span>' +
-          '<h1>¡' + esc(dorado.titulo) + ' desbloqueado!</h1>' +
-          '<p class="qr-message">' + esc(dorado.mensaje) + '</p>' +
-          '<div class="gold-code">' + esc(code) + '</div>' +
-          '<p class="muted">Presenta esta pantalla activa y tu credencial estudiantil en recepción antes del sellado.</p>' +
-          '<a class="btn ghost" href="qr.html">Ver toda la ruta</a></article>';
-      }
+    if (/^dorado-[1-3]$/.test(id)) {
+      target.innerHTML = '<article class="event-hero qr-story gold-view"><h1>QR Dorado de prueba</h1>' +
+        '<p>Escanea el QR Dorado impreso en la facultad para obtener el código de canje.</p>' +
+        '<a class="btn ghost" href="qr.html#dorados">Ver la Ruta QR</a></article>';
     } else if (mensaje) {
       target.innerHTML = '<article class="event-hero qr-story"><span class="kicker">' + esc(mensaje.ubicacion) + '</span>' +
         '<h1>' + esc(mensaje.titulo) + '</h1><p class="qr-message">' + esc(mensaje.texto) + '</p>' +
@@ -225,55 +141,68 @@
     document.getElementById('ruta-index').hidden = true;
     const target = document.getElementById('ruta-detalle');
     target.hidden = false;
-    target.innerHTML = '<article class="event-hero qr-story gold-view"><h1>QR Dorado CIYA 2026</h1>' +
-      '<p>El primer estudiante que lo canjee obtiene 3 boletos extra. Presenta esta pantalla activa y tu credencial en recepción antes del sellado.</p>' +
-      '<p id="gold-status" role="status"></p><div id="gold-code" class="gold-code"></div>' +
-      '<button class="btn" id="gold-refresh">Actualizar clave</button></article>';
+    target.innerHTML = `
+      <article class="event-hero qr-story gold-view">
+        <h1 id="gold-title">QR Dorado CIYA 2026</h1>
+        <p id="gold-status" role="status"></p>
+        <div id="gold-reward" hidden>
+          <p class="qr-message">Acabas de desbloquear un premio instantáneo y +3 boletos extra para la Gran Ruleta Digital de hoy.</p>
+          <div class="gold-credential">
+            <span>Código de canje</span>
+            <code class="gold-code" id="gold-code"></code>
+          </div>
+          <p><strong>¿Qué debes hacer?</strong> Toma una captura de pantalla ahora mismo y preséntate en la Mesa de Recepción Solidaria antes de las 17:45 para validar tu hallazgo. (Válido únicamente para el primer estudiante en canjearlo).</p>
+        </div>
+        <button class="btn" id="gold-refresh" type="button" hidden>Reintentar</button>
+        <a class="btn ghost" href="qr.html#dorados">Ver la Ruta QR</a>
+      </article>`;
     document.title = 'QR Dorado | CIYA Navidad 2026';
 
     const button = document.getElementById('gold-refresh');
     const status = document.getElementById('gold-status');
+    const title = document.getElementById('gold-title');
+    const reward = document.getElementById('gold-reward');
     const code = document.getElementById('gold-code');
     if (!Store.configured()) {
       status.textContent = 'La clave de canje no está disponible en este momento.';
-      button.disabled = true;
       return;
     }
-    async function refresh() {
-      clearTimeout(goldExpiryTimer);
-      code.textContent = '';
+    if (!/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(secret)) {
+      status.textContent = 'Código no válido.';
+      return;
+    }
+    async function loadGold() {
+      button.hidden = true;
       status.textContent = 'Consultando disponibilidad…';
-      button.disabled = true;
       try {
-        if (!/^[a-f0-9-]{36}$/i.test(secret)) throw new Error('Código no válido.');
         const result = await Store.gold(secret);
         const labels = {
           invalid: 'Código no válido.', claimed: 'Este QR Dorado ya fue canjeado.',
           closed: 'Recepción ya selló los registros de canje.'
         };
-        status.textContent = labels[result.status] || 'Clave válida durante dos minutos.';
-        if (result.status === 'available') {
-          code.textContent = result.code;
-          goldExpiryTimer = setTimeout(function () {
-            code.textContent = '';
-            status.textContent = 'Clave vencida. Actualízala al llegar a recepción.';
-          }, result.seconds * 1000);
+        if (labels[result.status]) {
+          status.textContent = labels[result.status];
+          return;
         }
+        if (result.status !== 'available' || !/^CIYA-ORO-0[1-3]$/.test(result.code)) {
+          throw new Error('La clave de canje no está disponible en este momento.');
+        }
+        title.textContent = '¡BINGO! ENCONTRASTE UN QR DORADO CIYA 2026';
+        code.textContent = result.code;
+        status.hidden = true;
+        reward.hidden = false;
       } catch (error) {
         status.textContent = error.message;
-      } finally {
-        button.disabled = false;
+        button.hidden = false;
       }
     }
-    button.addEventListener('click', refresh);
-    refresh();
+    button.addEventListener('click', loadGold);
+    loadGold();
   }
 
   function renderRoute() {
     const secret = new URLSearchParams(location.hash.slice(1)).get('dorado');
     if (secret === activeGold) return;
-    clearTimeout(goldExpiryTimer);
-    goldExpiryTimer = null;
     activeGold = secret;
     if (secret) renderGold(secret);
     else if (id) renderDetail();

@@ -169,29 +169,6 @@ window.CIYA_DATA = {
       texto: '¡Te dije que el código de la ruleta debía funcionar sin Wi-Fi! | En mi compu sí compilaba.'
     }
   ],
-  dorados: [
-    {
-      id: 'dorado-1',
-      numero: 1,
-      ubicacion: 'Punto oculto 1 · CIYA',
-      titulo: 'QR Dorado #1',
-      mensaje: 'El primer estudiante que canjee cada QR Dorado gana tres boletos extra.'
-    },
-    {
-      id: 'dorado-2',
-      numero: 2,
-      ubicacion: 'Punto oculto 2 · CIYA',
-      titulo: 'QR Dorado #2',
-      mensaje: 'El primer estudiante que canjee cada QR Dorado gana tres boletos extra.'
-    },
-    {
-      id: 'dorado-3',
-      numero: 3,
-      ubicacion: 'Punto oculto 3 · CIYA',
-      titulo: 'QR Dorado #3',
-      mensaje: 'El primer estudiante que canjee cada QR Dorado gana tres boletos extra.'
-    }
-  ],
   cronograma: [
     { fase: 'previo', hora: '08:00 – 17:45', bloque: 'Recepción Solidaria, Donaciones y Canje de QR', detalle: 'Recepción de bienes y canje de QR. Acreditación del sorteo de 17:00 a 17:45.' },
     { fase: 'previo', hora: '15:00', bloque: 'Cierre de montaje de Puertas Decoradas', detalle: 'Término del plazo formal para las cinco carreras.' },
