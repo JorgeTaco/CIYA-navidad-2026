@@ -43,6 +43,9 @@ el backend es el proyecto Supabase de `supabase/`.
   totales con iconos y colores. Los registros se leen en tablas de ancho
   completo en escritorio y en fichas apiladas en móvil.
 - La portada de acceso contiene el selector de módulos. La navegación pública se muestra abajo en móvil y en la cabecera en escritorio con Portal, Ruta QR y Cronograma. Las cuentas con varios roles regresan desde Recepción, Escenario o Administración a **Sesión activa** para abrir otro módulo. En la consola local se oculta esa barra.
+- Los paneles de organización usan el inicio de sesión de la portada. Si
+  se abre un panel sin sesión, la portada devuelve a la vista solicitada
+  después de autenticar una cuenta con el rol correspondiente.
 - El Mar de Linternas usa los tonos y el marco LED del ejemplo. Los botones **Mín.**, **Med.** y **Máx.** ajustan el brillo visual y guardan la preferencia localmente. La URL directa dibuja solo la linterna y permite cambiar de mensaje, carrera y nivel de brillo tras desconectar la red. La pausa de la marquesina, las partes de movimiento reducido y la pantalla completa siguen disponibles en sus modos correspondientes.
 - Ruta QR, Cronograma, Recepción, Administración y Escenario comparten tarjetas, formularios, tablas y estados visuales. La superficie proyectada permanece oscura y conserva la relación 16:9. El servidor de escenario sirve las fuentes desde la laptop. Se conservan los contratos de Supabase, los archivos de respaldo y las exportaciones.
 - El sitio se abre en **modo claro** en PC, laptops y tabletas, y en **modo
@@ -463,13 +466,18 @@ En la base de desarrollo, aplica la migración
 update ciya.event set gold_test_reset_enabled = true where singleton;
 ```
 
-Abre **Administración → Impresión privada de los QR Dorados → Reiniciar
-escaneos de QR Dorados (pruebas)**. El botón libera las reservas y las claves
+Inicia sesión en la portada con tu cuenta administradora y abre
+**Administración → Impresión privada de los QR Dorados → Reiniciar escaneos
+de QR Dorados (pruebas)**. El botón libera las reservas y las claves
 emitidas de los QR pendientes de canje para que los mismos impresos se puedan
 escanear desde otro navegador. Se conservan los canjes y los boletos emitidos.
-El botón aparece para administradores con la base habilitada y la recepción
-abierta. Para ocultarlo y retirar el permiso de reinicio, vuelve a establecer
-`gold_test_reset_enabled = false`.
+Durante el desarrollo, `goldTestResetUi: true` en
+`apps/web/shared/js/config.js` muestra el botón tras iniciar sesión como
+administrador en cualquier dirección de la app. El botón indica el estado
+de la base mientras se comprueba el permiso. Supabase habilita la acción
+solo si la base está configurada para pruebas y la recepción sigue abierta.
+Al terminar, establece `goldTestResetUi: false` para retirar el botón y
+`gold_test_reset_enabled = false` para desactivar el reinicio en la base.
 
 ### Comprobaciones del proyecto
 

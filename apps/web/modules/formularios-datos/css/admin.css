@@ -15,7 +15,8 @@
 
 @media print {
   body.print-gold header, body.print-gold footer, body.print-gold main > :not(#panel),
-  body.print-gold #panel > :not(#admin-gold), body.print-gold button { display: none !important; }
+  body.print-gold #panel > :not(#admin-gold), body.print-gold button,
+  body.print-gold #gold-test-reset-status { display: none !important; }
   body.print-gold .gold-print-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .gold-print-card { break-inside: avoid; }
 }

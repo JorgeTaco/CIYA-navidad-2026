@@ -66,6 +66,13 @@
     setTimeout(function () { item.remove(); }, 3700);
   }
 
+  function redirectToLogin(scope) {
+    const params = new URLSearchParams({ modo: 'acceso', next: scope });
+    if (location.search) params.set('panelQuery', location.search);
+    location.replace('index.html?' + params.toString());
+    return false;
+  }
+
   async function requireAccount(scope, title) {
     if (!Store.configured()) return showConfigRequired(title);
     if (Store.hasSession()) {
@@ -77,14 +84,12 @@
       } catch {
         const info = await Store.myRoles().catch(function () { return null; });
         if (info && info.roles.length) {
-          return showRoleRestricted(title, info);
+          return showRoleRestricted(scope, title, info);
         }
         await Store.logout();
       }
-    } else if (typeof Store.sessionRoles === 'function' && Store.sessionRoles().includes('asistente')) {
-      return showRoleRestricted(title, { email: 'Estudiante / Docente', roles: ['asistente'] });
     }
-    return promptLogin(scope, title);
+    return redirectToLogin(scope);
   }
 
   function showConfigRequired(title) {
@@ -104,7 +109,7 @@
     });
   }
 
-  function showRoleRestricted(title, info) {
+  function showRoleRestricted(scope, title, info) {
     return new Promise(function (resolve) {
       const overlay = document.createElement('div');
       overlay.className = 'pin-overlay';
@@ -124,48 +129,7 @@
       overlay.querySelector('[data-switch]').addEventListener('click', async function () {
         overlay.remove();
         await Store.logout();
-        initNav(lastNavActive, lastNavOptions);
-        resolve(await promptLogin(lastNavActive, title));
-      });
-      overlay.querySelector('[data-cancel]').addEventListener('click', function () {
-        overlay.remove();
-        resolve(false);
-      });
-    });
-  }
-
-  function promptLogin(scope, title) {
-    return new Promise(function (resolve) {
-      const overlay = document.createElement('div');
-      overlay.className = 'pin-overlay';
-      overlay.innerHTML =
-        '<div class="pin-card"><h2>' + escapeHtml(title) + '</h2>' +
-        '<form><label for="auth-email">Correo de organización</label>' +
-        '<input id="auth-email" type="email" autocomplete="username" required>' +
-        '<label for="auth-password">Contraseña</label>' +
-        '<input id="auth-password" type="password" autocomplete="current-password" required>' +
-        '<p class="pin-error" role="alert" hidden></p>' +
-        '<div class="row"><button class="btn primary" type="submit">Entrar</button>' +
-        '<button class="btn ghost" type="button" data-cancel>Cancelar</button></div>' +
-        '<p class="hint" style="margin-top:0.8rem"><a href="index.html">Volver al inicio de sesión principal</a></p></form></div>';
-      document.body.appendChild(overlay);
-      const form = overlay.querySelector('form');
-      const button = form.querySelector('[type=submit]');
-      form.querySelector('#auth-email').focus();
-      form.addEventListener('submit', async function (event) {
-        event.preventDefault();
-        button.disabled = true;
-        try {
-          await Store.login(form.querySelector('#auth-email').value, form.querySelector('#auth-password').value, scope);
-          overlay.remove();
-          initNav(lastNavActive || scope, lastNavOptions);
-          resolve(true);
-        } catch (failure) {
-          const error = form.querySelector('.pin-error');
-          error.textContent = failure.message;
-          error.hidden = false;
-          button.disabled = false;
-        }
+        resolve(redirectToLogin(scope));
       });
       overlay.querySelector('[data-cancel]').addEventListener('click', function () {
         overlay.remove();

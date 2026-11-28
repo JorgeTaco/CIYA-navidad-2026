@@ -93,9 +93,11 @@
   }
 
   function destinationFor(roles) {
-    const requested = new URLSearchParams(location.search).get('next');
+    const params = new URLSearchParams(location.search);
+    const requested = params.get('next');
     if (requested && roles.includes(requested) && UI.panels[requested]) {
-      return UI.panels[requested].href;
+      const query = new URLSearchParams(params.get('panelQuery') || '').toString();
+      return UI.panels[requested].href + (query ? '?' + query : '');
     }
     if (roles.length === 1 && UI.panels[roles[0]]) {
       return UI.panels[roles[0]].href;

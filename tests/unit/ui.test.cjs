@@ -4,7 +4,7 @@ const { join } = require('node:path');
 const { test } = require('node:test');
 const { createContext, runInContext } = require('node:vm');
 
-function loadShared({ configured = true, storedSession = null, storedRoles = null } = {}) {
+function loadShared({ configured = true, storedSession = null, storedRoles = null, pageSearch = '' } = {}) {
   const storage = new Map();
   if (storedSession) storage.set('ciya2026:session:v2', JSON.stringify(storedSession));
   if (storedRoles) storage.set('ciya2026:roles:v1', JSON.stringify(storedRoles));
@@ -24,8 +24,11 @@ function loadShared({ configured = true, storedSession = null, storedRoles = nul
   const timers = [];
   const docListeners = [];
   const network = [];
+  const redirects = [];
   const context = createContext({
     window: {},
+    URLSearchParams,
+    location: { search: pageSearch, replace: url => redirects.push(url) },
     sessionStorage: {
       getItem: key => (storage.has(key) ? storage.get(key) : null),
       setItem: (key, val) => storage.set(key, String(val)),
@@ -67,7 +70,8 @@ function loadShared({ configured = true, storedSession = null, storedRoles = nul
     logoutBtn,
     timers,
     docListeners,
-    network
+    network,
+    redirects
   };
 }
 
@@ -184,6 +188,23 @@ test('sin configuración no hay sesión, Roles ni operaciones', async () => {
   assert.throws(() => sinConfig.store.enterAsistente(), /Falta la configuración/);
   await assert.rejects(() => sinConfig.store.loginAccount('correo@example.test', 'clave'), /Falta la configuración/);
   await assert.rejects(() => sinConfig.store.action('wish', {}), /Falta la configuración/);
+});
+
+test('los paneles sin sesión de organización llevan al login de la portada', async () => {
+  const admin = loadShared();
+  assert.equal(await admin.ui.requireAccount('admin', 'Panel administrativo'), false);
+  assert.deepEqual(admin.redirects, ['index.html?modo=acceso&next=admin']);
+
+  const reception = loadShared({
+    pageSearch: '?modo=canjear',
+    storedRoles: { email: 'Estudiante / Docente', roles: ['asistente'], mode: 'asistente' }
+  });
+  assert.equal(await reception.ui.requireAccount('recepcion', 'Panel de recepción'), false);
+  const target = new URL(reception.redirects[0], 'https://example.test/repo/recepcion.html');
+  assert.equal(target.pathname, '/repo/index.html');
+  assert.equal(target.searchParams.get('modo'), 'acceso');
+  assert.equal(target.searchParams.get('next'), 'recepcion');
+  assert.equal(target.searchParams.get('panelQuery'), '?modo=canjear');
 });
 
 test('una sesión con varios roles vuelve al selector desde cualquier panel autorizado', () => {

@@ -194,15 +194,6 @@
         throw error;
       }
     },
-    async login(email, password, panel) {
-      requireConfig();
-      const credentials = await request('/auth/v1/token?grant_type=password', { email, password });
-      await request('/rest/v1/rpc/ciya_access', { panel }, credentials.access_token);
-      sessionStorage.setItem(sessionKey, JSON.stringify(credentials));
-      await this.myRoles().catch(function () {
-        saveRoles([panel], email, 'staff');
-      });
-    },
     async authorize(panel) {
       requireConfig();
       return rpc('ciya_access', { panel }, true);

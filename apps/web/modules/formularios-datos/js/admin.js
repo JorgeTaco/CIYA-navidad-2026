@@ -4,6 +4,7 @@
   const Data = window.CIYA_DATA;
   const QRCode = window.CIYA_QR_CODE;
   const esc = UI.escapeHtml;
+  const goldTestResetUi = window.CIYA_CONFIG.goldTestResetUi === true;
 
   function template() {
     return `
@@ -45,11 +46,12 @@
         <section class="section card" id="admin-gold">
           <h2>Impresión privada de los QR Dorados</h2>
           <p>Imprime los tres QR oficiales para colocarlos en la facultad. El primer escaneo reserva el código de canje. Mantén privado este listado.</p>
-          <div class="grid auto gold-print-grid" id="gold-links"></div>
           <div class="row">
             <button class="btn" id="print-gold" type="button">Imprimir listado privado</button>
-            <button class="btn ghost" id="reset-gold-tests" type="button" hidden>Reiniciar escaneos de QR Dorados (pruebas)</button>
+            ${goldTestResetUi ? '<button class="btn ghost" id="reset-gold-tests" type="button" aria-describedby="gold-test-reset-status" disabled>Reiniciar escaneos de QR Dorados (pruebas)</button>' : ''}
           </div>
+          ${goldTestResetUi ? '<p class="hint" id="gold-test-reset-status" role="status">Comprobando si el reinicio está habilitado en la base conectada…</p>' : ''}
+          <div class="grid auto gold-print-grid" id="gold-links"></div>
         </section>
         <section class="section card" id="admin-import">
           <h2>Importar respaldo de la primera versión</h2>
@@ -217,13 +219,22 @@
 
   async function setupGoldTestReset() {
     const button = document.getElementById('reset-gold-tests');
+    const status = document.getElementById('gold-test-reset-status');
     try {
       const capability = await Store.goldTestReset(false);
-      if (capability.enabled !== true) return;
-    } catch {
+      if (capability.enabled !== true) {
+        status.textContent = Store.get().sealed
+          ? 'Recepción está sellada. El reinicio está disponible mientras la recepción siga abierta.'
+          : 'Activa gold_test_reset_enabled en la base de desarrollo para usar este botón.';
+        return;
+      }
+    } catch (error) {
+      status.textContent = 'No se pudo comprobar si el reinicio está habilitado. ' + error.message;
       return;
     }
-    button.hidden = false;
+    button.disabled = false;
+    status.hidden = true;
+    status.textContent = '';
     button.addEventListener('click', async function () {
       button.disabled = true;
       try {
@@ -270,7 +281,7 @@
     window.addEventListener('afterprint', function () { document.body.classList.remove('print-gold'); });
     setupImport();
     setupDiscardDialog();
-    setupGoldTestReset();
+    if (goldTestResetUi) setupGoldTestReset();
 
     document.getElementById('export-aprobados').addEventListener('click', function () { exportDeseos(true); });
     document.getElementById('export-todos').addEventListener('click', function () { exportDeseos(false); });
