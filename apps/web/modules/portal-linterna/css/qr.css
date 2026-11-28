@@ -43,7 +43,6 @@
 .qr-scan-hint { font-size: .78rem; color: var(--muted); text-align: center; }
 .qr-meme-media { margin: 0; }
 .qr-meme-media img { width: 100%; max-width: 520px; height: auto; display: block; border-radius: 12px; border: 1px solid var(--line); }
-#lista-dorados .qr-message-card { border-color: #d9b467; }
 
 @media print {
   .qr-svg { width: 140px; break-inside: avoid; }

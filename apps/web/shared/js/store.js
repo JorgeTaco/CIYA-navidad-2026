@@ -9,6 +9,7 @@
   const empty = { attendees: [], donations: [], groups: [], deseos: [], scores: [], puertas: [],
     qrClaims: [], ranking: [], counts: {}, receipts: {}, recepcionCerrada: false, sealed: false, snapshot: null };
   const listeners = new Set();
+  const goldScanTokens = new Map();
   let state = { ...empty };
   let scope = 'public';
   let online = false;
@@ -131,6 +132,19 @@
     return hex.replace(/^(........)(....)(....)(....)/, '$1-$2-$3-$4-');
   }
 
+  function goldScanToken(secret) {
+    const key = 'ciya2026:gold-scan:' + secret.toLowerCase();
+    if (goldScanTokens.has(key)) return goldScanTokens.get(key);
+    let token;
+    try { token = localStorage.getItem(key); } catch {}
+    if (!token) {
+      token = uuid();
+      try { localStorage.setItem(key, token); } catch {}
+    }
+    goldScanTokens.set(key, token);
+    return token;
+  }
+
   window.CIYA_STORE = {
     configured,
     hasSession: function () { return configured() && Boolean(session()); },
@@ -245,7 +259,10 @@
     },
     newRequestId: uuid,
     gold: function (secret) {
-      return rpc('ciya_gold', { secret }, false);
+      return rpc('ciya_gold', { secret, scan_token: goldScanToken(secret) }, false);
+    },
+    goldTestReset: function (applyReset) {
+      return rpc('ciya_gold_test_reset', { apply_reset: applyReset }, true);
     },
     groupDetails: function (id) {
       return rpc('ciya_group_details', { group_id: id }, false);

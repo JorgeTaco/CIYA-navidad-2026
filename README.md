@@ -24,11 +24,15 @@ el backend es el proyecto Supabase de `supabase/`.
   encuentra en **Acreditar**.
 - Los tres **QR Dorados** oficiales se obtienen en **Administración →
   Impresión privada de los QR Dorados**, donde se pueden escanear, imprimir
-  o copiar sus URL. Al escanearlos se muestra el mensaje
+  o copiar sus URL. El primer escaneo de cada QR reserva el código en
+  Supabase para ese navegador. El primer navegador puede volver a abrirlo
+  mientras conserve sus datos del sitio. Los demás ven «Este QR Dorado solo
+  se puede escanear una vez. Ya no está disponible para canje». Al primer
+  escaneo se muestra el mensaje
   «¡BINGO!», el código de canje en un recuadro y la indicación de llevar una
-  captura a Recepción Solidaria antes de las 17:45. La **Ruta QR** vuelve a
-  mostrar tres tarjetas escaneables marcadas **De prueba**. Cada una abre
-  una vista de escaneo que indica dónde encontrar el QR impreso.
+  captura a Recepción Solidaria antes de las 17:45. La **Ruta QR** y los
+  enlaces antiguos de prueba remiten a los QR Dorados impresos en la
+  facultad.
 - **Recepción Solidaria → Canjear** admite `CIYA-ORO-01`, `CIYA-ORO-02`
   y `CIYA-ORO-03`. El formulario ajusta mayúsculas y separadores al enviar.
   El operador verifica la captura y la credencial. El primer canje de cada
@@ -141,7 +145,9 @@ CIYA-navidad-2026/
 │  │  ├─ 0007_group_details.sql    # ficha pública de un grupo inscrito
 │  │  ├─ 0008_recepcion_sin_horario.sql # captura en recepción hasta el sellado
 │  │  ├─ 0009_registros_sin_horario.sql # inscripción y QR Dorados sin bloqueo de horario
-│  │  └─ 0010_qr_dorados_codigo_fijo.sql # códigos fijos emitidos al escanear el QR oficial
+│  │  ├─ 0010_qr_dorados_codigo_fijo.sql # códigos fijos emitidos al escanear el QR oficial
+│  │  ├─ 0011_qr_dorados_primer_escaneo.sql # reserva por primer navegador
+│  │  └─ 0012_qr_dorados_reinicio_pruebas.sql # reinicio de reservas para desarrollo
 │  └─ functions/ciya-receipts/     # Edge Function → Brevo
 ├─ tests/
 │  └─ unit/                        # draw, ui, lantern-matrix, ignition, sound y local-stage
@@ -187,7 +193,11 @@ mensajes del muro y donaciones fuera de horario. `0009_registros_sin_horario.sql
 extiende esa disponibilidad a la inscripción de villancicos y a la emisión y
 el canje de claves de QR Dorados. `0010_qr_dorados_codigo_fijo.sql` hace que
 el código fijo se habilite al escanear el QR oficial y siga aceptándose
-hasta el primer canje o el sellado. Las 17:45 indican la hora de
+hasta el primer canje o el sellado. `0011_qr_dorados_primer_escaneo.sql`
+reserva cada QR en una transacción y cambia la RPC a
+`ciya_gold(secret, scan_token)`. Los códigos emitidos antes de la migración
+se consideran escaneados y se pueden canjear con la captura original. Las
+17:45 indican la hora de
 presentación en la mesa. La curaduría y la exportación pueden realizarse
 desde que se reciben las frases.
 
@@ -233,6 +243,8 @@ query** y ejecutarlo **uno por uno**, en este orden exacto:
 0008_recepcion_sin_horario.sql habilita captura en recepción hasta el sellado
 0009_registros_sin_horario.sql habilita inscripción y canje sin horario
 0010_qr_dorados_codigo_fijo.sql emite CIYA-ORO-01, CIYA-ORO-02 y CIYA-ORO-03
+0011_qr_dorados_primer_escaneo.sql reserva cada QR para el primer navegador
+0012_qr_dorados_reinicio_pruebas.sql agrega el reinicio de escaneos para desarrollo
 ```
 
 No pegar todas las migraciones juntas. Si una marca error, detenerse y corregir antes de
@@ -344,6 +356,8 @@ supabase functions deploy ciya-receipts
 | `0008_recepcion_sin_horario.sql` | Acreditación, registro del muro y donaciones en cualquier fecha hasta el sellado |
 | `0009_registros_sin_horario.sql` | Inscripción de villancicos y emisión y canje de QR Dorados fuera del horario del evento |
 | `0010_qr_dorados_codigo_fijo.sql` | Código fijo por QR oficial, válido desde el escaneo hasta el primer canje o el sellado |
+| `0011_qr_dorados_primer_escaneo.sql` | Reserva del código para el primer navegador y aviso en escaneos posteriores |
+| `0012_qr_dorados_reinicio_pruebas.sql` | Botón de reinicio para administradores en una base habilitada para pruebas |
 
 Si las migraciones ya están aplicadas, omitir `supabase db push`. Si falta
 alguna, no editar los archivos anteriores: agregar una migración nueva.
@@ -439,6 +453,25 @@ Las horas son de Ecuador continental (UTC−05:00). Ante discrepancias entre los
 documentos fuente prevalece el cronograma de las bases oficiales.
 
 ## Verificación
+
+### Reiniciar escaneos de QR Dorados en desarrollo
+
+En la base de desarrollo, aplica la migración
+`0012_qr_dorados_reinicio_pruebas.sql` y habilita el botón desde el SQL Editor:
+
+```sql
+update ciya.event set gold_test_reset_enabled = true where singleton;
+```
+
+Abre **Administración → Impresión privada de los QR Dorados → Reiniciar
+escaneos de QR Dorados (pruebas)**. El botón libera las reservas y las claves
+emitidas de los QR pendientes de canje para que los mismos impresos se puedan
+escanear desde otro navegador. Se conservan los canjes y los boletos emitidos.
+El botón aparece para administradores con la base habilitada y la recepción
+abierta. Para ocultarlo y retirar el permiso de reinicio, vuelve a establecer
+`gold_test_reset_enabled = false`.
+
+### Comprobaciones del proyecto
 
 ```bash
 cd /home/eser/Documentos/GitHub/CIYA-navidad-2026

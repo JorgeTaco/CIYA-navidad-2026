@@ -53,7 +53,7 @@ test('qr.js renderiza código QR en cada tarjeta de mensajes navideños y muestr
     return el;
   }
 
-  ['qr-root', 'ruta-index', 'ruta-detalle', 'lista-mensajes', 'lista-trivias', 'lista-memes', 'lista-dorados']
+  ['qr-root', 'ruta-index', 'ruta-detalle', 'lista-mensajes', 'lista-trivias', 'lista-memes']
     .forEach(makeEl);
 
   const context = createContext({
@@ -86,13 +86,8 @@ test('qr.js renderiza código QR en cada tarjeta de mensajes navideños y muestr
 
   const index = elements.get('ruta-index').innerHTML;
   assert.match(index, /QR Dorados impresos en la facultad/);
-  assert.doesNotMatch(index, /CIYA-ORO-0[1-3]|reset-dorados/);
-  const goldPreviews = elements.get('lista-dorados').innerHTML;
-  for (const slot of [1, 2, 3]) {
-    const url = new URL('qr.html?id=dorado-' + slot, context.location.href).href;
-    assert.ok(goldPreviews.includes(QRCode.toSvg(url, { label: 'QR Dorado ' + slot + ' de prueba' })));
-  }
-  assert.doesNotMatch(goldPreviews, /CIYA-ORO|#dorado=/);
+  assert.doesNotMatch(index, /CIYA-ORO-0[1-3]|lista-dorados|reset-dorados/);
+  assert.doesNotMatch(index.match(/<section[^>]+id="dorados">[\s\S]*?<\/section>/)[0], /<svg|de prueba/i);
 
   const mensajesHtml = elements.get('lista-mensajes').innerHTML;
   for (const item of context.CIYA_DATA.mensajesQR) {
@@ -252,6 +247,7 @@ test('QR Dorados: muestran el mensaje y el código oficial por separado mientras
   for (const [status, message] of [
     ['invalid', 'Código no válido.'],
     ['claimed', 'Este QR Dorado ya fue canjeado.'],
+    ['scanned', 'Este QR Dorado solo se puede escanear una vez. Ya no está disponible para canje.'],
     ['closed', 'Recepción ya selló los registros de canje.']
   ]) {
     const { elements } = await runQr({ status });
@@ -262,7 +258,6 @@ test('QR Dorados: muestran el mensaje y el código oficial por separado mientras
 
   const legacy = await runQr(null, '?id=dorado-1', '');
   assert.deepEqual(legacy.requests, []);
-  assert.match(legacy.elements.get('ruta-detalle').innerHTML, /QR Dorado 1 de prueba/);
   assert.match(legacy.elements.get('ruta-detalle').innerHTML, /Escanea el QR Dorado impreso/);
-  assert.doesNotMatch(legacy.elements.get('ruta-detalle').innerHTML, /CIYA-ORO-01|gold-code/);
+  assert.doesNotMatch(legacy.elements.get('ruta-detalle').innerHTML, /CIYA-ORO-01|gold-code|de prueba/i);
 });

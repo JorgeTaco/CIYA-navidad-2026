@@ -68,7 +68,6 @@
       <section class="section card" id="dorados">
         <h2>QR Dorados</h2>
         <p>Escanea uno de los tres QR Dorados impresos en la facultad para ver tu código de canje. El primer estudiante que valide cada hallazgo en Recepción Solidaria gana tres boletos extra.</p>
-        <div class="grid auto" id="lista-dorados"></div>
       </section>
       <section class="section card">
         <h2>Impresión de la ruta</h2>
@@ -85,10 +84,6 @@
     document.getElementById('lista-memes').innerHTML = Data.memes.map(function (m) {
       return renderQrCard(m, m.ubicacion || 'Meme', m.plantilla, 'Código QR para meme ' + m.plantilla, 'Escanea con tu teléfono para ver el meme');
     }).join('');
-    document.getElementById('lista-dorados').innerHTML = [1, 2, 3].map(function (number) {
-      const title = 'QR Dorado ' + number;
-      return renderQrCard({ id: 'dorado-' + number }, 'De prueba', title, title + ' de prueba', 'Escanea para comprobar la lectura.');
-    }).join('');
     target.querySelector('[data-print-route]').onclick = function () { window.print(); };
   }
 
@@ -96,13 +91,12 @@
     const mensaje = Data.mensajesQR.find(function (m) { return m.id === id; });
     const trivia = Data.trivias.find(function (t) { return t.id === id; });
     const meme = Data.memes.find(function (m) { return m.id === id; });
-    const preview = /^dorado-([1-3])$/.exec(id);
     document.getElementById('ruta-index').hidden = true;
     const target = document.getElementById('ruta-detalle');
     target.hidden = false;
 
-    if (preview) {
-      target.innerHTML = '<article class="event-hero qr-story gold-view"><h1>QR Dorado ' + preview[1] + ' de prueba</h1>' +
+    if (/^dorado-[1-3]$/.test(id)) {
+      target.innerHTML = '<article class="event-hero qr-story gold-view"><h1>QR Dorados</h1>' +
         '<p>Escanea el QR Dorado impreso en la facultad para obtener el código de canje.</p>' +
         '<a class="btn ghost" href="qr.html#dorados">Ver la Ruta QR</a></article>';
     } else if (mensaje) {
@@ -184,6 +178,7 @@
         const result = await Store.gold(secret);
         const labels = {
           invalid: 'Código no válido.', claimed: 'Este QR Dorado ya fue canjeado.',
+          scanned: 'Este QR Dorado solo se puede escanear una vez. Ya no está disponible para canje.',
           closed: 'Recepción ya selló los registros de canje.'
         };
         if (labels[result.status]) {

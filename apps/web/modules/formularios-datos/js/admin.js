@@ -44,9 +44,12 @@
         </section>
         <section class="section card" id="admin-gold">
           <h2>Impresión privada de los QR Dorados</h2>
-          <p>Imprime los tres QR oficiales para colocarlos en la facultad. Mantén privado este listado.</p>
+          <p>Imprime los tres QR oficiales para colocarlos en la facultad. El primer escaneo reserva el código de canje. Mantén privado este listado.</p>
           <div class="grid auto gold-print-grid" id="gold-links"></div>
-          <button class="btn" id="print-gold">Imprimir listado privado</button>
+          <div class="row">
+            <button class="btn" id="print-gold" type="button">Imprimir listado privado</button>
+            <button class="btn ghost" id="reset-gold-tests" type="button" hidden>Reiniciar escaneos de QR Dorados (pruebas)</button>
+          </div>
         </section>
         <section class="section card" id="admin-import">
           <h2>Importar respaldo de la primera versión</h2>
@@ -212,6 +215,28 @@
     });
   }
 
+  async function setupGoldTestReset() {
+    const button = document.getElementById('reset-gold-tests');
+    try {
+      const capability = await Store.goldTestReset(false);
+      if (capability.enabled !== true) return;
+    } catch {
+      return;
+    }
+    button.hidden = false;
+    button.addEventListener('click', async function () {
+      button.disabled = true;
+      try {
+        const result = await Store.goldTestReset(true);
+        UI.toast(result.reset ? 'Los QR Dorados pendientes se pueden volver a escanear.' : 'No hay escaneos pendientes que reiniciar.');
+      } catch (error) {
+        UI.toast(error.message, 'bad');
+      } finally {
+        button.disabled = false;
+      }
+    });
+  }
+
   function setup() {
     document.getElementById('puerta-carrera').innerHTML = Data.carreras.map(function (c) {
       return '<option value="' + c.id + '">' + esc(c.nombre) + '</option>';
@@ -245,6 +270,7 @@
     window.addEventListener('afterprint', function () { document.body.classList.remove('print-gold'); });
     setupImport();
     setupDiscardDialog();
+    setupGoldTestReset();
 
     document.getElementById('export-aprobados').addEventListener('click', function () { exportDeseos(true); });
     document.getElementById('export-todos').addEventListener('click', function () { exportDeseos(false); });
