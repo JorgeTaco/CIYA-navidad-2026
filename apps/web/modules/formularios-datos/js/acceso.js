@@ -11,7 +11,6 @@
           <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
         </div>
         <div class="access-banner-copy">
-          <div class="access-event-date">${UI.icon('calendar_month')} 4 de diciembre · Hall principal CIYA</div>
           <h1 id="access-title">Ingenio que ilumina <em>la Navidad</em></h1>
           <p>CIYA Navidad 2026</p>
         </div>
@@ -86,7 +85,6 @@
         </div>
         <h3 id="access-modules-title">Elige un módulo</h3>
         <nav class="grid access-module-menu" id="acceso-role-cards" aria-labelledby="access-modules-title"></nav>
-        <button class="btn ghost small" id="acceso-logout" type="button">Cerrar sesión</button>
       </section>`;
   }
 
@@ -163,7 +161,6 @@
     mount();
     UI.initNav('acceso');
 
-    byId('acceso-logout').addEventListener('click', UI.logout);
     byId('btn-asistente').addEventListener('click', function () {
       if (Store.configured()) Store.enterAsistente();
       location.replace('portal.html');
