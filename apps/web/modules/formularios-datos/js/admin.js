@@ -2,6 +2,7 @@
   const UI = window.CIYA_UI;
   const Store = window.CIYA_STORE;
   const Data = window.CIYA_DATA;
+  const QRCode = window.CIYA_QR_CODE;
   const esc = UI.escapeHtml;
 
   function template() {
@@ -43,8 +44,8 @@
         </section>
         <section class="section card" id="admin-gold">
           <h2>Impresión privada de los QR Dorados</h2>
-          <p>Usa estas URLs en el generador de QR. Distribuye solo los tres impresos y guarda este listado en privado.</p>
-          <div id="gold-links"></div>
+          <p>Imprime los tres QR oficiales para colocarlos en la facultad. Mantén privado este listado.</p>
+          <div class="grid auto gold-print-grid" id="gold-links"></div>
           <button class="btn" id="print-gold">Imprimir listado privado</button>
         </section>
         <section class="section card" id="admin-import">
@@ -268,8 +269,17 @@
 
     document.getElementById('gold-links').innerHTML = (state.goldLinks || []).map(function (gold) {
       const url = new URL('qr.html#dorado=' + gold.secret, location.href).href;
-      return '<p>QR Dorado ' + gold.slot + ' · <span class="break-url">' + esc(url) +
-        '</span> <button class="btn small" data-copy-gold="' + esc(url) + '">Copiar URL</button></p>';
+      const title = 'QR Dorado ' + gold.slot;
+      let qr = '';
+      try {
+        qr = QRCode.toSvg(url, { label: 'Código oficial del ' + title, margin: 4 });
+      } catch {}
+      return `<article class="card gold-print-card">
+        <h3>${esc(title)}</h3>
+        ${qr}
+        <p class="break-url">${esc(url)}</p>
+        <button class="btn small" type="button" data-copy-gold="${esc(url)}">Copiar URL</button>
+      </article>`;
     }).join('');
     document.querySelectorAll('[data-copy-gold]').forEach(function (button) {
       button.onclick = function () { UI.copy(button.dataset.copyGold); };

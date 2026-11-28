@@ -23,10 +23,12 @@ el backend es el proyecto Supabase de `supabase/`.
   comprobante de la operación. La confirmación del Muro de la Empatía se
   encuentra en **Acreditar**.
 - Los tres **QR Dorados** oficiales se obtienen en **Administración →
-  Impresión privada de los QR Dorados**. Al escanearlos se muestra el mensaje
+  Impresión privada de los QR Dorados**, donde se pueden escanear, imprimir
+  o copiar sus URL. Al escanearlos se muestra el mensaje
   «¡BINGO!», el código de canje en un recuadro y la indicación de llevar una
-  captura a Recepción Solidaria antes de las 17:45. Los enlaces públicos de
-  prueba ahora indican que se debe escanear el QR impreso.
+  captura a Recepción Solidaria antes de las 17:45. La **Ruta QR** vuelve a
+  mostrar tres tarjetas escaneables marcadas **De prueba**. Cada una abre
+  una vista de escaneo que indica dónde encontrar el QR impreso.
 - **Recepción Solidaria → Canjear** admite `CIYA-ORO-01`, `CIYA-ORO-02`
   y `CIYA-ORO-03`. El formulario ajusta mayúsculas y separadores al enviar.
   El operador verifica la captura y la credencial. El primer canje de cada
