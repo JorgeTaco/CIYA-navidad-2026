@@ -1,14 +1,112 @@
 .reception-page .container { max-width: 57rem; }
+.reception-page .reception-operation { max-width: 43rem; }
 .reception-heading h1 { margin: 0; }
-.reception-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .35rem; padding: .3rem; margin-bottom: .7rem; border: 1px solid var(--line); border-radius: 13px; background: var(--bg-soft); }
-.reception-tabs button { padding: .5rem .3rem; min-height: 44px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: var(--muted); font: inherit; font-weight: 750; cursor: pointer; }
-.reception-tabs button:hover { color: var(--text); border-color: var(--line); }
-.reception-tabs [aria-selected="true"] { color: var(--action-ink); background: var(--primary); }
+.reception-nav {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .4rem;
+  margin-bottom: 1rem;
+  padding: .4rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+}
+.reception-nav .btn { padding-inline: .35rem; }
+.reception-nav .ghost { border-color: transparent; }
 .wall-confirmation, .receipt-card, .gold-availability { margin: .75rem 0 0; }
-.wall-confirmation form, .record-list summary + div { margin-top: 1rem; }
+.wall-confirmation form { margin-top: 1rem; }
 .gold-availability { display: flex; flex-wrap: wrap; gap: .4rem; }
 .receipt-card { border-color: #8abeb1; overflow-wrap: anywhere; }
 .receipt-card h2 { font-size: 1.25rem; }
 .ticket-list { max-height: 12rem; overflow: auto; font-variant-numeric: tabular-nums; }
 #form-checkin details { margin: 1rem 0; }
-.record-list { min-width: 0; margin-bottom: 0; }
+
+.reception-records {
+  display: grid;
+  gap: .75rem;
+}
+.reception-records .record-list {
+  --record-ink: var(--green);
+  --record-surface: var(--green-soft);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--surface-gradient);
+}
+.reception-records .record-list-donaciones {
+  --record-ink: var(--gold);
+  --record-surface: var(--gold-soft);
+}
+.record-summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: .75rem;
+  padding: .85rem 1rem;
+  list-style: none;
+}
+.record-summary::-webkit-details-marker { display: none; }
+.record-summary:hover { background: color-mix(in srgb, var(--record-surface) 55%, transparent); }
+.record-summary:focus-visible { outline-offset: -3px; }
+.record-list[open] > .record-summary { border-bottom: 1px solid var(--line); }
+.record-title {
+  color: var(--primary);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+.record-summary .feature-icon, .record-count {
+  background: var(--record-surface);
+  color: var(--record-ink);
+}
+.record-count {
+  min-width: 2.25rem;
+  padding: .2rem .55rem;
+  border-radius: 999px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.record-chevron {
+  width: .55rem;
+  height: .55rem;
+  margin-inline: .2rem;
+  border: solid var(--muted);
+  border-width: 0 2px 2px 0;
+  transform: translateY(-.12rem) rotate(45deg);
+}
+.record-list[open] .record-chevron { transform: translateY(.12rem) rotate(225deg); }
+.record-content { padding: .9rem 1rem 1rem; }
+.record-content .table-wrap { background: var(--panel); }
+.record-content tbody tr:nth-child(even) { background: var(--bg-soft); }
+.record-content :is(th, td) { white-space: normal; overflow-wrap: anywhere; }
+.record-content td:first-child { color: var(--primary); font-weight: 800; }
+.record-list-asistentes td:nth-child(2),
+.record-list-donaciones td:nth-last-child(-n + 2) { font-variant-numeric: tabular-nums; }
+.record-content .empty {
+  margin: 0;
+  padding: .75rem .9rem;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  font-style: normal;
+}
+
+@media (max-width: 640px) {
+  .record-summary { gap: .55rem; padding: .75rem; }
+  .record-content { padding: .75rem; }
+  .record-content .table-stack { background: transparent; }
+  .record-content .table-stack tbody tr { padding: .45rem .7rem; background: var(--panel); }
+  .record-content .table-stack tr:last-child { margin-bottom: 0; }
+  .record-content .table-stack td:first-child {
+    grid-template-columns: minmax(0, 1fr);
+    margin-bottom: .2rem;
+    padding-bottom: .5rem;
+    border-bottom: 1px solid var(--line);
+    font-size: .95rem;
+  }
+  .record-content .table-stack td:first-child .table-label { display: none; }
+}
+
+@media (max-width: 480px) {
+  .reception-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

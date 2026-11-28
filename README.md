@@ -16,6 +16,20 @@ el backend es el proyecto Supabase de `supabase/`.
   Puertas Decoradas muestran los criterios y sus descripciones. Las
   ponderaciones y el total de 100 puntos se usan en los formularios de
   calificación de Escenario y Administración.
+- **Recepción Solidaria** abre en **Resumen**, con el ranking, la exportación
+  CSV, las listas de registros y el sellado. **Acreditar**, **Donar** y
+  **Canjear** abren vistas propias mediante `recepcion.html?modo=acreditar`,
+  `?modo=donar` y `?modo=canjear`. Cada vista muestra su formulario y el
+  comprobante de la operación. La confirmación del Muro de la Empatía se
+  encuentra en **Acreditar**.
+- En **Canjear**, la clave oficial de QR Dorado se convierte a mayúsculas y
+  se eliminan espacios y guiones al escribir o pegar. Si el formato es
+  incorrecto, el campo indica cómo corregirlo dentro del formulario.
+  Los códigos de prueba de la Ruta QR muestran un aviso específico.
+- En el **Resumen** de Recepción Solidaria, las tarjetas desplegables de
+  **Asistentes registrados** y **Donaciones registradas** destacan sus
+  totales con iconos y colores. Los registros se leen en tablas de ancho
+  completo en escritorio y en fichas apiladas en móvil.
 - La portada de acceso contiene el selector de módulos. La navegación pública se muestra abajo en móvil y en la cabecera en escritorio con Portal, Ruta QR y Cronograma. Las cuentas con varios roles regresan desde Recepción, Escenario o Administración a **Sesión activa** para abrir otro módulo. En la consola local se oculta esa barra.
 - El Mar de Linternas usa los tonos y el marco LED del ejemplo. Los botones **Mín.**, **Med.** y **Máx.** ajustan el brillo visual y guardan la preferencia localmente. La URL directa dibuja solo la linterna y permite cambiar de mensaje, carrera y nivel de brillo tras desconectar la red. La pausa de la marquesina, las partes de movimiento reducido y la pantalla completa siguen disponibles en sus modos correspondientes.
 - Ruta QR, Cronograma, Recepción, Administración y Escenario comparten tarjetas, formularios, tablas y estados visuales. La superficie proyectada permanece oscura y conserva la relación 16:9. El servidor de escenario sirve las fuentes desde la laptop. Se conservan los contratos de Supabase, los archivos de respaldo y las exportaciones.
