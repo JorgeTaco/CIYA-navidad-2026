@@ -146,12 +146,12 @@
         <h1 id="gold-title">QR Dorado CIYA 2026</h1>
         <p id="gold-status" role="status"></p>
         <div id="gold-reward" hidden>
-          <p class="qr-message">Acabas de desbloquear un premio instantáneo y +3 boletos extra para la Gran Ruleta Digital de hoy.</p>
+          <p class="qr-message">Acabas de desbloquear un premio instantáneo y +3 boletos extra para la Gran Ruleta Digital.</p>
           <div class="gold-credential">
             <span>Código de canje</span>
             <code class="gold-code" id="gold-code"></code>
           </div>
-          <p><strong>¿Qué debes hacer?</strong> Toma una captura de pantalla ahora mismo y preséntate en la Mesa de Recepción Solidaria antes de las 17:45 para validar tu hallazgo. (Válido únicamente para el primer estudiante en canjearlo).</p>
+          <p><strong>¿Qué debes hacer?</strong> Toma una captura de pantalla ahora mismo y preséntate en la Mesa de Recepción Solidaria mientras el registro siga abierto. El canje es válido únicamente para el primer estudiante que lo complete.</p>
         </div>
         <button class="btn" id="gold-refresh" type="button" hidden>Reintentar</button>
         <a class="btn ghost" href="qr.html#dorados">Ver la Ruta QR</a>

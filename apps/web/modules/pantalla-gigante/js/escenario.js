@@ -66,7 +66,7 @@
 
             <section class="card tab-panel" data-panel="deseos" hidden>
               <h2>Frases aprobadas</h2>
-              <p class="muted">Rotación automática cada 8 segundos durante la chocolatada final (19:25 – 20:15).</p>
+              <p class="muted">Al iniciar la rotación, se muestra una frase nueva cada 8 segundos.</p>
               <div class="row"><button class="btn small" id="deseos-play">Iniciar rotación</button><button class="btn small ghost" id="deseos-stop">Detener</button></div>
               <div id="deseos-lista" style="margin-top:1rem"></div>
             </section>
@@ -89,7 +89,7 @@
 
             <section class="card tab-panel" data-panel="respaldo" hidden>
               <h2>Respaldo local</h2>
-              <p class="muted">A las 17:45, descarga el JSON con la lista completa de boletos y el marcador final de donaciones. La ruleta, el ranking y el encendido siguen funcionando sin internet.</p>
+              <p class="muted">Cuando Recepción selle los datos, descarga el JSON con los boletos y el marcador final de donaciones. La ruleta, el ranking y el encendido siguen funcionando sin internet.</p>
               <button class="btn primary wide" id="backup-download" disabled>Descargar Respaldo Local (JSON)</button>
               <div class="field" style="margin-top:1rem"><label for="backup-file">Restaurar desde archivo</label><input id="backup-file" type="file" accept="application/json,.json"></div>
               <button class="btn wide" id="backup-load">Cargar respaldo</button>
@@ -183,7 +183,7 @@
           Math.max(0, Math.ceil((pending.expiresAt - Date.now()) / 1000)) + ' s' : '') :
           spinning ? 'Girando…' : 'Listo para el siguiente giro') + '</p>';
     } else {
-      screen.innerHTML = '<span class="kicker">Respaldo local</span><h2>Modo contingencia</h2><p class="muted">Descarga el JSON después de que recepción selle los datos a las 17:45.</p>';
+      screen.innerHTML = '<span class="kicker">Respaldo local</span><h2>Modo contingencia</h2><p class="muted">Descarga el JSON cuando Recepción selle los datos.</p>';
     }
   }
 
@@ -472,7 +472,7 @@
 
     document.getElementById('backup-download').onclick = function () {
       const snapshot = (draw && draw.snapshot) || Store.get().snapshot;
-      if (!snapshot) return UI.toast('Recepción debe sellar los datos a las 17:45.', 'warn');
+      if (!snapshot) return UI.toast('Recepción debe sellar los datos para generar el respaldo.', 'warn');
       UI.download('ciya2026-escenario-v2.json', JSON.stringify(snapshot, null, 2));
     };
     document.getElementById('backup-load').onclick = async function () {

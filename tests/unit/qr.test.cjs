@@ -240,8 +240,9 @@ test('QR Dorados: muestran el mensaje y el código oficial por separado mientras
     const html = elements.get('ruta-detalle').innerHTML;
     assert.match(html, /<code class="gold-code" id="gold-code"><\/code>/);
     assert.match(html, /premio instantáneo y \+3 boletos extra/);
-    assert.match(html, /Toma una captura de pantalla ahora mismo y preséntate en la Mesa de Recepción Solidaria antes de las 17:45/);
-    assert.match(html, /Válido únicamente para el primer estudiante en canjearlo/);
+    assert.match(html, /Toma una captura de pantalla ahora mismo y preséntate en la Mesa de Recepción Solidaria mientras el registro siga abierto/);
+    assert.match(html, /válido únicamente para el primer estudiante que lo complete/);
+    assert.doesNotMatch(html, /17:45|de hoy/);
   }
 
   for (const [status, message] of [

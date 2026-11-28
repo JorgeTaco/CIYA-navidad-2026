@@ -10,9 +10,13 @@
 
 ## Día del evento
 
+Los horarios son los previstos para la atención y las presentaciones en el
+hall. El sistema permite registrar y sellar en cualquier fecha.
+
 - 08:00–17:45: donaciones y canjes.
 - 17:00–17:45: acreditación con carrera y ciclo (Nivelación a 8vo).
-- 17:45: marcar cierre de recepción y descargar el respaldo sellado.
+- Al terminar la atención, confirmar el cierre de recepción y descargar el
+  respaldo sellado desde Escenario.
 - Escenario sin red: `python3 tools/local-stage.py` y abrir
   `http://127.0.0.1:8080/escenario.html?modo=local`.
 - 17:45–18:25: villancicos.

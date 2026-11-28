@@ -1,9 +1,6 @@
-.break-url { overflow-wrap: anywhere; }
-
 .gold-print-grid { margin-block: 1rem; }
 .gold-print-card { min-width: 0; text-align: center; }
 .gold-print-card .qr-svg { display: block; width: min(10rem, 100%); height: auto; margin-inline: auto; }
-.gold-print-card .break-url { font-size: .8rem; }
 
 .discard-wish-dialog {
   width: min(26rem, calc(100% - 2rem));

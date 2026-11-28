@@ -146,7 +146,7 @@
           <li>Juguete funcional: 2 boletos extra. Funda de caramelos: 1 boleto extra.</li>
           <li>QR Dorado canjeado: 3 boletos extra.</li>
         </ul>
-        <p class="hint">Horario de atención del evento: acreditación de 17:00 a 17:45 y donaciones y canjes de 08:00 a 17:45. Cada estudiante puede ganar un premio y tiene 45 segundos para presentarse con su identificación.</p>
+        <p class="hint">Recepción admite registros y canjes hasta que el equipo confirme el cierre. Consulta el cronograma para conocer el horario de atención presencial. Cada estudiante puede ganar un premio y tiene 45 segundos para presentarse con su identificación.</p>
       </section>
 
       <section class="section card" id="muro">
@@ -159,7 +159,7 @@
         <div class="card">
           <div class="grid cols-2">
             <div><h3>Espacios asignados</h3><div id="espacios-puertas"></div></div>
-            <div><h3>Matriz de evaluación</h3><div id="criterios-puertas"></div><p class="hint">Instalación hasta las 15:00. Jurado: 15:30 – 16:45. Se prioriza reciclaje, bajo costo y protección de bienes institucionales.</p></div>
+            <div><h3>Matriz de evaluación</h3><div id="criterios-puertas"></div><p class="hint">El cronograma prevé la instalación hasta las 15:00 y la evaluación de 15:30 a 16:45. Se prioriza reciclaje, bajo costo y protección de bienes institucionales.</p></div>
           </div>
         </div>
       </section>

@@ -150,7 +150,7 @@
         ${recordList('donaciones', 'Donaciones registradas', 'favorite')}
       </section>
       <section class="section card">
-        <div class="row between"><div><h3>Cierre de recepción</h3><p class="muted">El sellado se habilita a las 17:45 del día del evento. Al sellar, la consola de escenario puede descargar el respaldo local JSON de la ruleta y el ranking.</p></div><button class="btn danger" id="btn-cerrar" disabled>Marcar cierre de recepción</button></div>
+        <div class="row between"><div><h3>Cierre de recepción</h3><p class="muted">Cuando termines de registrar los datos, marca el cierre para sellarlos y generar el respaldo local de la ruleta y el ranking.</p></div><button class="btn danger" id="btn-cerrar" disabled>Marcar cierre de recepción</button></div>
         <p id="estado-cierre"></p>
       </section>`;
   }
@@ -240,10 +240,9 @@
         return [esc(item.nombre || item.cedula), esc(Store.carrera(item.carrera).nombre), esc(item.tipo), item.cantidad, item.puntos];
       }), true);
     const sealed = state.sealed === true;
-    const canSeal = !sealed && state.recepcionCerrada === true;
     byId('estado-cierre').textContent = sealed ? 'Datos sellados. El respaldo está disponible en escenario.' :
-      'Puedes registrar información en cualquier fecha hasta el sellado.';
-    byId('btn-cerrar').disabled = !canSeal;
+      'Recepción está abierta. Puedes registrar información o confirmar el cierre en cualquier fecha.';
+    byId('btn-cerrar').disabled = sealed;
   }
 
   function renderOperation(state) {
@@ -325,7 +324,7 @@
 
   function setupOverview() {
     byId('btn-cerrar').onclick = async function (event) {
-      if (!confirm('¿Sellar el registro final para el respaldo de escenario?')) return;
+      if (!confirm('¿Sellar la recepción? Se cerrará el registro y se generará el respaldo final de Escenario.')) return;
       await UI.submit(event, 'seal', {}, true, function () { UI.toast('Recepción sellada.'); });
       renderOverview(Store.get());
     };

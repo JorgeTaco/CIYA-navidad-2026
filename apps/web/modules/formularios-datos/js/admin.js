@@ -31,7 +31,7 @@
         <section class="section grid cols-2">
           <form class="card" id="form-puerta">
             <h2>Evaluación de Puertas Decoradas</h2>
-            <p class="muted">Jurado: viernes 4 de diciembre, 15:30 – 16:45. Matriz de 100 puntos.</p>
+            <p class="muted">El jurado tiene prevista la evaluación el viernes 4 de diciembre, de 15:30 a 16:45. Matriz de 100 puntos.</p>
             <div class="field"><label for="puerta-carrera">Carrera evaluada</label><select id="puerta-carrera"></select></div>
             <div id="puerta-criterios"></div>
             <div class="field"><label for="puerta-notas">Observaciones</label><textarea id="puerta-notas" maxlength="400"></textarea></div>
@@ -53,10 +53,20 @@
           ${goldTestResetUi ? '<p class="hint" id="gold-test-reset-status" role="status">Comprobando si el reinicio está habilitado en la base conectada…</p>' : ''}
           <div class="grid auto gold-print-grid" id="gold-links"></div>
         </section>
-        <section class="section card" id="admin-import">
-          <h2>Importar respaldo de la primera versión</h2>
-          <p>Revisa los datos antes de importarlos a una instancia nueva. Confirma solo las acreditaciones verificadas presencialmente.</p>
-          <input type="file" id="legacy-file" accept=".json,application/json">
+        <section class="section card" id="admin-import" aria-labelledby="legacy-import-title">
+          <h2 id="legacy-import-title">Importar respaldo de la primera versión</h2>
+          <p>Recupera asistentes, donaciones, canjes, grupos de villancicos, deseos y evaluaciones desde un archivo JSON de la primera versión de CIYA Navidad.</p>
+          <p class="hint">La importación se realiza una sola vez en una base de datos vacía, antes de sellar Recepción.</p>
+          <ol>
+            <li>Selecciona el archivo y pulsa <strong>Revisar archivo</strong> para ver el resumen de los datos.</li>
+            <li>Marca solo las acreditaciones que ya se verificaron presencialmente. Los demás asistentes quedarán pendientes de acreditar.</li>
+            <li>Pulsa <strong>Importar respaldo revisado</strong> para guardar los registros.</li>
+          </ol>
+          <div class="field">
+            <label for="legacy-file">Archivo de respaldo de la primera versión (.json)</label>
+            <input type="file" id="legacy-file" accept=".json,application/json" aria-describedby="legacy-file-help">
+            <p class="hint" id="legacy-file-help">El respaldo sellado para la ruleta se carga en <strong>Escenario → Respaldo local</strong>.</p>
+          </div>
           <button class="btn" id="legacy-preview">Revisar archivo</button>
           <div id="legacy-report" aria-live="polite"></div>
           <button class="btn primary" id="legacy-apply" hidden>Importar respaldo revisado</button>
@@ -94,7 +104,10 @@
         const file = input.files[0];
         if (!file) throw new Error('Selecciona un respaldo de la primera versión.');
         const backup = JSON.parse(await file.text());
-        if (!backup || !Array.isArray(backup.attendees) || backup.version === 2) {
+        if (backup?.version === 2) {
+          throw new Error('Carga el respaldo sellado de la ruleta desde Escenario → Respaldo local.');
+        }
+        if (!backup || !Array.isArray(backup.attendees)) {
           throw new Error('El archivo debe contener la lista de asistentes de la primera versión.');
         }
         const records = ['donations', 'groups', 'deseos', 'scores', 'puertas', 'qrClaims', 'muro', 'winners'];
@@ -307,20 +320,15 @@
     document.getElementById('gold-links').innerHTML = (state.goldLinks || []).map(function (gold) {
       const url = new URL('qr.html#dorado=' + gold.secret, location.href).href;
       const title = 'QR Dorado ' + gold.slot;
-      let qr = '';
+      let qr = '<p class="muted">No se pudo generar este QR.</p>';
       try {
         qr = QRCode.toSvg(url, { label: 'Código oficial del ' + title, margin: 4 });
       } catch {}
       return `<article class="card gold-print-card">
         <h3>${esc(title)}</h3>
         ${qr}
-        <p class="break-url">${esc(url)}</p>
-        <button class="btn small" type="button" data-copy-gold="${esc(url)}">Copiar URL</button>
       </article>`;
     }).join('');
-    document.querySelectorAll('[data-copy-gold]').forEach(function (button) {
-      button.onclick = function () { UI.copy(button.dataset.copyGold); };
-    });
 
     const puestos = state.puertas.slice().sort(function (a, b) { return b.total - a.total; });
     document.getElementById('ranking-puertas').innerHTML = puestos.length ? puestos.map(function (p, index) {

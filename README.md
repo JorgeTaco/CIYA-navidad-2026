@@ -23,14 +23,14 @@ el backend es el proyecto Supabase de `supabase/`.
   comprobante de la operación. La confirmación del Muro de la Empatía se
   encuentra en **Acreditar**.
 - Los tres **QR Dorados** oficiales se obtienen en **Administración →
-  Impresión privada de los QR Dorados**, donde se pueden escanear, imprimir
-  o copiar sus URL. El primer escaneo de cada QR reserva el código en
+  Impresión privada de los QR Dorados**. Cada tarjeta muestra el número
+  y el QR para escanear o imprimir. El primer escaneo de cada QR reserva el código en
   Supabase para ese navegador. El primer navegador puede volver a abrirlo
   mientras conserve sus datos del sitio. Los demás ven «Este QR Dorado solo
   se puede escanear una vez. Ya no está disponible para canje». Al primer
   escaneo se muestra el mensaje
   «¡BINGO!», el código de canje en un recuadro y la indicación de llevar una
-  captura a Recepción Solidaria antes de las 17:45. La **Ruta QR** y los
+  captura a Recepción Solidaria mientras el registro esté abierto. La **Ruta QR** y los
   enlaces antiguos de prueba remiten a los QR Dorados impresos en la
   facultad.
 - **Recepción Solidaria → Canjear** admite `CIYA-ORO-01`, `CIYA-ORO-02`
@@ -150,7 +150,8 @@ CIYA-navidad-2026/
 │  │  ├─ 0009_registros_sin_horario.sql # inscripción y QR Dorados sin bloqueo de horario
 │  │  ├─ 0010_qr_dorados_codigo_fijo.sql # códigos fijos emitidos al escanear el QR oficial
 │  │  ├─ 0011_qr_dorados_primer_escaneo.sql # reserva por primer navegador
-│  │  └─ 0012_qr_dorados_reinicio_pruebas.sql # reinicio de reservas para desarrollo
+│  │  ├─ 0012_qr_dorados_reinicio_pruebas.sql # reinicio de reservas para desarrollo
+│  │  └─ 0013_operacion_sin_fecha.sql # cierre manual en cualquier fecha
 │  └─ functions/ciya-receipts/     # Edge Function → Brevo
 ├─ tests/
 │  └─ unit/                        # draw, ui, lantern-matrix, ignition, sound y local-stage
@@ -199,10 +200,10 @@ el código fijo se habilite al escanear el QR oficial y siga aceptándose
 hasta el primer canje o el sellado. `0011_qr_dorados_primer_escaneo.sql`
 reserva cada QR en una transacción y cambia la RPC a
 `ciya_gold(secret, scan_token)`. Los códigos emitidos antes de la migración
-se consideran escaneados y se pueden canjear con la captura original. Las
-17:45 indican la hora de
-presentación en la mesa. La curaduría y la exportación pueden realizarse
-desde que se reciben las frases.
+se consideran escaneados y se pueden canjear con la captura original.
+`0013_operacion_sin_fecha.sql` habilita también el sellado en cualquier fecha.
+El cierre se refleja en las vistas al confirmar el sellado. La curaduría y
+la exportación pueden realizarse desde que se reciben las frases.
 
 ## Requisitos funcionales — Módulo A: Portal y Mar de Linternas
 
@@ -248,6 +249,7 @@ query** y ejecutarlo **uno por uno**, en este orden exacto:
 0010_qr_dorados_codigo_fijo.sql emite CIYA-ORO-01, CIYA-ORO-02 y CIYA-ORO-03
 0011_qr_dorados_primer_escaneo.sql reserva cada QR para el primer navegador
 0012_qr_dorados_reinicio_pruebas.sql agrega el reinicio de escaneos para desarrollo
+0013_operacion_sin_fecha.sql habilita el sellado manual en cualquier fecha
 ```
 
 No pegar todas las migraciones juntas. Si una marca error, detenerse y corregir antes de
@@ -361,6 +363,7 @@ supabase functions deploy ciya-receipts
 | `0010_qr_dorados_codigo_fijo.sql` | Código fijo por QR oficial, válido desde el escaneo hasta el primer canje o el sellado |
 | `0011_qr_dorados_primer_escaneo.sql` | Reserva del código para el primer navegador y aviso en escaneos posteriores |
 | `0012_qr_dorados_reinicio_pruebas.sql` | Botón de reinicio para administradores en una base habilitada para pruebas |
+| `0013_operacion_sin_fecha.sql` | Sellado manual en cualquier fecha y estado de cierre basado en el respaldo sellado |
 
 Si las migraciones ya están aplicadas, omitir `supabase db push`. Si falta
 alguna, no editar los archivos anteriores: agregar una migración nueva.
@@ -436,17 +439,23 @@ la ruta correspondiente y conservan sus parámetros y fragmentos.
 
 ## Operación
 
+- En **Administración → Importar respaldo de la primera versión**, el panel
+  explica qué datos recupera el JSON antiguo, cómo revisar el archivo y
+  cuándo se guardan los registros. Las acreditaciones sin marcar quedan
+  pendientes. El respaldo sellado de la ruleta se carga en **Escenario →
+  Respaldo local**.
 - En **Administración → Curaduría y Evaluación → Buzón «Compilando Deseos
   2027»**, el botón **Descartar** abre una ventana modal dentro de la
   aplicación. **Cancelar** o **Escape** cierran la ventana y conservan
   el mensaje. **Descartar mensaje** confirma la eliminación. **Aprobar**
   aplica la decisión directamente.
-- Horario de atención del evento: donaciones y canjes de 08:00 a 17:45 y
-  acreditación de 17:00 a 17:45. Los formularios admiten registros en cualquier
-  fecha y hora. **Recepción Solidaria** admite acreditaciones, mensajes del
-  Muro de la Empatía, donaciones y canjes hasta sellar los datos.
-- Desde las 17:45 del día del evento se puede sellar desde recepción y descargar
-  el JSON versión 2. El sellado cierra definitivamente el registro.
+- El cronograma indica los horarios previstos para la atención presencial.
+  Los formularios admiten registros en cualquier fecha y hora. **Recepción
+  Solidaria** admite acreditaciones, mensajes del Muro de la Empatía,
+  donaciones y canjes hasta sellar los datos.
+- Cuando terminen los registros, confirma el cierre desde **Recepción
+  Solidaria** en cualquier fecha y descarga el JSON versión 2 desde
+  **Escenario**. El sellado cierra definitivamente el registro de Recepción.
 - Sin red: `python3 tools/local-stage.py` y abrir
   `http://127.0.0.1:8080/escenario.html?modo=local` con usuario `escenario`.
 - 18:20: proyectar el QR de la linterna. 18:25–18:55: acto central.

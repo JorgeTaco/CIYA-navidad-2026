@@ -56,7 +56,7 @@ window.CIYA_DATA = {
       id: 'mensaje-general',
       titulo: 'Mensaje general',
       ubicacion: 'Entrada / Hall',
-      texto: '¡Feliz Navidad, futuro ingeniero! Si sobreviviste a los parciales, a los informes de madrugada y al tráfico, mereces un buen chocolate caliente hoy. ¡Nos vemos desde las 17:00 en el hall para la acreditación!'
+      texto: '¡Feliz Navidad, futuro ingeniero! Si sobreviviste a los parciales, a los informes de madrugada y al tráfico, mereces un buen chocolate caliente. Consulta el cronograma para la acreditación en el hall.'
     },
     {
       id: 'mensaje-electricidad',
@@ -92,7 +92,7 @@ window.CIYA_DATA = {
       id: 'mensaje-solidario',
       titulo: 'Mensaje solidario',
       ubicacion: 'Cerca de los contenedores',
-      texto: 'Ese juguete o funda de caramelos que trajiste hoy es el mejor proyecto de ingeniería del semestre: estás diseñando una sonrisa real.'
+      texto: 'Ese juguete o funda de caramelos que trajiste es el mejor proyecto de ingeniería del semestre: estás diseñando una sonrisa real.'
     }
   ],
   trivias: [
@@ -110,12 +110,12 @@ window.CIYA_DATA = {
       pregunta: '¿Cuál es el verdadero combustible oficial que mantiene encendidos los laboratorios de CIYA en semana de exámenes?',
       opciones: ['Energía solar', 'Café cargado y fe', '220V trifásico'],
       correcta: 1,
-      remate: 'Dato científicamente comprobado. ¡Ve por tu chocolate caliente hoy a las 19:25!'
+      remate: 'Dato científicamente comprobado. ¡Nos vemos en la chocolatada!'
     },
     {
       id: 'trivia-laboratorios',
       ubicacion: 'Laboratorios',
-      pregunta: 'En el encendido de hoy, ¿cuál es el orden exacto de la reacción en cadena "5 Carreras, 1 Energía"?',
+      pregunta: 'En el encendido del árbol, ¿cuál es el orden exacto de la reacción en cadena "5 Carreras, 1 Energía"?',
       opciones: ['Electricidad → Software → Industrial', 'Industrial → Hidráulica → Electromecánica → Software → Electricidad', 'Todos a la vez y que sea lo que Dios quiera'],
       correcta: 1,
       remate: '¡Aprobado! No te pierdas el acto central de 18:25 a 18:55 en el hall.'
@@ -126,7 +126,7 @@ window.CIYA_DATA = {
       pregunta: '¿Qué significa el error HTTP 404 aplicado a tu cuenta bancaria en diciembre?',
       opciones: ['Servidor sobrecargado', 'Aguinaldo Not Found', 'Conexión exitosa'],
       correcta: 1,
-      remate: 'Por suerte hoy el evento y la chocolatada son a costo $0.'
+      remate: 'Por suerte, el evento y la chocolatada son a costo $0.'
     },
     {
       id: 'trivia-banos',
