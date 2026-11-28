@@ -26,7 +26,6 @@
         <p class="hint">La ficha pública del grupo incluye el nombre del representante y la nómina de integrantes.</p>
         <button class="btn primary wide" type="submit"${Store.configured() ? '' : ' disabled'}>Inscribir grupo</button>
         ${Store.configured() ? '' : '<p class="hint">La inscripción estará disponible cuando se configure la conexión.</p>'}
-        <p class="hint">Inscripción oficial abierta hasta el jueves 3 de diciembre de 2026, 17:30.</p>
       </form>`;
   }
 

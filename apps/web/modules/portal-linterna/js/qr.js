@@ -99,7 +99,7 @@
       </section>
       <section class="section card" id="dorados">
         <h2>QR Dorados</h2>
-        <p>El primer estudiante que canjee cada QR Dorado gana tres boletos extra. Muestra la pantalla activa y tu credencial estudiantil en recepción antes de las 17:45.</p>
+        <p>El primer estudiante que canjee cada QR Dorado gana tres boletos extra. Muestra la pantalla activa y tu credencial estudiantil en recepción antes del sellado.</p>
         <div class="grid auto" id="lista-dorados"></div>
         <div class="row qr-gold-tools">
           <button class="btn ghost small" id="reset-dorados" type="button">Reiniciar validación de QR Dorados (pruebas)</button>
@@ -180,7 +180,7 @@
           '<h1>¡' + esc(dorado.titulo) + ' desbloqueado!</h1>' +
           '<p class="qr-message">' + esc(dorado.mensaje) + '</p>' +
           '<div class="gold-code">' + esc(code) + '</div>' +
-          '<p class="muted">Presenta esta pantalla activa y tu credencial estudiantil en recepción antes de las 17:45.</p>' +
+          '<p class="muted">Presenta esta pantalla activa y tu credencial estudiantil en recepción antes del sellado.</p>' +
           '<a class="btn ghost" href="qr.html">Ver toda la ruta</a></article>';
       }
     } else if (mensaje) {
@@ -226,7 +226,7 @@
     const target = document.getElementById('ruta-detalle');
     target.hidden = false;
     target.innerHTML = '<article class="event-hero qr-story gold-view"><h1>QR Dorado CIYA 2026</h1>' +
-      '<p>El primer estudiante que lo canjee obtiene 3 boletos extra. Presenta esta pantalla activa y tu credencial en recepción antes de las 17:45.</p>' +
+      '<p>El primer estudiante que lo canjee obtiene 3 boletos extra. Presenta esta pantalla activa y tu credencial en recepción antes del sellado.</p>' +
       '<p id="gold-status" role="status"></p><div id="gold-code" class="gold-code"></div>' +
       '<button class="btn" id="gold-refresh">Actualizar clave</button></article>';
     document.title = 'QR Dorado | CIYA Navidad 2026';
@@ -249,7 +249,7 @@
         const result = await Store.gold(secret);
         const labels = {
           invalid: 'Código no válido.', claimed: 'Este QR Dorado ya fue canjeado.',
-          closed: 'Canjes disponibles el 4 de diciembre de 08:00 a 17:45.'
+          closed: 'Recepción ya selló los registros de canje.'
         };
         status.textContent = labels[result.status] || 'Clave válida durante dos minutos.';
         if (result.status === 'available') {

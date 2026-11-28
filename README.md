@@ -12,6 +12,10 @@ el backend es el proyecto Supabase de `supabase/`.
   **Ciclo** (Nivelación, 1er a 8vo ciclo). El ciclo se valida en `ciya_write` y se
   conserva en la base con la migración `0006_ciclo.sql`; la lista de asistentes
   muestra el ciclo registrado.
+- En el portal de **Estudiantes y docentes**, las matrices de Villancicos y
+  Puertas Decoradas muestran los criterios y sus descripciones. Las
+  ponderaciones y el total de 100 puntos se usan en los formularios de
+  calificación de Escenario y Administración.
 - La portada de acceso contiene el selector de módulos. La navegación pública se muestra abajo en móvil y en la cabecera en escritorio con Portal, Ruta QR y Cronograma. Las cuentas con varios roles regresan desde Recepción, Escenario o Administración a **Sesión activa** para abrir otro módulo. En la consola local se oculta esa barra.
 - El Mar de Linternas usa los tonos y el marco LED del ejemplo. Los botones **Mín.**, **Med.** y **Máx.** ajustan el brillo visual y guardan la preferencia localmente. La URL directa dibuja solo la linterna y permite cambiar de mensaje, carrera y nivel de brillo tras desconectar la red. La pausa de la marquesina, las partes de movimiento reducido y la pantalla completa siguen disponibles en sus modos correspondientes.
 - Ruta QR, Cronograma, Recepción, Administración y Escenario comparten tarjetas, formularios, tablas y estados visuales. La superficie proyectada permanece oscura y conserva la relación 16:9. El servidor de escenario sirve las fuentes desde la laptop. Se conservan los contratos de Supabase, los archivos de respaldo y las exportaciones.
@@ -112,7 +116,9 @@ CIYA-navidad-2026/
 │  │  ├─ 0004_legacy_import.sql    # importación del respaldo v1
 │  │  ├─ 0005_role_discovery.sql   # RPC ciya_my_roles para acceso por rol
 │  │  ├─ 0006_ciclo.sql            # ciclo de asistentes y grupos inscritos
-│  │  └─ 0007_group_details.sql    # ficha pública de un grupo inscrito
+│  │  ├─ 0007_group_details.sql    # ficha pública de un grupo inscrito
+│  │  ├─ 0008_recepcion_sin_horario.sql # captura en recepción hasta el sellado
+│  │  └─ 0009_registros_sin_horario.sql # inscripción y QR Dorados sin bloqueo de horario
 │  └─ functions/ciya-receipts/     # Edge Function → Brevo
 ├─ tests/
 │  └─ unit/                        # draw, ui, lantern-matrix, ignition, sound y local-stage
@@ -148,14 +154,17 @@ CIYA-navidad-2026/
 | Actor | Acceso y responsabilidad | Implementación |
 | --- | --- | --- |
 | Estudiantes y Docentes (Asistentes) | Portal móvil responsive: Mar de Linternas, inscripción de villancicos, buzón “Compilando Deseos 2027” y Ruta de Códigos QR. | `apps/web/portal.html`, `modules/portal-linterna/`, `modules/formularios-datos/js/inscripciones.js`, `modules/formularios-datos/js/buzon.js` y `qr.html`; acciones públicas `group` y `wish`. |
-| Equipo de Recepción (Delegados Estudiantiles de Industrial) | Panel desde celular o laptop, 17:00–17:45: registrar asistentes, contabilizar donaciones por carrera y validar QR Dorados. | `recepcion.html` y `recepcion.js`; rol `recepcion`; acciones `checkin`, `donate`, `redeem` y `seal`; franjas en `ciya.event`. |
+| Equipo de Recepción (Delegados Estudiantiles de Industrial) | Panel desde celular o laptop para acreditar asistentes, confirmar mensajes del muro, registrar donaciones y validar QR Dorados en cualquier fecha hasta el sellado. | `recepcion.html` y `recepcion.js`; rol `recepcion`; acciones `checkin`, `donate`, `redeem` y `seal`. |
 | Equipo de Producción / Escenario (Sistemas y Software) | Consola conectada a proyector y Arduino/ESP32: ranking en vivo, villancicos, Encendido 5 en 1 y Gran Ruleta Digital. | `escenario.html`, `modules/pantalla-gigante/` y `modules/hardware-encendido/`; rol `escenario`; modo local sin red. |
 | Docentes Organizadores y Asociación Estudiantil (Curadores) | Vista privada del buzón para moderar, aprobar y exportar las frases en enero. | `admin.html` y `admin.js`; rol `admin`; acción `moderate`; CSV de deseos aprobados o todos. |
 
-Los permisos no son solo visuales: `ciya_access` y `ciya_write` validan roles y
-horarios en `supabase/migrations/0002_rpc_read_write.sql`. La exportación en
-enero es la actividad operativa prevista; no hay un bloqueo de fecha que impida
-exportar antes, porque la curaduría puede realizarse apenas se reciben las frases.
+Las funciones `ciya_access` y `ciya_write` validan los roles en Supabase.
+`0008_recepcion_sin_horario.sql` habilita la captura de acreditaciones,
+mensajes del muro y donaciones fuera de horario. `0009_registros_sin_horario.sql`
+extiende esa disponibilidad a la inscripción de villancicos y a la emisión y
+el canje de claves de QR Dorados. Las claves siguen siendo válidas durante
+dos minutos desde su emisión y pueden actualizarse. La curaduría y la
+exportación pueden realizarse desde que se reciben las frases.
 
 ## Requisitos funcionales — Módulo A: Portal y Mar de Linternas
 
@@ -196,6 +205,8 @@ query** y ejecutarlo **uno por uno**, en este orden exacto:
 0005_role_discovery.sql    RPC ciya_my_roles() para acceso por rol
 0006_ciclo.sql             columna ciclo y validación en checkin/group
 0007_group_details.sql     consulta de la ficha pública de un grupo
+0008_recepcion_sin_horario.sql habilita captura en recepción hasta el sellado
+0009_registros_sin_horario.sql habilita inscripción y canje sin horario
 ```
 
 No pegar todas las migraciones juntas. Si una marca error, detenerse y corregir antes de
@@ -293,7 +304,7 @@ supabase db push
 supabase functions deploy ciya-receipts
 ```
 
-`supabase db push` aplica en orden los 7 archivos de `supabase/migrations/`:
+`supabase db push` aplica en orden las migraciones pendientes de `supabase/migrations/`:
 
 | Archivo | Qué crea |
 |---------|----------|
@@ -304,6 +315,8 @@ supabase functions deploy ciya-receipts
 | `0005_role_discovery.sql` | RPC `ciya_my_roles()` para acceso por rol |
 | `0006_ciclo.sql` | Ciclo de Nivelación a 8vo en acreditaciones y grupos |
 | `0007_group_details.sql` | Ficha pública de villancicos con representante, obra musical y nómina |
+| `0008_recepcion_sin_horario.sql` | Acreditación, registro del muro y donaciones en cualquier fecha hasta el sellado |
+| `0009_registros_sin_horario.sql` | Inscripción de villancicos y emisión y canje de QR Dorados fuera del horario del evento |
 
 Si las migraciones ya están aplicadas, omitir `supabase db push`. Si falta
 alguna, no editar los archivos anteriores: agregar una migración nueva.
@@ -379,8 +392,17 @@ la ruta correspondiente y conservan sus parámetros y fragmentos.
 
 ## Operación
 
-- Donaciones y canjes: 08:00–17:45. Acreditación: 17:00–17:45.
-- A las 17:45, sellar desde recepción y descargar el JSON versión 2.
+- En **Administración → Curaduría y Evaluación → Buzón «Compilando Deseos
+  2027»**, el botón **Descartar** abre una ventana modal dentro de la
+  aplicación. **Cancelar** o **Escape** cierran la ventana y conservan
+  el mensaje. **Descartar mensaje** confirma la eliminación. **Aprobar**
+  aplica la decisión directamente.
+- Horario de atención del evento: donaciones y canjes de 08:00 a 17:45 y
+  acreditación de 17:00 a 17:45. Los formularios admiten registros en cualquier
+  fecha y hora. **Recepción Solidaria** admite acreditaciones, mensajes del
+  Muro de la Empatía, donaciones y canjes hasta sellar los datos.
+- Desde las 17:45 del día del evento se puede sellar desde recepción y descargar
+  el JSON versión 2. El sellado cierra definitivamente el registro.
 - Sin red: `python3 tools/local-stage.py` y abrir
   `http://127.0.0.1:8080/escenario.html?modo=local` con usuario `escenario`.
 - 18:20: proyectar el QR de la linterna. 18:25–18:55: acto central.

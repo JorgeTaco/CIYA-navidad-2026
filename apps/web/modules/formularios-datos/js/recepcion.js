@@ -31,7 +31,7 @@
           <div id="panel-acreditar" role="tabpanel" aria-labelledby="tab-acreditar">
             <form class="card" id="form-checkin">
               <h2>Acreditación presencial</h2>
-              <p class="hint">De 17:00 a 17:45. Verifica la identidad y matrícula del estudiante.</p>
+              <p class="hint">Verifica la identidad y matrícula del estudiante.</p>
               <div class="field"><label for="chk-nombre">Nombre completo</label><input id="chk-nombre" maxlength="120" required autocomplete="name"></div>
               <div class="form-row">
                 <div class="grow field"><label for="chk-cedula">Cédula</label><input id="chk-cedula" required inputmode="numeric" pattern="[0-9]{10}"></div>
@@ -66,7 +66,7 @@
           <div id="panel-donar" role="tabpanel" aria-labelledby="tab-donar" hidden>
             <form class="card" id="form-donation">
               <h2>Registrar una donación</h2>
-              <p class="hint">De 08:00 a 17:45. Juguete funcional y completo o funda industrial sellada de al menos 200 g. Cada aporte debe llevar un mensaje de empatía.</p>
+              <p class="hint">Juguete funcional y completo o funda industrial sellada de al menos 200 g. Cada aporte debe llevar un mensaje de empatía.</p>
               <div class="field"><label for="don-cedula">Cédula del donante</label><input id="don-cedula" required inputmode="numeric" pattern="[0-9]{10}"></div>
               <div class="form-row">
                 <div class="grow field"><label for="don-tipo">Tipo</label><select id="don-tipo"><option value="juguete">Juguete funcional</option><option value="caramelos">Funda de caramelos</option></select></div>
@@ -80,7 +80,7 @@
           <div id="panel-canjear" role="tabpanel" aria-labelledby="tab-canjear" hidden>
             <form class="card" id="form-gold">
               <h2>Validar QR Dorado</h2>
-              <p class="hint">Verifica la pantalla activa y la credencial estudiantil antes de las 17:45.</p>
+              <p class="hint">Verifica la pantalla activa y la credencial estudiantil. El canje está disponible hasta el sellado de recepción.</p>
               <div class="field"><label for="oro-codigo">Clave de la pantalla activa</label><input id="oro-codigo" required maxlength="16" pattern="[A-Fa-f0-9]{16}" autocomplete="off" autocapitalize="characters"></div>
               <div class="field"><label for="oro-cedula">Cédula del estudiante</label><input id="oro-cedula" inputmode="numeric" pattern="[0-9]{10}" required></div>
               <label><input id="oro-declaracion" type="checkbox" required> Pantalla activa, credencial estudiantil y juego limpio verificados</label>
@@ -102,7 +102,7 @@
           <details class="card record-list"><summary>Donaciones registradas <span class="badge" id="count-donaciones">—</span></summary><div id="lista-donaciones"></div></details>
         </section>
         <section class="section card">
-          <div class="row between"><div><h3>Cierre de recepción</h3><p class="muted">El cierre formal es a las 17:45. Al cerrar, la consola de escenario puede descargar el respaldo local JSON de la ruleta y el ranking.</p></div><button class="btn danger" id="btn-cerrar" disabled>Marcar cierre de recepción</button></div>
+          <div class="row between"><div><h3>Cierre de recepción</h3><p class="muted">El sellado se habilita a las 17:45 del día del evento. Al sellar, la consola de escenario puede descargar el respaldo local JSON de la ruleta y el ranking.</p></div><button class="btn danger" id="btn-cerrar" disabled>Marcar cierre de recepción</button></div>
           <p id="estado-cierre"></p>
         </section>
       </div>`;
@@ -202,10 +202,11 @@
       return '<span class="badge ' + (gold.canjeado ? 'warn' : 'ok') + '">QR ' + gold.slot + ' · ' + (gold.canjeado ? 'Canjeado' : 'Sin canjear') + '</span>';
     }).join('');
     const sealed = state.sealed === true;
+    const canSeal = !sealed && state.recepcionCerrada === true;
     byId('estado-cierre').textContent = sealed ? 'Datos sellados. El respaldo está disponible en escenario.' :
-      state.recepcionCerrada ? 'Horario terminado. Sella los datos para generar el respaldo.' : 'Cierre programado a las 17:45.';
-    byId('btn-cerrar').disabled = sealed || !state.recepcionCerrada;
-    byId('reception-workspace').hidden = state.recepcionCerrada;
+      'Puedes registrar información en cualquier fecha hasta el sellado.';
+    byId('btn-cerrar').disabled = !canSeal;
+    byId('reception-workspace').hidden = sealed;
     paintMailStatus(state);
   }
 

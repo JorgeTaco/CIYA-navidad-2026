@@ -1,5 +1,13 @@
 .break-url { overflow-wrap: anywhere; }
 
+.discard-wish-dialog {
+  width: min(26rem, calc(100% - 2rem));
+  background: var(--surface-gradient);
+  color: var(--text);
+}
+.discard-wish-dialog h2 { margin: 0 0 .5rem; }
+.discard-wish-dialog::backdrop { background: #061b2ac4; }
+
 @media print {
   body.print-gold header, body.print-gold footer, body.print-gold main > :not(#panel),
   body.print-gold #panel > :not(#admin-gold), body.print-gold button { display: none !important; }

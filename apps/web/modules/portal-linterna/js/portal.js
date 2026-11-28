@@ -140,13 +140,13 @@
 
       <section class="section card" id="registro">
         <h2>Registro para el Gran Sorteo</h2>
-        <p>Acude a la mesa del hall de 17:00 a 17:45 con tu credencial o documento de identificación. Recepción verificará tu ingreso y enviará el comprobante a tu correo.</p>
+        <p>Presenta tu credencial o documento de identificación en la mesa del hall. Recepción verificará tu ingreso y enviará el comprobante a tu correo.</p>
         <ul>
           <li>Ingreso acreditado y mensaje en el Muro de la Empatía: 1 boleto base.</li>
           <li>Juguete funcional: 2 boletos extra. Funda de caramelos: 1 boleto extra.</li>
           <li>QR Dorado canjeado: 3 boletos extra.</li>
         </ul>
-        <p class="hint">Donaciones y canjes de 08:00 a 17:45. Cada estudiante puede ganar un premio y tiene 45 segundos para presentarse con su identificación.</p>
+        <p class="hint">Horario de atención del evento: acreditación de 17:00 a 17:45 y donaciones y canjes de 08:00 a 17:45. Cada estudiante puede ganar un premio y tiene 45 segundos para presentarse con su identificación.</p>
       </section>
 
       <section class="section card" id="muro">
@@ -159,7 +159,7 @@
         <div class="card">
           <div class="grid cols-2">
             <div><h3>Espacios asignados</h3><div id="espacios-puertas"></div></div>
-            <div><h3>Matriz de evaluación (100 puntos)</h3><div id="criterios-puertas"></div><p class="hint">Instalación hasta las 15:00. Jurado: 15:30 – 16:45. Se prioriza reciclaje, bajo costo y protección de bienes institucionales.</p></div>
+            <div><h3>Matriz de evaluación</h3><div id="criterios-puertas"></div><p class="hint">Instalación hasta las 15:00. Jurado: 15:30 – 16:45. Se prioriza reciclaje, bajo costo y protección de bienes institucionales.</p></div>
           </div>
         </div>
       </section>
@@ -192,7 +192,7 @@
         <details class="card villancicos-criteria">
           <summary>Criterios de evaluación</summary>
           <ul>${Data.criteriosVillancicos.map(function (criterion) {
-            return '<li><strong>' + esc(criterion.nombre) + ' · ' + criterion.peso + '%</strong><p>' + esc(criterion.detalle) + '</p></li>';
+            return '<li><strong>' + esc(criterion.nombre) + '</strong><p>' + esc(criterion.detalle) + '</p></li>';
           }).join('')}</ul>
         </details>
         <dialog class="villancico-dialog" id="villancico-dialog" aria-labelledby="villancico-dialog-title">
@@ -358,7 +358,7 @@
       return '<p><span class="carrera-dot" style="--dot-color:' + c.color + '"></span><strong>' + esc(c.nombre) + '</strong><br><small>Aulas ' + esc(c.aula) + '</small></p>';
     }).join('');
     document.getElementById('criterios-puertas').innerHTML = Data.criteriosPuertas.map(function (c) {
-      return '<p><strong>' + esc(c.nombre) + ' · ' + c.peso + '%</strong><br><small>' + esc(c.detalle) + '</small></p>';
+      return '<p><strong>' + esc(c.nombre) + '</strong><br><small>' + esc(c.detalle) + '</small></p>';
     }).join('');
   }
 

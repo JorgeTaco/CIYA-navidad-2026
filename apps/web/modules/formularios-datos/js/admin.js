@@ -12,10 +12,19 @@
       <div id="locked" hidden><p class="empty">Esta vista privada requiere una cuenta de administración.</p></div>
       <div id="panel" hidden>
         <section class="section">
-          <div class="section-head"><div><h2>Buzón “Compilando Deseos 2027”</h2><p class="muted">Revisa, aprueba o descarta las frases. Las aprobadas podrán proyectarse en la chocolatada y exportarse para redes de CIYA en enero.</p></div>
+          <div class="section-head"><div><h2 id="admin-wishes-title" tabindex="-1">Buzón “Compilando Deseos 2027”</h2><p class="muted">Revisa, aprueba o descarta las frases. Las aprobadas podrán proyectarse en la chocolatada y exportarse para redes de CIYA en enero.</p></div>
             <div class="row"><button class="btn small" id="export-aprobados">Exportar aprobados CSV</button><button class="btn small ghost" id="export-todos">Exportar todos CSV</button></div>
           </div>
           <div class="card"><div id="lista-deseos"></div></div>
+          <dialog class="card discard-wish-dialog" id="discard-wish-dialog" aria-labelledby="discard-wish-title" aria-describedby="discard-wish-question">
+            <h2 id="discard-wish-title">Descartar mensaje</h2>
+            <p id="discard-wish-question">¿Estás seguro de que deseas descartar este mensaje?</p>
+            <p class="pin-error" id="discard-wish-error" role="alert" hidden></p>
+            <div class="row end">
+              <button class="btn ghost" id="discard-wish-cancel" type="button" autofocus>Cancelar</button>
+              <button class="btn danger" id="discard-wish-confirm" type="button">Descartar mensaje</button>
+            </div>
+          </dialog>
         </section>
         <section class="section grid cols-2">
           <form class="card" id="form-puerta">
@@ -156,6 +165,52 @@
     };
   }
 
+  function setupDiscardDialog() {
+    const list = document.getElementById('lista-deseos');
+    const dialog = document.getElementById('discard-wish-dialog');
+    const error = document.getElementById('discard-wish-error');
+    const cancelButton = document.getElementById('discard-wish-cancel');
+    const confirmButton = document.getElementById('discard-wish-confirm');
+    const discardSelector = '[data-moderate="discard"]';
+    let wishId;
+
+    list.addEventListener('click', function (event) {
+      const trigger = event.target.closest(discardSelector);
+      if (!trigger) return;
+      wishId = trigger.dataset.id;
+      error.hidden = true;
+      dialog.showModal();
+    });
+    cancelButton.addEventListener('click', function () { dialog.close(); });
+    dialog.addEventListener('cancel', function (event) {
+      if (confirmButton.disabled) event.preventDefault();
+    });
+    dialog.addEventListener('close', function () {
+      if (dialog.open) return;
+      const trigger = Array.from(list.querySelectorAll(discardSelector)).find(function (button) {
+        return button.dataset.id === wishId;
+      });
+      (trigger || document.getElementById('admin-wishes-title')).focus();
+    });
+    confirmButton.addEventListener('click', async function () {
+      confirmButton.disabled = true;
+      cancelButton.disabled = true;
+      error.hidden = true;
+      try {
+        await Store.action('moderate', { id: wishId, decision: 'discard' }, true);
+        dialog.close();
+        UI.toast('Mensaje descartado.');
+      } catch (failure) {
+        error.textContent = failure.message;
+        error.hidden = false;
+      } finally {
+        confirmButton.disabled = false;
+        cancelButton.disabled = false;
+        if (dialog.open) confirmButton.focus();
+      }
+    });
+  }
+
   function setup() {
     document.getElementById('puerta-carrera').innerHTML = Data.carreras.map(function (c) {
       return '<option value="' + c.id + '">' + esc(c.nombre) + '</option>';
@@ -188,6 +243,7 @@
     };
     window.addEventListener('afterprint', function () { document.body.classList.remove('print-gold'); });
     setupImport();
+    setupDiscardDialog();
 
     document.getElementById('export-aprobados').addEventListener('click', function () { exportDeseos(true); });
     document.getElementById('export-todos').addEventListener('click', function () { exportDeseos(false); });
@@ -203,9 +259,9 @@
         '<button class="btn small danger" data-moderate="discard" data-id="' + esc(d.id) + '">Descartar</button></div></div>';
     }).join('') : '<p class="empty">Aún no hay frases enviadas.</p>';
 
-    document.querySelectorAll('[data-moderate]').forEach(function (button) {
+    document.querySelectorAll('[data-moderate="approve"]').forEach(function (button) {
       button.addEventListener('click', function (event) {
-        UI.submit(event, 'moderate', { id: button.dataset.id, decision: button.dataset.moderate }, true,
+        UI.submit(event, 'moderate', { id: button.dataset.id, decision: 'approve' }, true,
           function () { UI.toast('Decisión guardada.'); });
       });
     });
